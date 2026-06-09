@@ -3,7 +3,50 @@ import bike1 from "../../assets/images/bike1.png";
 import card1 from "../../assets/images/card1.png";
 import card2 from "../../assets/images/card2.png";
 import card3 from "../../assets/images/card3.png";
+import ProductCard from "./card"; 
+import bike2 from "../../assets/images/bike2.png";
+import bike3 from "../../assets/images/bike3.png";
+import bike4 from "../../assets/images/bike4.png";
+import bike5 from "../../assets/images/bike5.png";
 
+const shopProducts = [  
+    {
+        id: 1,
+        name: "Specialized Roubaix",
+        category: "ROAD",
+        description: "Xe đua đường trường khung carbon.",
+        price: "$4,500",
+        rating: 5,
+        image: bike2
+    },
+    {
+        id: 2,
+        name: "Canyon Spectral",
+        category: "MOUNTAIN",
+        description: "Chinh phục mọi địa hình hiểm trở.",
+        price: "$3,200",
+        rating: 4,
+        image: bike3
+    },
+    {
+        id: 3,
+        name: "VanMoof S5",
+        category: "ELECTRIC",
+        description: "Xe đạp điện thông minh tích hợp GPS.",
+        price: "$2,500",
+        rating: 5,
+        image: bike4
+    },
+    {
+        id: 4,
+        name: "Specialized Roubaix",
+        category: "MOUNTAIN",
+        description: "Chinh phục mọi địa hình.",
+        price: "$3,200",
+        rating: 4,
+        image: bike5
+    }
+];
 export default function MainHome() {
     return (
         <div className="max-w-6xl mx-auto my-10 px-4">
@@ -56,8 +99,32 @@ export default function MainHome() {
                         </div>
                 </div>
             </div>
-            
+            <div className="space-y-10 pt-10">
+                <div className="text-center">
+                    <h2 className="font-bold text-5xl text-blue-950">
+                        FROM THE SHOP 
+                        <div className="w-30 h-1 bg-red-500 mx-auto mt-3 rounded-full"></div>
+                    </h2>
+                </div>
+            </div>
+            <div className="max-w-6xl mx-auto my-10 px-4 space-y-20">
+                    <div className="space-y-10 pt-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                            {shopProducts.map((product) => (
+                                <ProductCard 
+                                    key={product.id}
+                                    name={product.name}
+                                    category={product.category}
+                                    description={product.description}
+                                    price={product.price}
+                                    rating={product.rating}
+                                    image={product.image}
+                                />
+                            ))}
+                        </div>
+                </div>
 
+             </div>
         </div>
     );
 }
