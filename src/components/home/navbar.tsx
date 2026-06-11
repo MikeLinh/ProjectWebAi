@@ -24,9 +24,9 @@ export default function Navbar() {
                 <button className=" flex text-gray-300" hover:text-blue-400 transition-colors duration-200 item-center>
                     <SearchIcon className="text-xl"/>
                 </button>
-                <button className="text-gray-300 hover:text-blue-500 transition-colors duration-200 flex items-center transition-all hover:scale-110">
+                <Link to="/login" className="text-gray-300 hover:text-blue-500 transition-colors duration-200 flex items-center hover:scale-110">
                     <AccountBoxIcon className="text-xl" />
-                </button>
+                </Link>
                 <button className="relative text-gray-300 hover:text-blue-500 transition-colors duration-200 flex items-center transition-all hover:scale-110">
                     <ShoppingCartOutlineIcon className="text-xl" />
                 </button>
