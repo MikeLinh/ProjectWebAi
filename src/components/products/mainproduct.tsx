@@ -44,7 +44,7 @@ export default function MainProduct() {
       discount: 18,
     },
     {
-      id: 3,
+      id: 4,
       name: "Electric Bike E7",
       price: 1800,
       originalPrice: 2200,
@@ -54,7 +54,7 @@ export default function MainProduct() {
       discount: 18,
     },
     {
-      id: 3,
+      id: 5,
       name: "Electric Bike E7",
       price: 1800,
       originalPrice: 2200,
@@ -64,7 +64,7 @@ export default function MainProduct() {
       discount: 18,
     },
     {
-      id: 3,
+      id: 6,
       name: "Electric Bike E7",
       price: 1800,
       originalPrice: 2200,
@@ -74,7 +74,7 @@ export default function MainProduct() {
       discount: 18,
     },
     {
-      id: 3,
+      id: 7,
       name: "Electric Bike E7",
       price: 1800,
       originalPrice: 2200,
@@ -84,7 +84,7 @@ export default function MainProduct() {
       discount: 18,
     },
      {
-      id: 3,
+      id: 8,
       name: "Electric Bike E7",
       price: 1800,
       originalPrice: 2200,

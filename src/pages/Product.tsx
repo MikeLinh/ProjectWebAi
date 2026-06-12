@@ -5,8 +5,6 @@ import Footer from "../components/home/footer";
 import Chatbox from "../components/chatbox/chatbox";
 
 
-
-
 export default function Product() {
     return (
        

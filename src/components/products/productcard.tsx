@@ -24,7 +24,7 @@ export default function Card({ product }: CardProps) {
 
   // Hàm xử lý khi người dùng click vào thẻ sản phẩm
   const handleCardClick = () => {
-    navigate(`/product/${product.id}`); // Chuyển hướng sang trang chi tiết /product/123
+    navigate(`/product/${product.id}`,{state:{product}}); // Chuyển hướng sang trang chi tiết /product/123
   };
 
   return (

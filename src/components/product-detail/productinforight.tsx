@@ -22,9 +22,9 @@ export default function ProductInfoRight({name,price,originalPrice,category,rati
 
     const hasDiscount = originalPrice && originalPrice > price;
     return(
-      <div className="space-y-5 text-white">
+      <div className="space-y-5 text-gray-800">
         <span className="text-xs text-blue-500 font-bold tracking-wider uppercase">{category}</span>    
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-100">{name}</h1>
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">{name}</h1>
 
         {/*Đánh giá sao*/}
         <div className="flex items-center space-x-2">
@@ -33,7 +33,7 @@ export default function ProductInfoRight({name,price,originalPrice,category,rati
                     i < rating ? <StarIcon key={i} style={{fontSize:20}}/> : <StarBorderIcon key={i} style={{fontSize:20}}/>                
                 ))}
             </div>
-            <span className="text-gray-400 text-xs">{reviewCount}</span>
+            <span className="text-gray-500 text-xs">{reviewCount}</span>
         </div>
         {/*Giá tiền*/}
         <div className="flex items-baseline space-x-3 pt-2">
@@ -43,10 +43,10 @@ export default function ProductInfoRight({name,price,originalPrice,category,rati
             )}
         </div>
          {/*Mô tả*/}
-        <div className="text-gray-400 text-sm border-t border-gray-800/60 pt-4">{description}</div>
+        <div className="text-gray-600 text-sm border-t border-gray-200 pt-4">{description}</div>
          {/*Chọn size*/}
          <div className="space-y-2 pt-2">
-            <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">Size</span>
+            <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Size</span>
              <div className="flex space-x-3">
             {["S","M","L"].map((size) => (
                 <button 
@@ -54,8 +54,8 @@ export default function ProductInfoRight({name,price,originalPrice,category,rati
                 onClick={() => setSelectedSize(size)}
                 className={`px-4 py-2 text-xs font-bold rounded-lg border transition-all ${
                     selectedSize === size 
-                    ? "border-red-500 bg-red-500/10 text-red-400" 
-                    : "border-gray-700 text-gray-400 hover:border-gray-500"
+                    ? "border-red-500 bg-red-500/10 text-red-500" 
+                    : "border-gray-300 text-gray-500 hover:border-gray-400"
                 }`}
                 >
               {size}
@@ -77,7 +77,7 @@ export default function ProductInfoRight({name,price,originalPrice,category,rati
         </button>
         </div>
         {/* Khối tiện ích cam kết */}
-      <div className="grid grid-cols-3 gap-2 pt-6 border-t border-gray-800 text-center text-[11px] text-gray-400">
+      <div className="grid grid-cols-3 gap-2 pt-6 border-t border-gray-200 text-center text-[11px] text-gray-500">
         <div className="space-y-1"><SecurityIcon className="text-blue-500" style={{ fontSize: 20 }} /><p>100% Chính hãng</p></div>
         <div className="space-y-1"><LocalAtmIcon className="text-blue-500" style={{ fontSize: 20 }} /><p>Giá rẻ nhất</p></div>
         <div className="space-y-1"><LocalShippingIcon className="text-blue-500" style={{ fontSize: 20 }} /><p>Miễn phí giao hàng</p></div>
