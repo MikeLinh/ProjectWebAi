@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
  
-// ─── Types ────────────────────────────────────────────────────────────────────
+// Types 
 interface SidebarFilterProps {
   onFilterChange?: (filters: FilterState) => void;
 }
@@ -16,7 +16,7 @@ interface FilterState {
   rating: number | null;
 }
  
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// Sub-components
 function Section({ title, children }: { title: string; children: ReactNode }) {
   const [open, setOpen] = useState(true);
   return (
@@ -84,7 +84,7 @@ function StarRow({ count, selected, onClick }: { count: number; selected: boolea
   );
 }
  
-// ─── Main Component ───────────────────────────────────────────────────────────
+// Main Component
 const COLORS = [
   "#1E40AF", "#F5F5DC", "#06B6D4", "#6B7280",
   "#15803D", "#93C5FD", "#7C3AED", "#DC2626", "#FACC15",
