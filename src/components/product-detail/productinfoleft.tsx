@@ -13,7 +13,7 @@ export default function ProductInfoLeft({image,name,discount}: ProductInfoLeftPr
                 {discount && (
                     <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">-{discount}%</div>
                 )}
-                <img src={image} alt={name} className="max-h-full max-w-full object-contain"/>
+                <img src={image} alt={name} className="max-h-full max-w-full object-contain  rounded-2xl"/>
            </div>
         </div>
     );

@@ -26,7 +26,7 @@ export default function RelatedProducts({products} : RelatedProductProps){
                 {products.map((item)=>(
                     <Card key={item.id} product={item}/>
                 )
-                )};
+                )}
             </div>
         </div>
     )

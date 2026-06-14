@@ -4,8 +4,11 @@ import StarBorderIcon from "@mui/icons-material/StarBorder";
 import SecurityIcon from "@mui/icons-material/Security";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import LocalAtmIcon from "@mui/icons-material/LocalAtm";
+import {useCart} from "../../components/context/carcontext"
 
 interface ProductInfoRightProps{
+    id: number;
+    image: string;
     name: string;
     price: number;
     originalPrice?: number;
@@ -16,11 +19,24 @@ interface ProductInfoRightProps{
     description?: string;
 }
 
-export default function ProductInfoRight({name,price,originalPrice,category,rating,reviewCount,inStock,description} : ProductInfoRightProps){
+export default function ProductInfoRight({id,image,name,price,originalPrice,category,rating,reviewCount,inStock=15,description} : ProductInfoRightProps){
     const[quantity,setQuantity] = useState<number>(1);
     const[selectedSize,setSelectedSize] = useState<string>("M");
 
+    const{ addToCart } = useCart();
     const hasDiscount = originalPrice && originalPrice > price;
+
+    const handleAddToCart = () =>{
+      addToCart({
+        id,
+        name,
+        price,
+        image,
+        size: selectedSize
+      }, quantity);
+      alert(`Đã thêm thành công ${quantity} sản phẩm "${name}" vào giỏ hàng!`);
+    }
+
     return(
       <div className="space-y-5 text-gray-800">
         <span className="text-xs text-blue-500 font-bold tracking-wider uppercase">{category}</span>    
@@ -37,7 +53,7 @@ export default function ProductInfoRight({name,price,originalPrice,category,rati
         </div>
         {/*Giá tiền*/}
         <div className="flex items-baseline space-x-3 pt-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-red-500">&{price.toLocaleString()}</span>
+            <span className="text-2xl sm:text-3xl font-extrabold text-red-500">${price.toLocaleString()}</span>
             {hasDiscount && (
                 <span className="text-gray-500 line-through text-base sm:text-lg">{originalPrice?.toLocaleString()}</span>
             )}
@@ -72,7 +88,7 @@ export default function ProductInfoRight({name,price,originalPrice,category,rati
                 <span className="px-3 py-2 font-bold text-sm min-w-[30px] text-center">{quantity}</span>
                 <button onClick={()=>setQuantity(quantity + 1)} className="px-4 py-2 hover:bg-gray-800 text-gray-400 font-bold">+</button>
             </div>
-            <button className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl uppercase tracking-wider text-xs sm:text-sm transition-colors shadow-lg shadow-red-600/10 active:scale-[0.99]">
+            <button onClick={handleAddToCart} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl uppercase tracking-wider text-xs sm:text-sm transition-colors shadow-lg shadow-red-600/10 active:scale-[0.99]">
           Add To Cart
         </button>
         </div>

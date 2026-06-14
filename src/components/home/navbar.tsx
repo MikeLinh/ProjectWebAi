@@ -3,9 +3,12 @@ import logoAvatar from "../../assets/images/logo-avatar.png";
 import SearchIcon from '@mui/icons-material/Search';
 import AccountBoxIcon from '@mui/icons-material/AccountBox'; 
 import ShoppingCartOutlineIcon from '@mui/icons-material/ShoppingCartOutlined';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import {useCart} from "../../components/context/carcontext"
 
 export default function Navbar() {
+    const navigate = useNavigate();
+    const {getCartCount}=useCart();
     return (
         <nav className="w-full bg-blue-950 text-white px-6 py-4 flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -27,8 +30,14 @@ export default function Navbar() {
                 <Link to="/login" className="text-gray-300 hover:text-blue-500 transition-colors duration-200 flex items-center hover:scale-110">
                     <AccountBoxIcon className="text-xl" />
                 </Link>
-                <button className="relative text-gray-300 hover:text-blue-500 transition-colors duration-200 flex items-center transition-all hover:scale-110">
+                <button onClick={()=>navigate("/cart")} className="relative text-gray-300 hover:text-blue-500 transition-colors duration-200 flex items-center transition-all hover:scale-110">
                     <ShoppingCartOutlineIcon className="text-xl" />
+                    {getCartCount() > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+                        {getCartCount()}
+                    </span>
+                    )}
+                
                 </button>
 
             </div>

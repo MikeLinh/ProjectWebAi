@@ -53,6 +53,8 @@ export default function ProductDetail() {
               discount={product.discount}
             />
             <ProductInfoRight
+              id={product.id}
+              image={product.image}
               name={product.name}
               price={product.price}
               originalPrice={product.originalPrice}
@@ -74,15 +76,15 @@ export default function ProductDetail() {
           <RelatedProducts
             products={[
               {
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                originalPrice: product.originalPrice,
-                discount: product.discount,
-                rating: product.rating,
-                reviewCount: product.reviewCount,
-                category: product.category || "Bicycles",
-                image: product.image
+                id: product?.id || 0,
+                name: product?.name || "Sản phẩm liên quan",
+                price: product?.price || 0,
+                originalPrice: product?.originalPrice,
+                discount: product?.discount,
+                rating: product?.rating || 5, 
+                reviewCount: product?.reviewCount || 0,
+                category: product?.category || "Bicycles",
+                image: product?.image || ""
               }
             ]}
           />
