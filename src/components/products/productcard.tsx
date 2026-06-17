@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import hook điều hướng
+import { useNavigate } from "react-router-dom"; 
 
 interface Product {
   id: number;
@@ -24,7 +24,7 @@ export default function Card({ product }: CardProps) {
 
   // Hàm xử lý khi người dùng click vào thẻ sản phẩm
   const handleCardClick = () => {
-    navigate(`/product/${product.id}`,{state:{product}}); // Chuyển hướng sang trang chi tiết /product/123
+    navigate(`/product/${product.id}`,{state:{product}}); 
   };
 
   return (

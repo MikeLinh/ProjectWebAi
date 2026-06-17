@@ -12,7 +12,7 @@ interface ProductInfoRightProps{
     name: string;
     price: number;
     originalPrice?: number;
-    category: string;
+    category: string;                                                   
     rating: number;
     reviewCount:number;
     inStock?: number;

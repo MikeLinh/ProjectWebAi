@@ -6,25 +6,28 @@ import ProductDetail from "./pages/Productdetail"
 import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
 import { CartProvider } from './components/context/carcontext'
-
-
+import { GoogleOAuthProvider } from "@react-oauth/google"
 
 function App() {
+  const ClientID = import.meta.env.VITE_GOOGLE_ID as string;
   return (
-    <CartProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />}/>
-          <Route path="/product" element={<Product />}/>
-          <Route path="/login" element={<Login />}/>
-          <Route path="/product/:id" element={<ProductDetail />}/>
-          <Route path="/cart" element={<CartPage />}/>
-          <Route path="/checkout" element={<CheckoutPage />}/>
-        </Routes>
-      </Router>
-    </CartProvider>
+    <GoogleOAuthProvider clientId={ClientID}>
+        <CartProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />}/>
+              <Route path="/product" element={<Product />}/>
+              <Route path="/login" element={<Login />}/>
+              <Route path="/product/:id" element={<ProductDetail />}/>
+              <Route path="/cart" element={<CartPage />}/>
+              <Route path="/checkout" element={<CheckoutPage />}/>
+            </Routes>
+          </Router>
+        </CartProvider>
+    </GoogleOAuthProvider>
   )
+
 }
 
 export default App
