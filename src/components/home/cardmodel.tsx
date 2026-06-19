@@ -2,7 +2,7 @@ import React from "react";
 import { useCart } from "../context/carcontext";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useNavigate } from "react-router-dom"; // Thêm để điều hướng trang
+import { useNavigate } from "react-router-dom"; 
 
 interface CartModelProps {
   isOpen: boolean;

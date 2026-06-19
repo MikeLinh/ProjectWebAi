@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
 import { useCart } from "../../components/context/carcontext"; 
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
-
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 interface Product {
   id: number;
   name: string;
@@ -90,7 +89,7 @@ export default function Card({ product }: CardProps) {
             className="bg-blue-950 text-sm text-white hover:bg-blue-900 p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center focus:outline-none shrink-0"
             title="Thêm vào giỏ hàng"
           >Add to cart
-            <AddShoppingCartIcon style={{ fontSize: 18 }} />
+            <ShoppingCartIcon style={{ fontSize: 18 }} />
           </button>
         </div>
   

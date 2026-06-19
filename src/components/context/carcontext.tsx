@@ -21,7 +21,6 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  // Khởi tạo giỏ hàng ban đầu từ localStorage để tránh mất dữ liệu khi F5
   const [cart, setCart] = useState<CartItem[]>(() => {
     const localData = localStorage.getItem("cart");
     return localData ? JSON.parse(localData) : [];
@@ -31,7 +30,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  // Thêm sản phẩm (hoặc tăng số lượng nếu đã tồn tại)
   const addToCart = (product: any, quantity: number = 1) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.id === product.id);

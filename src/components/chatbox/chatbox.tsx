@@ -10,19 +10,17 @@ interface Message {
 }
 
 export default function AIChatbot() {
-    const [isOpen, setIsOpen] = useState(false); // Trạng thái đóng/mở hộp chat
+    const [isOpen, setIsOpen] = useState(false); 
     const [messages, setMessages] = useState<Message[]>([
         { id: 1, text: "Xin chào! Mình là trợ lý AI của BIKECYC STORE. Bạn cần tư vấn về mẫu xe nào ạ? 🚴‍♂️", sender: "bot" }
     ]);
     const [inputValue, setInputValue] = useState("");
     const chatEndRef = useRef<HTMLDivElement>(null);
 
-    // Tự động cuộn xuống tin nhắn mới nhất khi hội thoại dài ra
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isOpen]);
 
-    // Hàm xử lý gửi tin nhắn của người dùng
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
         if (!inputValue.trim()) return;
@@ -36,7 +34,6 @@ export default function AIChatbot() {
         setMessages((prev) => [...prev, userMessage]);
         setInputValue("");
 
-        // Giả lập phản hồi tự động của AI sau 1 giây
         setTimeout(() => {
             const botReply: Message = {
                 id: Date.now() + 1,
@@ -50,7 +47,7 @@ export default function AIChatbot() {
     return (
         <div className="fixed bottom-6 right-6 z-50 font-sans">
             
-            {/* CỬA SỔ CHAT AI */}
+
             {isOpen && (
                 <div className="absolute bottom-16 right-0 w-[350px] sm:w-[380px] h-[500px] bg-[#1a1a1a] text-white border border-gray-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 transform translate-y-0 scale-100">
                     
@@ -76,7 +73,6 @@ export default function AIChatbot() {
                         </button>
                     </div>
 
-                    {/* Vùng chứa các nội dung tin nhắn */}
                     <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-[#121212]">
                         {messages.map((msg) => (
                             <div 
@@ -95,7 +91,6 @@ export default function AIChatbot() {
                         <div ref={chatEndRef} />
                     </div>
 
-                    {/* Thanh nhập dữ liệu chat */}
                     <form onSubmit={handleSendMessage} className="p-3 bg-[#1a1a1a] border-t border-gray-800 flex gap-2">
                         <input
                             type="text"
@@ -114,7 +109,6 @@ export default function AIChatbot() {
                 </div>
             )}
 
-            {/*NÚT BẤM TRÒN AI*/}
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`w-14 h-14 rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 ${

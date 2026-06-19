@@ -1,11 +1,37 @@
+import { useState, useEffect } from "react"; 
 import { useCart } from "../components/context/carcontext";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/home/navbar";
 import Footer from "../components/home/footer";
+import PromoSection from "../components/promotion/promosection"; 
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, getCartTotal } = useCart();
   const navigate = useNavigate();
+  
+  const [discount, setDiscount] = useState<number>(0);
+  const [appliedCode, setAppliedCode] = useState<string>("");
+
+  const cartTotal = getCartTotal();
+  
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
+    if (appliedCode === "BIKE3000" && cartTotal < 3000) handleResetDiscount();
+    else if (appliedCode === "BIKE2000" && cartTotal < 2000) handleResetDiscount();
+    else if (appliedCode === "BIKE1000" && cartTotal < 1000) handleResetDiscount();
+  }, [cartTotal, appliedCode]);
+
+  const handleResetDiscount = () => {
+    setDiscount(0);
+    setAppliedCode("");
+  };
+
+  const handleApplyDiscount = (discountAmount: number, code: string) => {
+    setDiscount(discountAmount);
+    setAppliedCode(code);
+  };
+
+  const finalTotal = cartTotal - discount;
 
   return (
     <div className="bg-white min-h-screen text-black flex flex-col justify-between">
@@ -22,7 +48,6 @@ export default function CartPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Danh sách item */}
             <div className="lg:col-span-2 space-y-4">
               {cart.map((item) => (
                 <div key={item.id} className="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
@@ -33,7 +58,6 @@ export default function CartPage() {
                     <h3 className="font-bold text-sm truncate text-black">{item.name}</h3>
                     <p className="text-red-500 font-semibold text-sm mt-1">${item.price.toLocaleString()}</p>
                   </div>
-                  {/* Bộ tăng giảm số lượng */}
                   <div className="flex items-center border border-gray-100 rounded-lg overflow-hidden shrink-0">
                     <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="px-2.5 py-1 bg-gray-100 text-black hover:bg-gray-200">-</button>
                     <span className="px-3 text-xs font-bold w-8 text-center">{item.quantity}</span>
@@ -44,27 +68,39 @@ export default function CartPage() {
               ))}
             </div>
 
-            {/* Bảng tính tổng tiền & Proceed to Checkout */}
-            <div className="bg-gray-50 p-6 rounded-2xl border border-gray-800 h-fit space-y-4">
-              <h2 className="text-lg font-bold border-b border-gray-800 pb-3">CART TOTALS</h2>
-              <div className="flex justify-between text-sm">
-                <span className="text-black">Tạm tính:</span>
-                <span>${getCartTotal().toLocaleString()}</span>
+            <div className="h-fit space-y-4">
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 space-y-4">
+                <h2 className="text-lg font-bold border-b border-gray-200 pb-3">CART TOTALS</h2>
+                <div className="flex justify-between text-sm">
+                  <span className="text-black">Tạm tính:</span>
+                  <span>${cartTotal.toLocaleString()}</span>
+                </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm text-green-600 font-medium">
+                    <span>Giảm giá ({appliedCode}):</span>
+                    <span>-${discount.toLocaleString()}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between text-sm border-b border-gray-200 pb-3">
+                  <span className="text-black">Giao hàng:</span>
+                  <span className="text-green-500">Miễn phí</span>
+                </div>
+                <div className="flex justify-between font-bold text-base pt-1">
+                  <span>Tổng cộng:</span>
+                  <span className="text-red-500">${finalTotal.toLocaleString()}</span>
+                </div>
+                <button 
+                  onClick={() => navigate("/checkout")}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl uppercase tracking-wider text-xs transition-colors mt-4"
+                >
+                  Proceed To Checkout
+                </button>
               </div>
-              <div className="flex justify-between text-sm border-b border-gray-800 pb-3">
-                <span className="text-black">Giao hàng:</span>
-                <span className="text-green-500">Miễn phí</span>
-              </div>
-              <div className="flex justify-between font-bold text-base pt-1">
-                <span>Tổng cộng:</span>
-                <span className="text-red-500">${getCartTotal().toLocaleString()}</span>
-              </div>
-              <button 
-                onClick={() => navigate("/checkout")}
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl uppercase tracking-wider text-xs transition-colors mt-4"
-              >
-                Proceed To Checkout
-              </button>
+              <PromoSection 
+                cartTotal={cartTotal} 
+                onApplyDiscount={handleApplyDiscount} 
+              />
             </div>
           </div>
         )}

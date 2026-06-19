@@ -7,14 +7,37 @@ import { Link } from "react-router-dom";
 import { useCart } from "../../components/context/carcontext";
 import CardModel from "../home/cardmodel"; 
 import SearchPopup from "./searchpopup";
+import { motion } from "framer-motion";
 
 export default function Navbar() {
     const { getCartCount } = useCart();
     const [isCartOpen, setIsCartOpen] = useState<boolean>(false); 
     const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
 
+    const navbarVariants = {
+        hidden: { 
+            y: -100, 
+            opacity: 0 
+        },
+        visible: { 
+            y: 0, 
+            opacity: 1,
+            transition: {
+                type: "spring",
+                stiffness: 80,
+                damping: 20,
+                duration: 0.6
+            }
+        }
+    };
+
     return (
-        <nav className="w-full bg-blue-950 text-white px-6 py-4 flex items-center justify-between relative z-40">
+        <motion.nav 
+            className="w-full bg-blue-950 text-white px-6 py-4 flex items-center justify-between relative z-40"
+            initial="hidden"
+            animate="visible"
+            variants={navbarVariants}
+        >
             <div className="flex items-center space-x-3">
                 <img src={logoAvatar} alt="Logo" className="w-8 h-8"/>
                 <span className="font-bold tracking-wider text-lg">
@@ -52,9 +75,9 @@ export default function Navbar() {
                     )}
                 </button>
             </div>
-            <SearchPopup isOpen={isSearchOpen} onClose={()=>setIsSearchOpen(false)}/>
 
+            <SearchPopup isOpen={isSearchOpen} onClose={()=>setIsSearchOpen(false)}/>
             <CardModel isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-        </nav>
+        </motion.nav>
     );
 }

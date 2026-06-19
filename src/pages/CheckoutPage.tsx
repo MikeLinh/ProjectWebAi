@@ -14,20 +14,19 @@ export default function CheckoutPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Xử lý gửi API đặt hàng 
     console.log("Thông tin đơn hàng:", { customer: formData, products: cart, total: getCartTotal() });
-    clearCart(); // Đặt hàng thành công xóa giỏ hàng
+    clearCart(); 
     setIsOrdered(true);
   };
 
   if (isOrdered) {
     return (
-      <div className="bg-[#121212] min-h-screen text-white flex flex-col justify-between">
+      <div className="bg-[#d6d6d6] min-h-screen text-white flex flex-col justify-between">
         <Navbar />
         <div className="text-center py-32 max-w-md mx-auto px-4">
           <div className="text-5xl mb-4">🎉</div>
           <h1 className="text-2xl font-bold text-green-500 mb-2">ĐẶT HÀNG THÀNH CÔNG!</h1>
-          <p className="text-gray-400 text-sm mb-6">Cảm ơn bạn đã tin tưởng lựa chọn chúng tôi. Mã đơn hàng đang được hệ thống xử lý.</p>
+          <p className="text-gray-900 text-sm mb-6">Cảm ơn bạn đã tin tưởng lựa chọn chúng tôi. Mã đơn hàng đang được hệ thống xử lý.</p>
           <a href="/product" className="inline-block bg-red-600 px-6 py-2 rounded-lg font-bold text-xs uppercase tracking-wider">Tiếp tục mua sắm</a>
         </div>
         <Footer />

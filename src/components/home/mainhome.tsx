@@ -8,6 +8,8 @@ import bike2 from "../../assets/images/bike2.png";
 import bike3 from "../../assets/images/bike3.png";
 import bike4 from "../../assets/images/bike4.png";
 import bike5 from "../../assets/images/bike5.png";
+import {motion} from "framer-motion";
+
 
 const shopProducts = [  
     {
@@ -51,7 +53,11 @@ export default function MainHome() {
     return (
         <div className="max-w-6xl mx-auto my-10 px-4">
             <div className="max-w-6xl mx-auto my-10 flex items-center justify-between gap-10">
-                <div className="flex-1 space-y-6 ">
+                <motion.div
+                    initial={{opacity: 0, x:-50}}
+                    animate={{opacity: 1, x:0}}
+                    transition={{duration:0.8, ease:"easeOut"}}
+                    className="flex-1 space-y-6 ">
                     <h2 className="text-gray-900 font-bold text-xl">
                         Ride Your <span className="text-blue-500">Dream Bike</span>
                     </h2>
@@ -65,10 +71,14 @@ export default function MainHome() {
                         <button className="bg-blue-500 rounded-3xl font-normal text-white px-4 py-2 hover:bg-blue-600  transition-all duration-300 hover:scale-125
                         hover:text-black">Khám phá ngay</button>
                     </div>
-                </div>
-                <div className="flex-1 space-y-4">
+                </motion.div>
+                <motion.div 
+                    initial={{opacity:0, x:50}}
+                    animate={{opacity:1, x:0}}
+                    transition={{duration:0.8,ease:"easeOut", delay:0.2}}
+                    className="flex-1 space-y-4">
                     <img src={bike1} alt="Bike" className="w-full rounded-2xl transition-all hover:scale-105"/>
-                </div>
+                </motion.div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="h-[250px]  rounded-2xl bg-cover bg-center relative group cursor-pointer shadow-md transition-all hover:scale-105" style={{ backgroundImage: `url(${card1})` }}>
