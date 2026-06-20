@@ -7,6 +7,7 @@ import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
 import { CartProvider } from './components/context/carcontext'
 import { GoogleOAuthProvider } from "@react-oauth/google"
+import OrderTrackingPage from './pages/OrderTracking'
 
 function App() {
   const ClientID = import.meta.env.VITE_GOOGLE_ID as string;
@@ -22,6 +23,7 @@ function App() {
               <Route path="/product/:id" element={<ProductDetail />}/>
               <Route path="/cart" element={<CartPage />}/>
               <Route path="/checkout" element={<CheckoutPage />}/>
+              <Route path="/ordertracking" element={<OrderTrackingPage />}/>
             </Routes>
           </Router>
         </CartProvider>

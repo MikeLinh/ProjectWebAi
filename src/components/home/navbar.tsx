@@ -7,14 +7,15 @@ import { Link } from "react-router-dom";
 import { useCart } from "../../components/context/carcontext";
 import CardModel from "../home/cardmodel"; 
 import SearchPopup from "./searchpopup";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
+import LocalMallIcon from '@mui/icons-material/LocalMall';
 
 export default function Navbar() {
     const { getCartCount } = useCart();
     const [isCartOpen, setIsCartOpen] = useState<boolean>(false); 
     const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
 
-    const navbarVariants = {
+    const navbarVariants: Variants = {
         hidden: { 
             y: -100, 
             opacity: 0 
@@ -74,6 +75,9 @@ export default function Navbar() {
                     </span>
                     )}
                 </button>
+                  <Link to="/ordertracking" className="text-gray-300 hover:text-blue-500 transition-colors duration-200 flex items-center hover:scale-110">
+                    <LocalMallIcon className="text-xl" />
+                </Link>
             </div>
 
             <SearchPopup isOpen={isSearchOpen} onClose={()=>setIsSearchOpen(false)}/>
