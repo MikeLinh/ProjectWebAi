@@ -1,6 +1,7 @@
 import React from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import GoogleIcon from '@mui/icons-material/Google';
+import {Link} from "react-router-dom"
 
 export default function Login() {
   const loginWithGoogle = useGoogleLogin({
@@ -52,8 +53,9 @@ export default function Login() {
               <input type="checkbox" />
               Remember me
             </label>
+
             <button type="button" className="text-blue-500 hover:underline">
-              Forgot password?
+              <Link to="/forgotpassword">Forgot password?</Link> 
             </button>
           </div>
 
@@ -66,7 +68,7 @@ export default function Login() {
 
         <div className="relative flex py-5 items-center">
           <div className="flex-grow border-t border-gray-200"></div>
-          <span className="flex-shrink mx-4 text-gray-400 text-xs uppercase">Or</span>
+          <span className="flex-shrink mx-4 text-gray-900 text-xs uppercase">Or</span>
           <div className="flex-grow border-t border-gray-200"></div>
         </div>
         <button
@@ -78,7 +80,7 @@ export default function Login() {
         </button>
         <p className="text-center text-sm text-gray-500 mt-6">
           Don’t have an account?{" "}
-          <span className="text-blue-500 cursor-pointer hover:underline">Register</span>
+          <Link to="/register" className="text-blue-500 cursor-pointer hover:underline">Register</Link>
         </p>
       </div>
     </div>

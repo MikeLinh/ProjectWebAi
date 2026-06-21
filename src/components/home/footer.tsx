@@ -1,7 +1,7 @@
 import React from "react";
 import DeblurIcon from '@mui/icons-material/Deblur';
 import { Facebook, Instagram, Twitter, LinkedIn } from '@mui/icons-material';
-import { motion } from "framer-motion"; // 1. Import Framer Motion
+import { motion } from "framer-motion"; 
 
 export default function Footer() {
     const containerVariants = {
@@ -50,7 +50,6 @@ export default function Footer() {
                     <motion.div variants={itemVariants} className="space-y-4">
                         <h4 className="font-bold text-sm tracking-widest text-blue-400">SẢN PHẨM</h4>
                         <ul className="space-y-2.5 text-sm text-gray-400">
-                            {/* 6. Hiệu ứng dịch chữ sang phải của Tailwind */}
                             <li className="hover:text-white cursor-pointer transition-transform duration-300 hover:translate-x-1.5 inline-block w-full">
                                 Xe đường trường
                             </li>
