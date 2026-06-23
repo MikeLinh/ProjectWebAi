@@ -10,7 +10,9 @@ import { GoogleOAuthProvider } from "@react-oauth/google"
 import OrderTrackingPage from './pages/OrderTracking'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
-
+import CheckoutSuccessPage from './pages/CheckoutSuccessPage'
+import AdminLayout from "./admin/pages/AdminLayout";
+import { AdminRoute, PrivateRoute } from "./components/private/protectedroute";
 function App() {
   const ClientID = import.meta.env.VITE_GOOGLE_ID as string;
   return (
@@ -27,7 +29,10 @@ function App() {
               <Route path="/product/:id" element={<ProductDetail />}/>
               <Route path="/cart" element={<CartPage />}/>
               <Route path="/checkout" element={<CheckoutPage />}/>
+              <Route path="/checkout/success" element={<PrivateRoute><CheckoutSuccessPage /></PrivateRoute>}/>
               <Route path="/ordertracking" element={<OrderTrackingPage />}/>
+              <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>
+        } />
             </Routes>
           </Router>
         </CartProvider>

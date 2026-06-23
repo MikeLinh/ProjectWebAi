@@ -91,7 +91,12 @@ export default function CartPage() {
                   <span className="text-red-500">${finalTotal.toLocaleString()}</span>
                 </div>
                 <button 
-                  onClick={() => navigate("/checkout")}
+                  onClick={() => navigate("/checkout", {
+                    state:{
+                      discount: discount,
+                      couponCode: appliedCode,
+                    }
+                  })}
                   className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl uppercase tracking-wider text-xs transition-colors mt-4"
                 >
                   Proceed To Checkout
