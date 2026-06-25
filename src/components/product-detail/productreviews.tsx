@@ -12,12 +12,12 @@ export default function ProductReviews({ reviewCount, rating }: ProductReviewsPr
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 bg-white p-6 rounded-2xl border border-gray-100 text-gray-800">
       {/* Bên Trái: Thống kê & Danh sách Review */}
       <div className="md:col-span-2 space-y-6">
-        <h2 className="text-base sm:text-lg font-bold tracking-wider text-gray-900">{reviewCount} Review For This Product</h2>
+        <h2 className="text-base sm:text-lg font-bold tracking-wider text-gray-900">{reviewCount} Đánh giá sản phẩm này</h2>
         
         <div className="flex flex-col sm:flex-row gap-6 items-center bg-gray-50 p-6 rounded-xl border border-gray-100">
           <div className="text-center space-y-1 shrink-0">
             <div className="text-4xl font-black text-amber-400">{rating.toFixed(2)}</div>
-            <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Out Of 5 Stars</div>
+            <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Trong số 5 sao</div>
           </div>
           
           <div className="flex-1 w-full space-y-2">

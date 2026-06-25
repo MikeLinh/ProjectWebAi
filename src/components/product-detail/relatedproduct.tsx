@@ -1,5 +1,5 @@
 import React from "react";
-import Card from "../../components/products/productcard.tsx"
+import Card from "../products/productcard.tsx"
 
 interface RelatedProductsItem{
     id: number;

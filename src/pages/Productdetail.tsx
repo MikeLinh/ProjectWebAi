@@ -36,6 +36,7 @@ export default function ProductDetail() {
         </div>
         <Footer />
       </div>
+      
     );
   }
 

@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "../components/home/navbar";
-import MainProduct from "../components/products/mainproduct";
+import MainProduct from "../components/products/MainProduct/mainproduct";
 import Footer from "../components/home/footer";
 import Chatbox from "../components/chatbox/chatbox";
 
