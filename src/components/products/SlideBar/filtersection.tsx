@@ -14,7 +14,7 @@ export default function FilterSection({ title, children }: FilterSectionProps) {
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between mb-3"
       >
-        <span className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-widest">
+        <span className="flex items-center gap-2 text-[16px] font-bold text-gray-700 uppercase tracking-widest">
           <span className="w-[3px] h-3.5 bg-red-500 rounded-full" />
           {title}
         </span>

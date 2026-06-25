@@ -28,6 +28,7 @@ export default function BrandFilter({ filters, update }: BrandFilterProps) {
             label={b} 
             active={filters.brands.includes(b)} 
             onClick={() => toggleBrand(b)} 
+            
           />
         ))}
       </div>

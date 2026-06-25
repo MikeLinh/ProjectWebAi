@@ -23,7 +23,7 @@ export default function RatingFilter({ filters, update }: RatingFilterProps) {
                 <span key={i} className={`text-sm ${i < star ? "text-amber-400" : "text-gray-200"}`}>★</span>
               ))}
             </span>
-            <span className="text-xs text-gray-400 font-medium">
+            <span className="text-[15px] text-gray-400 font-medium">
               {star === 5 ? "5 sao" : `${star} sao trở lên`}
             </span>
           </button>

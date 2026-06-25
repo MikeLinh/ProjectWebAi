@@ -45,7 +45,7 @@ export default function CategoryFilter({ filters, update }: CategoryFilterProps)
                   checked={active}
                   onChange={() => toggleCategory(cat.value)}
                 />
-                <span className={`text-sm transition-colors ${active ? "text-red-600 font-medium" : "text-gray-600"}`}>
+                <span className={`text-[15px] transition-colors ${active ? "text-red-600 font-medium" : "text-gray-600"}`}>
                   {cat.label}
                 </span>
               </label>
