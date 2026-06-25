@@ -18,7 +18,7 @@ export default function OrderSummary({ cart,subTotal,discount,couponCode }: Orde
 const finalTotal = subTotal - discount;
   return (
     <div className="bg-gray-100 p-6 rounded-2xl border border-gray-800 h-fit space-y-4">
-      <h2 className="text-lg font-bold border-b border-gray-800 pb-3">YOUR ORDER</h2>
+      <h2 className="text-lg font-bold border-b border-gray-800 pb-3">ĐƠN HÀNG CỦA BẠN</h2>
       <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
         {cart.map((item) => (
           <div key={item.id} className="flex justify-between text-xs text-black">

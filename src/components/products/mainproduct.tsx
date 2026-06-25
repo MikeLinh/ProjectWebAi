@@ -107,11 +107,11 @@ export default function MainProduct() {
 
                <div className="relative z-10 text-center space-y-2">
           <p className="text-sm md:text-base tracking-[3px] uppercase">
-            Home / Products
+            Trang chủ/ Sản phẩm
           </p>
 
           <h1 className="text-3xl md:text-5xl font-bold tracking-wide">
-            PRODUCTS
+            SẢN PHẨM
           </h1>
         </div>
       </div>
@@ -133,27 +133,27 @@ export default function MainProduct() {
               
               <div>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  All Products
+                  Tất cả sản phẩm
                 </h2>
 
                 <p className="text-sm text-gray-500 mt-1">
-                  Showing {products.length} products
+                  Hiển thị {products.length} sản phẩm
                 </p>
               </div>
 
               {/* Sort */}
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-500">
-                  Sort by:
+                  Sắp xếp theo:
                 </span>
 
                 <select
                   className="border border-gray-200 rounded-lg px-4 py-2 text-sm outline-none focus:border-red-400"
                 >
-                  <option>Newest</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
-                  <option>Best Rating</option>
+                  <option>Mới nhất</option>
+                  <option>Giá: Thấp tới Cao</option>
+                  <option>Giá: Cao tới Thấp</option>
+                  <option>Đánh giá tốt nhất</option>
                 </select>
               </div>
             </div>
@@ -184,7 +184,7 @@ export default function MainProduct() {
               </button>
 
               <button className="px-4 h-10 rounded-lg border border-gray-200 hover:border-red-400 hover:text-red-500 transition-colors">
-                Next
+                Tiếp tục
               </button>
             </div>
           </div>

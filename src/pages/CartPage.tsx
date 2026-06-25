@@ -37,7 +37,7 @@ export default function CartPage() {
     <div className="bg-white min-h-screen text-black flex flex-col justify-between">
       <Navbar />
       <div className="max-w-6xl w-full mx-auto px-4 py-10 flex-1">
-        <h1 className="text-3xl font-bold tracking-wide mb-8">YOUR CART</h1>
+        <h1 className="text-3xl font-bold tracking-wide mb-8">GIỎ HÀNG CỦA BẠN</h1>
 
         {cart.length === 0 ? (
           <div className="text-center py-20 border border-gray-800 rounded-2xl bg-gray-50">
@@ -70,7 +70,7 @@ export default function CartPage() {
 
             <div className="h-fit space-y-4">
               <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 space-y-4">
-                <h2 className="text-lg font-bold border-b border-gray-200 pb-3">CART TOTALS</h2>
+                <h2 className="text-lg font-bold border-b border-gray-200 pb-3">TỔNG GIỎ HÀNG</h2>
                 <div className="flex justify-between text-sm">
                   <span className="text-black">Tạm tính:</span>
                   <span>${cartTotal.toLocaleString()}</span>
@@ -99,7 +99,7 @@ export default function CartPage() {
                   })}
                   className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl uppercase tracking-wider text-xs transition-colors mt-4"
                 >
-                  Proceed To Checkout
+                  Tiến hành thanh toán
                 </button>
               </div>
               <PromoSection 

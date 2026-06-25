@@ -71,7 +71,7 @@ export default function ProductCard({
                     
                     <button className="bg-[#1976d2] hover:bg-[#1565c0] text-white text-sm font-bold px-6 py-2.5 rounded-2xl flex items-center gap-2 transition-all active:scale-95 ">
                         <ShoppingCartIcon className="text-2xl"/>
-                        <span>ADD</span>
+                        <span>THÊM</span>
                     </button>
                 </div>
             </div>

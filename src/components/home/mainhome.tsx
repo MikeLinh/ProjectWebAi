@@ -112,8 +112,8 @@ export default function MainHome() {
             <div className="space-y-10 pt-10">
                 <div className="text-center">
                     <h2 className="font-bold text-5xl text-blue-950">
-                        FROM THE SHOP 
-                        <div className="w-30 h-1 bg-red-500 mx-auto mt-3 rounded-full"></div>
+                        SẢN PHẨM TỪ CỬA HÀNG 
+                        <div className="w-45 h-1 bg-red-500 mx-auto mt-3 rounded-full"></div>
                     </h2>
                 </div>
             </div>

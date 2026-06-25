@@ -32,7 +32,7 @@ export default function ProductDetail() {
       <div className="flex flex-col min-h-screen bg-gray-50">
         <Navbar />
         <div className="flex-1 flex items-center justify-center text-red-500 font-bold text-lg">
-          Product data not found! Please return to shop page.
+          Dữ liệu của sản phẩm không tìm thấy !
         </div>
         <Footer />
       </div>

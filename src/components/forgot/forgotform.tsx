@@ -37,7 +37,7 @@ export default function ForgotForm(){
                 onChange={(e) => setEmail(e.target.value)}
                 required
             />
-            <SubmitButton isLoading={loading}>Send reset code</SubmitButton>
+            <SubmitButton isLoading={loading}>Gửi mã khôi phục</SubmitButton>
         </form>
     )
 }

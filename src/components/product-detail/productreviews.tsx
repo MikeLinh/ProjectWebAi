@@ -37,23 +37,23 @@ export default function ProductReviews({ reviewCount, rating }: ProductReviewsPr
         <div className="flex gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
           <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0 flex items-center justify-center font-bold text-gray-600 text-sm">J</div>
           <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-x-2"><span className="font-bold text-sm text-gray-900">Jessica</span><span className="text-xs text-gray-400">— October 13, 2023</span></div>
+            <div className="flex flex-wrap items-center gap-x-2"><span className="font-bold text-sm text-gray-900">Jessica</span><span className="text-xs text-gray-400">— 13 tháng 10, 2023</span></div>
             <div className="flex text-amber-400">
               {Array.from({ length: 5 }).map((_, i) => i < 4 ? <StarIcon key={i} style={{ fontSize: 14 }} /> : <StarBorderIcon key={i} style={{ fontSize: 14 }} />)}
             </div>
-            <p className="text-sm text-gray-600 pt-1">Its was good..</p>
+            <p className="text-sm text-gray-600 pt-1">Mặt hàng này thật tốt</p>
           </div>
         </div>
       </div>
 
       {/* Bên Phải: Form Add Review */}
       <form className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-4 h-fit">
-        <h3 className="font-bold text-sm tracking-wide text-gray-900">Add A Review</h3>
+        <h3 className="font-bold text-sm tracking-wide text-gray-900">Thêm đánh giá</h3>
         <input type="text" placeholder="Review title" className="w-full bg-gray-50 border border-gray-100 rounded-lg p-2.5 text-xs text-gray-500 placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors" />
         <textarea placeholder="Your Review *" rows={3} className="w-full bg-gray-50 border border-gray-100 rounded-lg p-2.5 text-xs text-gray-500 placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors" required></textarea>
         <input type="text" placeholder="Name *" className="w-full bg-gray-50 border border-gray-100 rounded-lg p-2.5 text-xs text-gray-500 placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors" required />
         <input type="email" placeholder="Email *" className="w-full bg-gray-50 border border-gray-100rounded-lg p-2.5 text-xs text-gray-500 placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors" required />
-        <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-lg uppercase tracking-wider transition-colors">Submit</button>
+        <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-lg uppercase tracking-wider transition-colors">Gửi</button>
       </form>
     </div>
   );

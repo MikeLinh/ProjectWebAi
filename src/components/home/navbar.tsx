@@ -47,10 +47,10 @@ export default function Navbar() {
             </div>
             
             <div className="items-center space-x-8 hidden md:flex text-sm text-blue-400 tracking-wide">
-                <Link to="/" className="hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all duration-300 tracking-wide">HOME</Link>
-                <Link to="/product" className="hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all duration-300 tracking-wide">PRODUCTS</Link>
-                <Link to="/about" className="hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all duration-300 tracking-wide">ABOUT</Link>
-                <Link to="/sale" className="hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all duration-300 tracking-wide">SALE</Link>
+                <Link to="/" className="hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all duration-300 tracking-wide">TRANG CHỦ</Link>
+                <Link to="/product" className="hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all duration-300 tracking-wide">SẢN PHẨM</Link>
+                <Link to="/about" className="hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all duration-300 tracking-wide">GIỚI THIỆU</Link>
+                <Link to="/sale" className="hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all duration-300 tracking-wide">KHUYẾN MÃI</Link>
             </div>
 
             <div className="flex space-x-10">

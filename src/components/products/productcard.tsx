@@ -88,7 +88,7 @@ export default function Card({ product }: CardProps) {
             onClick={handleAddToCart}
             className="bg-blue-950 text-sm text-white hover:bg-blue-900 p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center focus:outline-none shrink-0"
             title="Thêm vào giỏ hàng"
-          >Add to cart
+          >Thêm vào giỏ hàng
             <ShoppingCartIcon style={{ fontSize: 18 }} />
           </button>
         </div>

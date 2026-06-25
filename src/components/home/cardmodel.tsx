@@ -87,7 +87,7 @@ export default function CardModel({ isOpen, onClose }: CartModelProps) {
                   }}
                   className="flex-1 border border-blue-950 text-blue-950 hover:bg-gray-50 py-2 rounded text-xs font-bold transition-colors text-center uppercase"
                 >
-                  View Cart
+                  Xem giỏ hàng
                 </button>
                 <button 
                   onClick={clearCart}

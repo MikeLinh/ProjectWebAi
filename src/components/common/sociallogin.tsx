@@ -11,7 +11,7 @@ export default function SocialLogin({text}:SosicalLoginProps){
                 <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-200"></div>
                 </div>
-                <span className="relative bg-white px-3 text-gray-400 text-[10px] uppercase tracking-wider">Or</span>
+                <span className="relative bg-white px-3 text-gray-400 text-[10px] uppercase tracking-wider">Hoặc</span>
             </div>
             <button
             type="button"

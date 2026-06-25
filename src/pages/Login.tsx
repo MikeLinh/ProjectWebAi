@@ -97,7 +97,7 @@ export default function Login() {
             type="submit"
             className="w-full bg-blue-950 hover:bg-blue-900 text-white py-3 rounded-xl font-semibold transition-colors text-sm"
           >
-            Login
+            Đăng nhập
           </button>
         </form>
 
@@ -110,9 +110,9 @@ export default function Login() {
         <GoogleLoginButton onGoogleClick={() => loginWithGoogle()} />
 
         <p className="text-center text-sm text-gray-500 mt-6">
-          Don’t have an account?{" "}
+         Bạn chưa có tài khoản?{" "}
           <Link to="/register" className="text-blue-500 cursor-pointer hover:underline">
-            Register
+            Đăng ký
           </Link>
         </p>
       </div>

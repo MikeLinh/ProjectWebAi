@@ -38,12 +38,12 @@ export default function RegisterFooter(){
                 onClick={() => loginWithGoogle()}
                 className="w-full flex items-center justify-center gap-2.5 border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 rounded text-sm font-medium transition-colors">
                 <GoogleIcon className="text-sm text-red-500" style={{ fontSize: 18 }} />
-                Sign in with Google
+                Đăng nhập bằng Google
             </button>
 
             <div className="text-center text-sm text-gray-500 mt-5">
-                Already have an account?{""}
-                <Link to="/login" className="text-blue-500 font-medium hover:underline">Login</Link>
+               Bạn đã có tài khoản chưa?{""}
+                <Link to="/login" className="text-blue-500 font-medium hover:underline">Đăng nhập</Link>
             </div>
     </>
     )

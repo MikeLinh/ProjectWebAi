@@ -20,7 +20,7 @@ export default function RelatedProducts({products} : RelatedProductProps){
     return(
         <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-gray-200 pb-3">
-                <h2 className="text-base sm:text-lg font-bold tracking-wider uppercase text-black">Related Products</h2>
+                <h2 className="text-base sm:text-lg font-bold tracking-wider uppercase text-black">Sản phẩm liên quan</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 {products.map((item)=>(
