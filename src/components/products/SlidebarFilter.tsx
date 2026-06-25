@@ -134,7 +134,7 @@ export default function SidebarFilter({ onFilterChange }: SidebarFilterProps) {
             <li key={name}>
               <button
                 onClick={() => update("categories", [])}
-                className={`w-full text-left text-sm px-1 py-1 rounded transition-colors ${
+                className={`w-full text-left text-[16px] px-1 py-1 rounded transition-colors ${
                   name === "Tất cả sản phẩm" && filters.categories.length === 0
                     ? "text-red-500 font-semibold"
                     : "text-gray-600 hover:text-red-500"
@@ -155,7 +155,7 @@ export default function SidebarFilter({ onFilterChange }: SidebarFilterProps) {
             <li key={h}>
               <button
                 onClick={() => update("highlight", h)}
-                className={`w-full text-left text-sm px-1 py-1 rounded transition-colors ${
+                className={`w-full text-left text-[16px] px-1 py-1 rounded transition-colors ${
                   filters.highlight === h
                     ? "text-red-500 font-semibold"
                     : "text-gray-600 hover:text-red-500"
@@ -176,7 +176,7 @@ export default function SidebarFilter({ onFilterChange }: SidebarFilterProps) {
           onChange={(e) => update("priceMax", Number(e.target.value))}
           className="w-full accent-red-500 cursor-pointer"
         />
-        <div className="flex justify-between text-xs text-gray-400 mt-1 mb-3">
+        <div className="flex justify-between text-[16px] text-gray-400 mt-1 mb-3">
           <span>$0</span>
           <span className="text-red-500 font-medium">${filters.priceMax}</span>
         </div>

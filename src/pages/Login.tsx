@@ -55,17 +55,9 @@ export default function Login() {
         const res = await fetch(googleAuthApi, {
           headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
         });
-        const userInfo = await res.json();
-        
-        const googleSessionUser = {
-          user_id: Date.now(),
-          full_name: userInfo.name,
-          email: userInfo.email,
-          role: userInfo.email === "admin.bikecyc@gmail.com" ? "ADMIN" : "USER"
-        };
-
-        localStorage.setItem("currentUser", JSON.stringify(googleSessionUser));
-        navigate(googleSessionUser.role === "ADMIN" ? "/admin" : "/product");
+        const data = await res.json();
+        console.log(data);
+      
       } catch (error) {
         console.error("Lỗi xác thực Google:", error);
       }
