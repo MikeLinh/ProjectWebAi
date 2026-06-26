@@ -17,7 +17,6 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", referencedColumnName = "category_id")
-    // Thêm dòng này để loại bỏ các thuộc tính quản lý proxy của Hibernate khi biến đổi thành JSON
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) 
     private Category category;
 

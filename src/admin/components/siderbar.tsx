@@ -10,8 +10,10 @@ export default function Siderbar({currentTab, setCurrentTab}:SiderBarProps){
     const menuItems= [
         {id: "overview", label: "Thống kê"},
         {id: "products", label: "Sản phẩm"},
+        {id: "categories", label: "Danh mục sản phẩm"},
         {id: "orders", label: "Đơn hàng"},
         {id: "promotions", label: "Khuyến mãi"},
+        {id: "user", label: "Tài khoản"},
     ];
     const handleLogout = () => {
         if(confirm("Bạn có muốn đăng xuất không ?")){

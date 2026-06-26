@@ -4,6 +4,8 @@ import DashboardOverview from "./Overview";
 import ManageProducts from "./ManagerProduct";
 import ManageOrders from "./ManagerOrder";
 import ManagePromotions from "./ManagerPromotion";
+import ManageCategories from "./ManagerCategory";
+import User from "./ManageUser"
 
 export default function AdminLayout() {
   const [currentTab, setCurrentTab] = useState<string>("overview");
@@ -18,6 +20,10 @@ export default function AdminLayout() {
         return <ManageOrders />;
       case "promotions":
         return <ManagePromotions />;
+      case "categories":
+        return <ManageCategories/>;
+      case "user":
+        return <User/>;
       default:
         return <DashboardOverview />;
     }

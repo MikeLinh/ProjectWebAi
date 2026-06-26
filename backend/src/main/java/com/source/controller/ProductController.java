@@ -20,13 +20,11 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<Product>> getAllProducts(
-            // Nhận chuỗi "Mountain,Road" rồi tự split — tránh lỗi Spring không parse List từ chuỗi CSV
             @RequestParam(value = "categoryName", required = false) String categoryName,
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice) {
 
-        // Split chuỗi "Mountain,Road" → ["Mountain", "Road"], trim khoảng trắng thừa
         List<String> categories = null;
         if (categoryName != null && !categoryName.isBlank()) {
             categories = Arrays.stream(categoryName.split(","))
@@ -45,5 +43,24 @@ public class ProductController {
 
         List<Product> products = productService.getFilteredProducts(categories, brands, minPrice, maxPrice);
         return ResponseEntity.ok(products);
+    }
+
+    @PostMapping
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        Product saved = productService.saveProduct(product);
+        return ResponseEntity.ok(saved);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable Integer id, @RequestBody Product product) {
+        product.setProductId(id);
+        Product saved = productService.saveProduct(product);
+        return ResponseEntity.ok(saved);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
     }
 }

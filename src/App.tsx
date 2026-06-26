@@ -13,15 +13,20 @@ import ForgotPassword from './pages/ForgotPassword'
 import CheckoutSuccessPage from './pages/CheckoutSuccessPage'
 import AdminLayout from "./admin/pages/AdminLayout";
 import { AdminRoute, PrivateRoute } from "./components/private/protectedroute";
+import { AuthProvider } from './components/context/authcontext'
+import Profile from './pages/Profiles'
 function App() {
   const ClientID = import.meta.env.VITE_GOOGLE_ID as string;
   return (
+
     <GoogleOAuthProvider clientId={ClientID}>
+      <AuthProvider>
         <CartProvider>
           <Router>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/home" element={<Home />}/>
+              <Route path="/profile" element={<Profile />}/>
               <Route path="/product" element={<Product />}/>
               <Route path="/login" element={<Login />}/>
               <Route path="/forgotpassword" element={<ForgotPassword />}/>
@@ -36,6 +41,7 @@ function App() {
             </Routes>
           </Router>
         </CartProvider>
+      </AuthProvider>
     </GoogleOAuthProvider>
   )
 

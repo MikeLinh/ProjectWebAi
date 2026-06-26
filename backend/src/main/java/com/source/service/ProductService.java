@@ -27,34 +27,35 @@ public class ProductService {
             BigDecimal minPrice,
             BigDecimal maxPrice) {
 
-        // Specification: build query động tuỳ theo filter nào được truyền vào
         Specification<Product> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Lọc theo danh mục — chỉ thêm nếu có giá trị
             if (categories != null && !categories.isEmpty()) {
                 predicates.add(root.get("category").get("categoryName").in(categories));
             }
-
-            // Lọc theo thương hiệu — chỉ thêm nếu có giá trị
             if (brands != null && !brands.isEmpty()) {
                 predicates.add(root.get("brand").in(brands));
             }
-
-            // Lọc giá tối thiểu
             if (minPrice != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("price"), minPrice));
             }
-
-            // Lọc giá tối đa
             if (maxPrice != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("price"), maxPrice));
             }
 
-            // Kết hợp tất cả điều kiện bằng AND
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
         return productRepository.findAll(spec);
+    }
+
+    @Transactional
+    public Product saveProduct(Product product) {
+        return productRepository.save(product);
+    }
+
+    @Transactional
+    public void deleteProduct(Integer id) {
+        productRepository.deleteById(id.longValue());
     }
 }

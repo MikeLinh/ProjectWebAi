@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { Link, useNavigate } from "react-router-dom";
@@ -5,47 +6,48 @@ import LoginHeader from "../components/login/loginheader";
 import InputField from "../components/login/inputfield";
 import RememberForgot from "../components/login/rememberforgot";
 import GoogleLoginButton from "../components/login/logingooglebutton";
-
-
-const MOCK_USERS_DATABASE = [
-  { user_id: 1, full_name: "Hệ thống Admin", email: "admin@gmail.com", password: "123", role: "ADMIN" },
-  { user_id: 2, full_name: "Nguyễn Văn A", email: "user@gmail.com", password: "user123", role: "USER" }
-];
+import {useAuth} from "../components/context/authcontext"
 
 export default function Login() {
   const navigate = useNavigate();
-  
+  const {login} = useAuth();
+  const [loading, setLoading] = useState<boolean>(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleNormalLogin = (e: React.FormEvent) => {
+  const handleNormalLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
+    setLoading(true);
 
-    const accountFound = MOCK_USERS_DATABASE.find(
-      (u) => u.email === email.trim() && u.password === password
-    );
+    try {
+      const res = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
 
-    if (accountFound) {
-      const sessionUser = {
-        user_id: accountFound.user_id,
-        full_name: accountFound.full_name,
-        email: accountFound.email,
-        role: accountFound.role
-      };
-      localStorage.setItem("currentUser", JSON.stringify(sessionUser));
-      
-      if (sessionUser.role === "ADMIN") {
+      if (!res.ok) {
+        throw new Error("Email hoặc mật khẩu không chính xác!");
+      }
+
+      const foundUser = await res.json();
+      localStorage.setItem("currentUser", JSON.stringify(foundUser));
+      login(foundUser);
+      if (foundUser.role === "ADMIN") {
         alert("Đăng nhập quyền Quản trị viên thành công!");
         navigate("/admin");
       } else {
-        alert(`Chào mừng quay trở lại, ${sessionUser.full_name}!`);
-        navigate("/product");
+        alert(`Chào mừng quay trở lại, ${foundUser.fullName}!`);
+        navigate("/");
       }
-    } else {
-      setErrorMessage("Email hoặc mật khẩu không chính xác. Hãy thử lại!");
+    } catch (error: any) {
+      setErrorMessage(error.message || "Không thể kết nối đến máy chủ.");
+    } finally {
+      setLoading(false);
     }
+    
   };
 
   const loginWithGoogle = useGoogleLogin({
@@ -115,7 +117,14 @@ export default function Login() {
             Đăng ký
           </Link>
         </p>
+        <p className="text-center text-sm text-blue-400 mt-6">
+          <Link to="/home">Quay trở lại</Link>
+        </p>
       </div>
     </div>
   );
+}
+
+function setLoading(_arg0: boolean) {
+  throw new Error("Function not implemented.");
 }

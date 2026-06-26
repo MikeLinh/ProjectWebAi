@@ -5,6 +5,7 @@ import card2 from "../../assets/images/card2.png";
 import card3 from "../../assets/images/card3.png";
 import ProductCard from "../products/productcard"; 
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 interface DBProduct {
   productId: number;
@@ -60,7 +61,7 @@ export default function MainHome() {
           </p>
           <div className="pt-1">
             <button className="bg-blue-500 rounded-3xl font-normal text-white px-4 py-2 hover:bg-blue-600 transition-all duration-300 hover:scale-125 hover:text-black">
-              Khám phá ngay
+              <Link to="/product">Khám phá ngay</Link>
             </button>
           </div>
         </motion.div>

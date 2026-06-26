@@ -1,28 +1,49 @@
-import React, { useState } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import React, { useState, useEffect, useCallback } from "react";
 import ProductModal from "../components/productmodal";
 
+const API = "http://localhost:8080/api/products";
+
 export default function ManageProducts() {
-  const [products, setProducts] = useState([
-    { product_id: 1, product_name: "Mountain Bike X1", brand: "Giant", price: 1200, stock_quantity: 15, category_id: 1, image_url: "", description: "Xe địa hình cao cấp" }
-  ]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(API);
+      const data = await res.json();
+      setProducts(data);
+    } catch (err) {
+      console.error("Lỗi tải sản phẩm:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
   const handleOpenAdd = () => { setEditingProduct(null); setIsModalOpen(true); };
   const handleOpenEdit = (p: any) => { setEditingProduct(p); setIsModalOpen(true); };
 
-  const handleSave = (productData: any) => {
-    if (editingProduct) {
-      setProducts(products.map(p => p.product_id === productData.product_id ? productData : p));
-    } else {
-      setProducts([...products, { ...productData, product_id: Date.now() }]);
-    }
+  const handleSave = () => {
     setIsModalOpen(false);
+    fetchProducts(); // Reload từ API sau khi lưu
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-      setProducts(products.filter(p => p.product_id !== id));
+  const handleDelete = async (id: number) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
+    try {
+      const res = await fetch(`${API}/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setProducts(products.filter(p => p.productId !== id));
+      } else {
+        alert("Xóa thất bại!");
+      }
+    } catch {
+      alert("Không thể kết nối đến máy chủ.");
     }
   };
 
@@ -30,42 +51,68 @@ export default function ManageProducts() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Quản lý kho sản phẩm</h1>
-        <button onClick={handleOpenAdd} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide">
+        <button
+          onClick={handleOpenAdd}
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide"
+        >
           ➕ Thêm sản phẩm
         </button>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-black">
-        <table className="w-full text-left border-collapse text-xs">
-          <thead className="bg-gray-50 text-gray-600 font-bold uppercase border-b">
-            <tr>
-              <th className="p-4">ID</th>
-              <th className="p-4">Tên sản phẩm</th>
-              <th className="p-4">Hãng</th>
-              <th className="p-4">Đơn giá</th>
-              <th className="p-4">Tồn kho</th>
-              <th className="p-4 text-center">Hành động</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {products.map((p) => (
-              <tr key={p.product_id} className="hover:bg-gray-50 transition-colors">
-                <td className="p-4 font-bold">#{p.product_id}</td>
-                <td className="p-4 font-semibold text-gray-900">{p.product_name}</td>
-                <td className="p-4 text-gray-600">{p.brand}</td>
-                <td className="p-4 text-red-600 font-bold">${p.price.toLocaleString()}</td>
-                <td className="p-4 font-medium">{p.stock_quantity} xe</td>
-                <td className="p-4 flex justify-center gap-2">
-                  <button onClick={() => handleOpenEdit(p)} className="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg font-semibold">Sửa</button>
-                  <button onClick={() => handleDelete(p.product_id)} className="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg font-semibold">Xóa</button>
-                </td>
+        {loading ? (
+          <div className="p-12 text-center text-gray-400 text-sm">Đang tải dữ liệu...</div>
+        ) : products.length === 0 ? (
+          <div className="p-12 text-center text-gray-400 text-sm">Chưa có sản phẩm nào.</div>
+        ) : (
+          <table className="w-full text-left border-collapse text-xs">
+            <thead className="bg-gray-50 text-gray-600 font-bold uppercase border-b">
+              <tr>
+                <th className="p-4">ID</th>
+                <th className="p-4">Tên sản phẩm</th>
+                <th className="p-4">Hãng</th>
+                <th className="p-4">Danh mục</th>
+                <th className="p-4">Đơn giá</th>
+                <th className="p-4">Tồn kho</th>
+                <th className="p-4 text-center">Hành động</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y">
+              {products.map((p) => (
+                <tr key={p.productId} className="hover:bg-gray-50 transition-colors">
+                  <td className="p-4 font-bold text-gray-400">#{p.productId}</td>
+                  <td className="p-4 font-semibold text-gray-900">{p.productName}</td>
+                  <td className="p-4 text-gray-600">{p.brand}</td>
+                  <td className="p-4 text-gray-500">{p.category?.categoryName || "—"}</td>
+                  <td className="p-4 text-red-600 font-bold">${Number(p.price).toLocaleString()}</td>
+                  <td className="p-4 font-medium">{p.stockQuantity} xe</td>
+                  <td className="p-4 flex justify-center gap-2">
+                    <button
+                      onClick={() => handleOpenEdit(p)}
+                      className="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg font-semibold"
+                    >
+                      Sửa
+                    </button>
+                    <button
+                      onClick={() => handleDelete(p.productId)}
+                      className="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg font-semibold"
+                    >
+                      Xóa
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
-      <ProductModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} editingProduct={editingProduct} />
+      <ProductModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+        editingProduct={editingProduct}
+      />
     </div>
   );
 }
