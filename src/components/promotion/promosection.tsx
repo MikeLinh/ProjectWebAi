@@ -1,4 +1,15 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from "react";
+
+interface Promotion {
+  promoId: number;
+  couponCode: string;
+  discountValue: number;
+  discountType: "PERCENT" | "FIXED";
+  minSpend: number;
+  startDate: string | null;
+  endDate: string | null;
+}
 
 interface PromoSectionProps {
   cartTotal: number;
@@ -6,14 +17,34 @@ interface PromoSectionProps {
 }
 
 export default function PromoSection({ cartTotal, onApplyDiscount }: PromoSectionProps) {
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [selectedCode, setSelectedCode] = useState<string>("");
   const [message, setMessage] = useState<{ text: string; isError: boolean }>({ text: "", isError: false });
 
-  const promoList = [
-    { code: "BIKE1000", discount: 0.20, minSpend: 1000, text: "Mã BIKE1000 - Giảm 20% (Đơn từ $1,000)" },
-    { code: "BIKE2000", discount: 0.15, minSpend: 2000, text: "Mã BIKE2000 - Giảm 15% (Đơn từ $2,000)" },
-    { code: "BIKE3000", discount: 0.10, minSpend: 3000, text: "Mã BIKE3000 - Giảm 10% (Đơn từ $3,000)" },
-  ];
+  useEffect(() => {
+    fetch("http://localhost:8080/api/promotions") 
+      .then((res) => res.json())
+      .then((data: Promotion[]) => setPromotions(data))
+      .catch((err) => console.error("Lỗi khi tải mã giảm giá:", err));
+  }, []);
+
+  const calculateDiscount = (promo: Promotion, total: number): number => {
+    if (promo.discountType === "PERCENT") {
+      return total * promo.discountValue;
+    }
+    return promo.discountValue; 
+  };
+
+  const getPromoText = (promo: Promotion) => {
+    const safeDiscount = Number(promo.discountValue) || 0;
+    const safeMinSpend = Number(promo.minSpend) || 0;
+
+    const detail = promo.discountType === "PERCENT" 
+      ? `Giảm ${safeDiscount * 100}%` 
+      : `Giảm $${safeDiscount.toLocaleString()}`;
+      
+    return `Mã ${promo.couponCode || "CODE"} - ${detail} (Đơn từ $${safeMinSpend.toLocaleString()})`;
+  };
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const code = e.target.value;
@@ -25,20 +56,22 @@ export default function PromoSection({ cartTotal, onApplyDiscount }: PromoSectio
       return;
     }
 
-    const promo = promoList.find((p) => p.code === code);
+    const promo = promotions.find((p) => p.couponCode === code);
 
     if (promo) {
-      if (cartTotal >= promo.minSpend) {
-        const discountAmount = cartTotal * promo.discount;
-        onApplyDiscount(discountAmount, promo.code);
+      const minSpend = Number(promo.minSpend) || 0; // Thêm dòng này
+
+      if (cartTotal >= minSpend) {
+        const discountAmount = calculateDiscount(promo, cartTotal);
+        onApplyDiscount(discountAmount, promo.couponCode);
         setMessage({ 
-          text: `Áp dụng thành công! Đã giảm $${discountAmount.toLocaleString()}`, 
+          text: `Áp dụng thành công! Đã giảm $${(Number(discountAmount) || 0).toLocaleString()}`, 
           isError: false 
         });
       } else {
         onApplyDiscount(0, "");
         setMessage({ 
-          text: `Giỏ hàng chưa đủ $${promo.minSpend.toLocaleString()} để áp dụng mã này.`, 
+          text: `Giỏ hàng chưa đủ $${minSpend.toLocaleString()} để áp dụng mã này.`, 
           isError: true 
         });
       }
@@ -47,20 +80,27 @@ export default function PromoSection({ cartTotal, onApplyDiscount }: PromoSectio
 
   useEffect(() => {
     if (selectedCode) {
-      const promo = promoList.find((p) => p.code === selectedCode);
-      if (promo && cartTotal < promo.minSpend) {
-        onApplyDiscount(0, "");
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setMessage({ 
-          text: `Mã đã bị hủy vì giỏ hàng giảm xuống dưới $${promo.minSpend.toLocaleString()}`, 
-          isError: true 
-        });
-      } else if (promo) {
-        const discountAmount = cartTotal * promo.discount;
-        onApplyDiscount(discountAmount, promo.code);
+      const promo = promotions.find((p) => p.couponCode === selectedCode);
+      if (promo) {
+        const minSpend = Number(promo.minSpend) || 0; // Thêm dòng này
+
+        if (cartTotal < minSpend) {
+          onApplyDiscount(0, "");
+          setMessage({ 
+            text: `Mã đã bị hủy vì giỏ hàng giảm xuống dưới $${minSpend.toLocaleString()}`, 
+            isError: true 
+          });
+        } else {
+          const discountAmount = calculateDiscount(promo, cartTotal);
+          onApplyDiscount(discountAmount, promo.couponCode);
+          setMessage({ 
+            text: `Áp dụng thành công! Đã giảm $${(Number(discountAmount) || 0).toLocaleString()}`, 
+            isError: false 
+          });
+        }
       }
     }
-  }, [cartTotal]);
+  }, [cartTotal, selectedCode, promotions]);
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 mt-4 space-y-3 shadow-sm">
@@ -81,15 +121,15 @@ export default function PromoSection({ cartTotal, onApplyDiscount }: PromoSectio
           className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-red-500 focus:border-red-500 block p-2.5 cursor-pointer outline-none transition-all"
         >
           <option value="">-- Chọn mã giảm giá phù hợp --</option>
-          {promoList.map((promo) => {
+          {promotions.map((promo) => {
             const isEligible = cartTotal >= promo.minSpend;
             return (
               <option 
-                key={promo.code} 
-                value={promo.code}
+                key={promo.promoId} 
+                value={promo.couponCode}
                 className={isEligible ? "text-green-600 font-medium" : "text-gray-400"}
               >
-                {promo.text} {!isEligible ? " (Chưa đủ điều kiện)" : ""}
+                {getPromoText(promo)} {!isEligible ? " (Chưa đủ điều kiện)" : ""}
               </option>
             );
           })}

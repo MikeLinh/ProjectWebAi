@@ -34,7 +34,7 @@ public class AuthController {
     
     @PutMapping("/update-profile/{id}")
     public ResponseEntity<?> updateProfile(@PathVariable Long id, @RequestBody User updatedData) {
-        // Tìm kiếm User theo ID trong Database
+ 
         Optional<User> userOpt = userRepository.findById(id);
         
         if (userOpt.isPresent()) {

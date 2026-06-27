@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 import { useState, useEffect } from "react"; 
 import { useCart } from "../components/context/carcontext";
 import { useNavigate } from "react-router-dom";
@@ -15,11 +16,10 @@ export default function CartPage() {
   const cartTotal = getCartTotal();
   
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
-    if (appliedCode === "BIKE3000" && cartTotal < 3000) handleResetDiscount();
-    else if (appliedCode === "BIKE2000" && cartTotal < 2000) handleResetDiscount();
-    else if (appliedCode === "BIKE1000" && cartTotal < 1000) handleResetDiscount();
-  }, [cartTotal, appliedCode]);
+  if (cartTotal === 0) {
+    handleResetDiscount();
+  }
+  }, [cartTotal]);
 
   const handleResetDiscount = () => {
     setDiscount(0);

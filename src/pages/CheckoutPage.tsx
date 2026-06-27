@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom"; 
 import { useCart } from "../components/context/carcontext";
 import Navbar from "../components/home/navbar";
@@ -13,11 +14,60 @@ export default function CheckoutPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const discount= location.state?.discount || 0;
+  const discount = location.state?.discount || 0;
   const couponCode = location.state?.couponCode || "";
   
   const [formData, setFormData] = useState({ name: "", phone: "", email: "", address: "", note: "" });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("COD");
+
+  useEffect(() => {
+    const applyUserData = (user: Record<string, string>) => {
+      setFormData({
+        name: user.fullName || "",
+        phone: user.phoneNumber || "",
+        email: user.email || "",
+        address: user.address || "",
+        note: ""
+      });
+    };
+
+    const rawUser =
+      localStorage.getItem("current_user") ||
+      localStorage.getItem("currentUser") ||
+      localStorage.getItem("user");
+
+    if (rawUser) {
+      try {
+        const user = JSON.parse(rawUser);
+        if (user.fullName || user.email || user.phoneNumber) {
+          applyUserData(user);
+          return;
+        }
+      } catch (error) {
+        console.error("Lỗi giải mã user JSON:", error);
+      }
+    }
+
+    let userId = localStorage.getItem("userId") || localStorage.getItem("userId");
+    if (!userId && rawUser) {
+      try {
+        const u = JSON.parse(rawUser);
+        if (u.userId) userId = String(u.userId);
+      } catch { /* ignore */ }
+    }
+
+    if (userId) {
+      fetch(`http://localhost:8080/api/users/${userId}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Không thể tải thông tin tài khoản");
+          return res.json();
+        })
+        .then((user) => {
+          applyUserData(user);
+        })
+        .catch((err) => console.error("Lỗi autofill checkout:", err));
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,7 +80,7 @@ export default function CheckoutPage() {
       alert("Giỏ hàng rỗng!");
       return;
     }
-    const subTotal= getCartTotal();
+    const subTotal = getCartTotal();
     const finalTotal = subTotal - discount;
 
     const completedOrder = {
