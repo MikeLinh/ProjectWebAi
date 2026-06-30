@@ -46,7 +46,6 @@ export default function ProductDetail() {
       <div className="flex-1 w-full py-10">
         <div className="max-w-7xl mx-auto px-4 space-y-10">
 
-          {/* Product Info*/}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white p-6 rounded-2xl border border-gray-200">
             <ProductInfoLeft
               image={product.image}
@@ -67,13 +66,11 @@ export default function ProductDetail() {
             />
           </div>
 
-          {/* Reviews*/}
           <ProductReviews
             reviewCount={product.reviewCount}
             rating={product.rating}
           />
 
-          {/* Related Products*/}
           <RelatedProducts
             products={[
               {

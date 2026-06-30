@@ -3,7 +3,7 @@ import OrderItem from "./orderitem";
 import type { Order } from "./orderitem";
 
 interface OrderListProps {
-  orders: Order[]; 
+  orders: Order[];
 }
 
 export default function OrderList({ orders }: OrderListProps) {
@@ -16,9 +16,9 @@ export default function OrderList({ orders }: OrderListProps) {
   }
 
   return (
-    <div className="space-y-4"> 
+    <div className="space-y-4">
       {orders.map((order) => (
-        <OrderItem key={order.id} order={order} /> 
+        <OrderItem key={order.orderId} order={order} />
       ))}
     </div>
   );

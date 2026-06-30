@@ -113,7 +113,7 @@ export default function Navbar() {
                     )}
                 </button>
 
-                <Link to="/ordertracking" className="text-gray-300 hover:text-blue-500 flex items-center hover:scale-110 transition-transform">
+                <Link to="/order-tracking" className="text-gray-300 hover:text-blue-500 flex items-center hover:scale-110 transition-transform">
                     <LocalMallIcon className="text-xl" />
                 </Link>
             </div>
