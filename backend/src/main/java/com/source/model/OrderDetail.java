@@ -30,7 +30,6 @@ public class OrderDetail {
     @Column(name = "price", precision = 15, scale = 2)
     private BigDecimal price;
 
-    // Getters & Setters
     public Long getOrderDetailId()              { return orderDetailId; }
     public void setOrderDetailId(Long id)       { this.orderDetailId = id; }
 

@@ -143,7 +143,7 @@ export default function MainHome() {
                       price: product.price,
                       image: finalImage,
                       rating: 5,
-                      reviewCount: 24,
+                      reviewCount: 4,
                       discount: 0,
                       originalPrice: product.price,
                       category: product.category?.categoryName || "Bicycles",

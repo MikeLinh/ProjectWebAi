@@ -26,14 +26,12 @@ export default function AIChatbot() {
   ]);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Cuộn xuống cuối mỗi khi có tin mới
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isOpen]);
 
-  // Fetch context từ backend 1 lần khi mở chatbot lần đầu
   const fetchContext = useCallback(async () => {
-    if (aiContext !== null) return; // đã có rồi, không fetch lại
+    if (aiContext !== null) return; 
     try {
       const res = await fetch(CONTEXT_API);
       if (!res.ok) throw new Error("Context API lỗi");
@@ -43,7 +41,6 @@ export default function AIChatbot() {
     } catch (err) {
       console.error("Không lấy được context:", err);
       setContextError(true);
-      // Dùng fallback tĩnh nếu backend chưa sẵn sàng
       setAiContext(
         "Bạn là trợ lý AI của BIKECYC STORE. Hãy tư vấn xe đạp một cách nhiệt tình và ngắn gọn."
       );
@@ -80,7 +77,7 @@ export default function AIChatbot() {
             {
               parts: [
                 {
-                  // Nhúng context DB thật vào mỗi prompt
+  
                   text: `${aiContext}\n\nKhách hàng hỏi: ${userText}`,
                 },
               ],
@@ -142,7 +139,7 @@ export default function AIChatbot() {
                   ) : (
                     <>
                       <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse inline-block"></span>
-                      <span className="text-green-400">Trực tuyến · Dữ liệu thật</span>
+                      <span className="text-green-400">Trực tuyến</span>
                     </>
                   )}
                 </p>

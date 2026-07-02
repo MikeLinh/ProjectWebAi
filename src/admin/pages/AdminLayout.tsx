@@ -5,6 +5,7 @@ import ManageProducts from "./ManagerProduct";
 import ManageOrders from "./ManagerOrder";
 import ManagePromotions from "./ManagerPromotion";
 import ManageCategories from "./ManagerCategory";
+import ManageWarehouse from "./ManagerWarehouse";
 import User from "./ManageUser"
 
 export default function AdminLayout() {
@@ -16,6 +17,8 @@ export default function AdminLayout() {
         return <DashboardOverview />;
       case "products":
         return <ManageProducts />;
+      case "warehouse":
+        return <ManageWarehouse />;
       case "orders":
         return <ManageOrders />;
       case "promotions":

@@ -7,6 +7,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   PACKING:   "Đang đóng gói",
   SHIPPING:  "Đang vận chuyển",
   DELIVERED: "Đã nhận hàng",
+  CANCELLED: "Đã hủy",
 };
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
@@ -15,6 +16,7 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
   PACKING:   "bg-purple-100 text-purple-800",
   SHIPPING:  "bg-orange-100 text-orange-800",
   DELIVERED: "bg-green-100  text-green-800",
+  CANCELLED: "bg-red-100    text-red-800",
 };
 
 const NEXT_ACTION: Partial<Record<OrderStatus, { label: string; next: OrderStatus }>> = {
@@ -38,6 +40,7 @@ export default function OrderDetailModal({
 
   const action = NEXT_ACTION[order.status as OrderStatus];
   const isUpdating = updatingId === order.orderId;
+  const canCancel = ["PENDING", "CONFIRMED"].includes(order.status);
 
   return (
     <div
@@ -83,9 +86,13 @@ export default function OrderDetailModal({
         </div>
 
         <div className="flex gap-2 pt-1">
-          <button onClick={onClose} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2.5 rounded-xl text-[11px] uppercase tracking-wider">
+          <button 
+            onClick={onClose} 
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2.5 rounded-xl text-[11px] uppercase tracking-wider"
+          >
             Đóng
           </button>
+
           {action && (
             <button
               onClick={() => onUpdateStatus(order.orderId, action.next)}
@@ -93,6 +100,17 @@ export default function OrderDetailModal({
               className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl text-[11px] uppercase tracking-wider"
             >
               {isUpdating ? "Đang xử lý..." : action.label}
+            </button>
+          )}
+
+          {/* Nút Hủy đơn hàng */}
+          {canCancel && (
+            <button
+              onClick={() => onUpdateStatus(order.orderId, "CANCELLED")}
+              disabled={isUpdating}
+              className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl text-[11px] uppercase tracking-wider"
+            >
+              {isUpdating ? "Đang xử lý..." : "Hủy đơn hàng"}
             </button>
           )}
         </div>

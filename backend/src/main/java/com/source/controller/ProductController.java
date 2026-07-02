@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
-@RestController
+@RestController 
 @RequestMapping("/api/products")
 @CrossOrigin(origins = "http://localhost:5173")
 public class ProductController {
@@ -20,6 +20,7 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<Product>> getAllProducts(
+            //query parameter
             @RequestParam(value = "categoryName", required = false) String categoryName,
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(required = false) BigDecimal minPrice,
@@ -41,7 +42,7 @@ public class ProductController {
                     .toList();
         }
 
-        List<Product> products = productService.getFilteredProducts(categories, brands, minPrice, maxPrice);
+        List<Product> products = productService.getFilteredProductsWithReviewCount(categories, brands, minPrice, maxPrice);
         return ResponseEntity.ok(products);
     }
 
@@ -63,4 +64,14 @@ public class ProductController {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/related-by-brand")
+    public ResponseEntity<List<Product>> getRelatedByBrand(
+            @RequestParam String brand,
+            @RequestParam(required = false) Long excludeId) {
+        
+        List<Product> products = productService.getProductsByBrandAndExcludeIdWithReviewCount(brand, excludeId);
+        return ResponseEntity.ok(products);
+    }
+    
+    
 }

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from "react";
 
-import backgroundp from "../../../assets/images/backgroundproduct.png"
+import backgroundp from "../../../assets/images/backgroundproduct.png";
 import SidebarFilter, { type FilterState } from "../SlideBar/SlidebarFilter.tsx";
 
 import ProductBanner from "./productbanner.tsx";
@@ -22,6 +22,7 @@ interface DBProduct {
     categoryName: string;
     description?: string;
   };
+  reviewCount?: number;
 }
 
 export type SortOption = "newest" | "price-asc" | "price-desc";
@@ -52,14 +53,25 @@ export default function MainProduct() {
 
   useEffect(() => {
     setLoading(true);
+
     const params = new URLSearchParams();
 
-    if (filters.categories.length > 0) params.append("categoryName", filters.categories.join(","));
-    if (filters.brands.length > 0) params.append("brand", filters.brands.join(","));
-    if (filters.priceMax < 5000) params.append("maxPrice", filters.priceMax.toString());
-    if (filters.priceMin > 0) params.append("minPrice", filters.priceMin.toString());
+    if (filters.categories.length > 0) {
+      params.append("categoryName", filters.categories.join(","));
+    }
+    if (filters.brands.length > 0) {
+      params.append("brand", filters.brands.join(","));
+    }
+    if (filters.priceMin > 0) {
+      params.append("minPrice", filters.priceMin.toString());
+    }
+    if (filters.priceMax < 5000) {
+      params.append("maxPrice", filters.priceMax.toString());
+    }
 
-    const url = `http://localhost:8080/api/products${params.toString() ? `?${params}` : ""}`;
+    const url = `http://localhost:8080/api/products${params.toString() ? `?${params.toString()}` : ""}`;
+
+    console.log("Fetching URL:", url);
 
     fetch(url)
       .then((res) => {
@@ -67,13 +79,14 @@ export default function MainProduct() {
         return res.json();
       })
       .then((data) => {
-        setDbProducts(data);
-        setLoading(false);
+        console.log("Số sản phẩm nhận được:", data.length, data.slice(0, 3)); // Debug thêm
+        setDbProducts(data || []);
       })
       .catch((err) => {
         console.error("Lỗi API:", err);
-        setLoading(false);
-      });
+        setDbProducts([]);
+      })
+      .finally(() => setLoading(false));
   }, [filters]);
 
   const sortedProducts = [...dbProducts].sort((a, b) => {

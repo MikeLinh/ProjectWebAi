@@ -30,7 +30,7 @@ export default function ManageProducts() {
 
   const handleSave = () => {
     setIsModalOpen(false);
-    fetchProducts(); // Reload từ API sau khi lưu
+    fetchProducts(); 
   };
 
   const handleDelete = async (id: number) => {
@@ -55,7 +55,7 @@ export default function ManageProducts() {
           onClick={handleOpenAdd}
           className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide"
         >
-          ➕ Thêm sản phẩm
+          Thêm sản phẩm
         </button>
       </div>
 

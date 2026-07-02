@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Table(name = "CATEGORIES")
 @Data
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // Thêm dòng này ở đầu class Category
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Category {
 
     @Id

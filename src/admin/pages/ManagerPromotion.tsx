@@ -6,12 +6,12 @@ const API = "http://localhost:8080/api/promotions";
 interface Promotion {
   promoId: number;
   couponCode: string;
-  discountValue: number;   // Số tiền giảm cố định (VD: 50, 100)
+  discountValue: number;   
   startDate: string;
   endDate: string;
 }
 
-const today = new Date().toISOString().slice(0, 16); // "yyyy-MM-ddTHH:mm"
+const today = new Date().toISOString().slice(0, 16);
 
 const emptyForm = {
   couponCode: "",
@@ -119,13 +119,12 @@ export default function ManagePromotions() {
       <h1 className="text-2xl font-bold text-gray-900">Quản lý khuyến mãi</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Form tạo mã */}
         <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm h-fit text-black text-xs space-y-4">
           <h2 className="text-sm font-bold border-b pb-3 uppercase tracking-wide">➕ Tạo mã ưu đãi mới</h2>
 
           {errorMsg && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-lg font-medium">
-              ⚠️ {errorMsg}
+              {errorMsg}
             </div>
           )}
 

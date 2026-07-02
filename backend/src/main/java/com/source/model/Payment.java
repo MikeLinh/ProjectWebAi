@@ -32,7 +32,6 @@ public class Payment {
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
-    // Getters & Setters
     public Long getPaymentId()                      { return paymentId; }
     public void setPaymentId(Long paymentId)        { this.paymentId = paymentId; }
 

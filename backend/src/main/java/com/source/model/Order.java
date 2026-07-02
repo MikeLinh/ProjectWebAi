@@ -50,16 +50,12 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<OrderDetail> items;
 
-    // Field tạm, KHÔNG lưu DB (bảng orders không có cột này).
-    // Frontend gửi paymentMethod trong cùng JSON body để Controller
-    // đọc và tự tạo bản ghi Payment riêng (bảng payments).
     @Transient
     private String paymentMethod;
 
     @Transient
     private BigDecimal discount;
 
-    // Getters & Setters
     public Long getOrderId()                    { return orderId; }
     public void setOrderId(Long orderId)        { this.orderId = orderId; }
 

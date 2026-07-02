@@ -1,5 +1,5 @@
-
 import ProductCard from "../productcard";
+
 
 interface ProductGridProps {
   currentProducts: any[];
@@ -7,6 +7,7 @@ interface ProductGridProps {
 }
 
 export default function ProductGrid({ currentProducts, loading }: ProductGridProps) {
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -51,7 +52,7 @@ export default function ProductGrid({ currentProducts, loading }: ProductGridPro
               price: product.price,
               image: finalImage,
               rating: 5,
-              reviewCount: 24,
+              reviewCount: product.reviewCount || 0,
               discount: 0,
               originalPrice: product.price,
               category: product.category?.categoryName || "Bicycles",

@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 @Table(name = "PRODUCTS")
 @Data
 public class Product {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
@@ -37,4 +36,14 @@ public class Product {
 
     @Column(name = "stock_quantity")
     private Integer stockQuantity;
+    @Transient  
+    private Integer reviewCount = 0;
+
+    public Integer getReviewCount() {
+        return reviewCount != null ? reviewCount : 0;
+    }
+
+    public void setReviewCount(Integer reviewCount) {
+        this.reviewCount = reviewCount != null ? reviewCount : 0;
+    }
 }

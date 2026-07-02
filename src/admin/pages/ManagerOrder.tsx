@@ -7,7 +7,9 @@ export type OrderStatus =
   | "CONFIRMED"
   | "PACKING"
   | "SHIPPING"
-  | "DELIVERED";
+  | "DELIVERED"
+  | "CANCELLED"
+  ;
 
 interface OrderItem {
   orderDetailId: number;
@@ -36,6 +38,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   PACKING:   "Đang đóng gói",
   SHIPPING:  "Đang vận chuyển",
   DELIVERED: "Đã nhận hàng",
+  CANCELLED: "Đã hủy",
 };
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
@@ -44,9 +47,9 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
   PACKING:   "bg-purple-50 text-purple-600 border-purple-200",
   SHIPPING:  "bg-orange-50 text-orange-600 border-orange-200",
   DELIVERED: "bg-green-50  text-green-600  border-green-200",
+  CANCELLED: "bg-red-50    text-red-600    border-red-200",
 };
 
-// Nút hành động kế tiếp tương ứng với từng trạng thái hiện tại
 const NEXT_ACTION: Partial<Record<OrderStatus, { label: string; next: OrderStatus }>> = {
   PENDING:   { label: "Xác nhận đơn",       next: "CONFIRMED" },
   CONFIRMED: { label: "Bắt đầu đóng gói",   next: "PACKING" },
@@ -88,7 +91,6 @@ export default function ManageOrders() {
       });
       if (!res.ok) throw new Error("Cập nhật thất bại");
 
-      // Cập nhật local state ngay, không cần fetch lại toàn bộ danh sách
       setOrders((prev) =>
         prev.map((o) => (o.orderId === id ? { ...o, status: newStatus } : o))
       );

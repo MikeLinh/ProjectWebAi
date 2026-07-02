@@ -20,11 +20,9 @@ public class Promotion {
     @Column(name = "discount_value", nullable = false, precision = 15, scale = 2)
     private BigDecimal discountValue;
 
-    // Loại giảm giá: "PERCENT" (Phần trăm) hoặc "FIXED" (Số tiền cố định)
     @Column(name = "discount_type", nullable = false, length = 10)
     private String discountType = "FIXED"; 
 
-    // Giá trị đơn hàng tối thiểu để áp dụng mã
     @Column(name = "min_spend", precision = 15, scale = 2)
     private BigDecimal minSpend = BigDecimal.ZERO;
 

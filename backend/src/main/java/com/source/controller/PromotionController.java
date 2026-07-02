@@ -24,7 +24,6 @@ public class PromotionController {
 
     @PostMapping
     public ResponseEntity<?> createPromotion(@RequestBody Promotion promo) {
-        // Kiểm tra coupon_code trùng
         if (promotionRepository.findByCouponCode(promo.getCouponCode()).isPresent()) {
             return ResponseEntity.badRequest().body("Mã code đã tồn tại!");
         }

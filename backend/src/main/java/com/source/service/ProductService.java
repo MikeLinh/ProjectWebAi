@@ -2,7 +2,11 @@ package com.source.service;
 
 import com.source.model.Product;
 import com.source.repository.ProductRepository;
+import com.source.repository.ProductReviewRepository;
+
 import jakarta.persistence.criteria.Predicate;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,9 +19,11 @@ import java.util.List;
 public class ProductService {
 
     protected final ProductRepository productRepository;
+    private final ProductReviewRepository productReviewRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, ProductReviewRepository productReviewRepository) {
         this.productRepository = productRepository;
+        this.productReviewRepository = productReviewRepository;
     }
 
     @Transactional(readOnly = true)
@@ -27,7 +33,7 @@ public class ProductService {
             BigDecimal minPrice,
             BigDecimal maxPrice) {
 
-        Specification<Product> spec = (root, query, cb) -> {
+        Specification<Product> spec = (root, query, cb) -> { //CriteriaBuilder = cb, 
             List<Predicate> predicates = new ArrayList<>();
 
             if (categories != null && !categories.isEmpty()) {
@@ -58,4 +64,56 @@ public class ProductService {
     public void deleteProduct(Integer id) {
         productRepository.deleteById(id.longValue());
     }
+    @Transactional(readOnly = true)
+    public List<Product> getAllProductsWithReviewCount() {
+        List<Product> products = productRepository.findAll();
+        for (Product p : products) {
+            long count = productReviewRepository.countByProductId(p.getProductId());
+            p.setReviewCount((int) count);
+        }
+        return products;
+    }
+    @Transactional(readOnly = true)
+    public List<Product> getFilteredProductsWithReviewCount(
+            List<String> categories,
+            List<String> brands,
+            BigDecimal minPrice,
+            BigDecimal maxPrice) {
+        
+        List<Product> products = getFilteredProducts(categories, brands, minPrice, maxPrice);
+        
+        for (Product p : products) {
+            long count = productReviewRepository.countByProductId(p.getProductId());
+            p.setReviewCount((int) count);
+        }
+        return products;
+    }
+        @Transactional(readOnly = true)
+    public List<Product> getProductsByBrandAndExcludeId(String brand, Long excludeProductId) {
+        Specification<Product> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (brand != null && !brand.isBlank()) {
+                predicates.add(cb.equal(root.get("brand"), brand));
+            }
+            if (excludeProductId != null) {
+                predicates.add(cb.notEqual(root.get("productId"), excludeProductId));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return productRepository.findAll(spec);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Product> getProductsByBrandAndExcludeIdWithReviewCount(String brand, Long excludeProductId) {
+        List<Product> products = getProductsByBrandAndExcludeId(brand, excludeProductId);
+        for (Product p : products) {
+            long count = productReviewRepository.countByProductId(p.getProductId());
+            p.setReviewCount((int) count);
+        }
+        return products;
+    }
+    
 }

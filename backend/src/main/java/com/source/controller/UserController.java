@@ -30,7 +30,6 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody User user) {
-        // Kiểm tra email trùng
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email đã tồn tại!");
         }
@@ -54,8 +53,6 @@ public class UserController {
         existing.setPhoneNumber(incoming.getPhoneNumber());
         existing.setAddress(incoming.getAddress());
         existing.setRole(incoming.getRole());
-
-        // Chỉ đổi mật khẩu nếu client gửi giá trị mới
         if (incoming.getPassword() != null && !incoming.getPassword().isBlank()) {
             existing.setPassword(incoming.getPassword());
         }

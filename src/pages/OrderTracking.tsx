@@ -7,10 +7,9 @@ import OrderList from "../components/ordertracking/orderlist";
 import { type Order, type OrderStatus } from "../components/ordertracking/orderitem";
 
 function getCurrentUserId(): number | null {
-  const rawUser =
-    localStorage.getItem("current_user") ||
-    localStorage.getItem("currentUser")  ||
-    localStorage.getItem("user");
+  const rawUser = localStorage.getItem("current_user") || 
+                  localStorage.getItem("currentUser") || 
+                  localStorage.getItem("user");
   if (!rawUser) return null;
   try {
     return JSON.parse(rawUser).userId ?? null;
@@ -23,31 +22,66 @@ export default function OrderTrackingPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "ALL">("ALL");
   const [timeSort, setTimeSort] = useState<"NEWEST" | "OLDEST" | "BY_HOUR">("NEWEST");
   const [selectedMonth, setSelectedMonth] = useState<string>("Tất cả");
   const [selectedYear, setSelectedYear] = useState<string>("Tất cả");
 
-  useEffect(() => {
+  const fetchOrders = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    else setRefreshing(true);
+
     const userId = getCurrentUserId();
     if (!userId) {
       setError("Vui lòng đăng nhập để xem lịch sử đơn hàng.");
       setLoading(false);
+      setRefreshing(false);
       return;
     }
 
-    fetch(`http://localhost:8080/api/orders/user/${userId}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Không thể tải đơn hàng");
-        return res.json();
-      })
-      .then((data: Order[]) => setOrders(data))
-      .catch((err) => {
-        console.error(err);
-        setError("Đã có lỗi khi tải đơn hàng. Vui lòng thử lại.");
-      })
-      .finally(() => setLoading(false));
+    try {
+      const res = await fetch(`http://localhost:8080/api/orders/user/${userId}`);
+      if (!res.ok) throw new Error("Không thể tải đơn hàng");
+      
+      const data: Order[] = await res.json();
+      setOrders(data);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError("Đã có lỗi khi tải đơn hàng.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: number) => {
+    if (!window.confirm("Bạn có chắc muốn hủy đơn hàng này không?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:8080/api/orders/${orderId}/cancel`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (res.ok) {
+        setOrders(prev => prev.map(order => 
+          order.orderId === orderId ? { ...order, status: "CANCELLED" as OrderStatus } : order
+        ));
+        alert("Đơn hàng đã được hủy thành công!");
+      } else {
+        alert("Không thể hủy đơn hàng ở trạng thái hiện tại.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Có lỗi xảy ra khi hủy đơn hàng.");
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
   }, []);
 
   const filteredAndSortedOrders = useMemo(() => {
@@ -92,7 +126,17 @@ export default function OrderTrackingPage() {
     <div className="bg-white min-h-screen text-black flex flex-col justify-between">
       <Navbar />
       <div className="max-w-4xl w-full mx-auto px-4 py-10 flex-1">
-        <h1 className="text-2xl font-bold tracking-wide mb-8 uppercase">Lịch sử đơn hàng</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold tracking-wide uppercase">Lịch sử đơn hàng</h1>
+          
+          <button
+            onClick={() => fetchOrders(false)}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors disabled:opacity-70"
+          >
+            {refreshing ? "Đang tải..." : "Làm mới"}
+          </button>
+        </div>
 
         {loading ? (
           <div className="text-center py-16 text-gray-400 text-sm">Đang tải đơn hàng...</div>
@@ -110,7 +154,10 @@ export default function OrderTrackingPage() {
               setSelectedYear={setSelectedYear}
               selectedYear={selectedYear}
             />
-            <OrderList orders={filteredAndSortedOrders} />
+            <OrderList 
+              orders={filteredAndSortedOrders} 
+              onCancelOrder={handleCancelOrder}
+            />
           </>
         )}
       </div>

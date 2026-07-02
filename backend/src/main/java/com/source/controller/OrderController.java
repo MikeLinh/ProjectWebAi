@@ -34,7 +34,7 @@ public class OrderController {
         return ResponseEntity.ok(orderRepository.findAllByOrderByOrderDateDesc());
     }
 
-    // ─── GET: Chi tiết 1 đơn ──────────────────────────────────────────────
+    
     @GetMapping("/{id}")
     public ResponseEntity<Order> getById(@PathVariable Long id) {
         return orderRepository.findById(id)
@@ -147,5 +147,22 @@ public class OrderController {
                 list.remove(emitter);
             }
         }
+    }
+        @PatchMapping("/{id}/cancel")
+        public ResponseEntity<?> cancelOrder(@PathVariable Long id) {
+        Optional<Order> opt = orderRepository.findById(id);
+        if (opt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Order order = opt.get();
+        if (!"PENDING".equals(order.getStatus()) && !"CONFIRMED".equals(order.getStatus())) {
+            return ResponseEntity.badRequest().body("Không thể hủy đơn hàng ở trạng thái hiện tại");
+        }
+        order.setStatus("CANCELLED");
+        orderRepository.save(order);
+        pushStatusUpdate(id, "CANCELLED");
+
+        return ResponseEntity.ok(order);
     }
 }

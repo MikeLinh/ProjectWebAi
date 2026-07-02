@@ -5,7 +5,8 @@ export type OrderStatus =
   | "CONFIRMED"
   | "PACKING"
   | "SHIPPING"
-  | "DELIVERED";
+  | "DELIVERED"
+  | "CANCELLED";
 
 export interface Order {
   orderId: number;
@@ -23,6 +24,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   PACKING:   "Đang đóng gói",
   SHIPPING:  "Đang vận chuyển",
   DELIVERED: "Đã nhận hàng",
+  CANCELLED: "Đã hủy",
 };
 
 const STATUS_BADGE: Record<OrderStatus, string> = {
@@ -31,13 +33,15 @@ const STATUS_BADGE: Record<OrderStatus, string> = {
   PACKING:   "bg-purple-50 text-purple-600 border-purple-200",
   SHIPPING:  "bg-orange-50 text-orange-600 border-orange-200",
   DELIVERED: "bg-green-50  text-green-600  border-green-200",
+  CANCELLED: "bg-red-50    text-red-600    border-red-200",
 };
 
 interface OrderItemProps {
   order: Order;
+  onCancelOrder?: (orderId: number) => void;   
 }
 
-export default function OrderItem({ order }: OrderItemProps) {
+export default function OrderItem({ order, onCancelOrder }: OrderItemProps) {
   const formatOrderDate = (dateString: string) => {
     const d = new Date(dateString);
     const giờ  = d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
@@ -46,6 +50,7 @@ export default function OrderItem({ order }: OrderItemProps) {
   };
 
   const { giờ, ngày } = formatOrderDate(order.orderDate);
+  const canCancel = ["PENDING", "CONFIRMED"].includes(order.status);
 
   return (
     <div className="border border-gray-200 rounded-xl p-5 hover:shadow-sm transition-shadow space-y-4 bg-white">
@@ -78,6 +83,15 @@ export default function OrderItem({ order }: OrderItemProps) {
         <span className="text-gray-500">Thành tiền:</span>
         <span className="text-sm font-bold text-red-500">${order.totalAmount.toLocaleString()}</span>
       </div>
+
+      {canCancel && onCancelOrder && (
+        <button 
+          onClick={() => onCancelOrder(order.orderId)}
+          className="mt-3 w-full py-2.5 text-red-600 border border-red-300 hover:bg-red-50 rounded-xl text-xs font-medium transition-colors"
+        >
+          Hủy đơn hàng
+        </button>
+      )}
     </div>
   );
 }
