@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/authcontext"; 
 import ProfileInput from "./profileinput";
@@ -5,6 +6,8 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import HomeIcon from "@mui/icons-material/Home";
 import EmailIcon from "@mui/icons-material/Email";
 import BadgeIcon from "@mui/icons-material/Badge";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 export default function ProfileForm() {
   const { user, login } = useAuth();
@@ -12,6 +15,8 @@ export default function ProfileForm() {
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [address, setAddress] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -21,6 +26,7 @@ export default function ProfileForm() {
       setFullName(user.fullName || "");
       setPhoneNumber(user.phoneNumber || "");
       setAddress(user.address || "");
+      setPassword(user.password || "");
     }
   }, [user]);
 
@@ -39,6 +45,7 @@ export default function ProfileForm() {
           fullName: fullName.trim(),
           phoneNumber: phoneNumber.trim(),
           address: address.trim(),
+          password: password.trim(),
         }),
       });
 
@@ -98,6 +105,23 @@ export default function ProfileForm() {
           onChange={setPhoneNumber}
           placeholder="Nhập số điện thoại của bạn"
         />
+        <div className="relative">
+          <ProfileInput
+            label="Mật khẩu mới (tùy chọn)"
+            icon={<PhoneIcon style={{ fontSize: 16 }} />} 
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={setPassword}
+            placeholder="Để trống nếu không muốn đổi mật khẩu"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-9 text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            {showPassword ? <VisibilityIcon fontSize="small" /> : <VisibilityOffIcon fontSize="small" />}
+          </button>
+        </div>
 
         <ProfileInput
           label="Địa chỉ nhận hàng"

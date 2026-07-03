@@ -17,54 +17,94 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleNormalLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage("");
-    setLoading(true);
+  e.preventDefault();
+  setErrorMessage("");
+  setLoading(true);
 
-    try {
-      const res = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password }),
-      });
+  try {
+    const res = await fetch("http://localhost:8080/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim(), password }),
+    });
 
-      if (!res.ok) {
-        throw new Error("Email hoặc mật khẩu không chính xác!");
-      }
-
-      const foundUser = await res.json();
-      localStorage.setItem("currentUser", JSON.stringify(foundUser));
-      login(foundUser);
-      if (foundUser.role === "ADMIN") {
-        alert("Đăng nhập quyền Quản trị viên thành công!");
-        navigate("/admin");
-      } else {
-        alert(`Chào mừng quay trở lại, ${foundUser.fullName}!`);
-        navigate("/");
-      }
-    } catch (error: any) {
-      setErrorMessage(error.message || "Không thể kết nối đến máy chủ.");
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      throw new Error("Email hoặc mật khẩu không chính xác!");
     }
+
+    const data = await res.json();
+    const { user, token, expiresAt } = data;
+
     
-  };
+    localStorage.setItem("currentUser", JSON.stringify(user));
+    localStorage.setItem("token", token);
+    localStorage.setItem("expiresAt", expiresAt);
+
+    login(user);
+
+    if (user.role === "ADMIN") {
+      alert("Đăng nhập quyền Quản trị viên thành công!");
+      navigate("/admin");
+    } else {
+      alert(`Chào mừng quay trở lại, ${user.fullName}!`);
+      navigate("/");
+    }
+  } catch (error: any) {
+    setErrorMessage(error.message || "Không thể kết nối đến máy chủ.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
+        setLoading(true);
+        setErrorMessage("");
+
         const googleAuthApi = import.meta.env.VITE_GOOGLE_API as string;
+
         const res = await fetch(googleAuthApi, {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${tokenResponse.access_token}` 
+          },
         });
+
         const data = await res.json();
-        console.log(data);
-      
-      } catch (error) {
-        console.error("Lỗi xác thực Google:", error);
+
+        if (!res.ok) {
+          throw new Error(data.message || "Đăng nhập Google thất bại!");
+        }
+
+        const user = data.user || data;
+        localStorage.setItem("currentUser", JSON.stringify(user));
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("expiresAt", data.expiresAt);
+
+        login(user);
+
+        if (user.role === "ADMIN") {
+          alert("Đăng nhập quyền Quản trị viên thành công!");
+          navigate("/admin");
+        } else {
+          alert(`Chào mừng, ${user.fullName}!`);
+          navigate("/");
+        }
+
+      } catch (error: any) {
+        console.error("Lỗi Google Login:", error);
+        setErrorMessage(error.message || "Đăng nhập Google thất bại. Vui lòng thử lại.");
+      } finally {
+        setLoading(false);
       }
     },
-  });
+    onError: (error) => {
+      console.error("Google Login Error:", error);
+      setErrorMessage("Không thể kết nối với Google.");
+    },
+});
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-8">

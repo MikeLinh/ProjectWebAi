@@ -53,11 +53,12 @@ public class UserController {
         existing.setPhoneNumber(incoming.getPhoneNumber());
         existing.setAddress(incoming.getAddress());
         existing.setRole(incoming.getRole());
-        if (incoming.getPassword() != null && !incoming.getPassword().isBlank()) {
-            existing.setPassword(incoming.getPassword());
+        if (incoming.getPassword() != null && !incoming.getPassword().trim().isEmpty()) {
+            existing.setPassword(incoming.getPassword().trim());
         }
 
         User saved = userRepository.save(existing);
+        saved.setPassword(null);
         return ResponseEntity.ok(saved);
     }
 

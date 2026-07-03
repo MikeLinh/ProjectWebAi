@@ -88,10 +88,10 @@ public class ProductService {
         }
         return products;
     }
-        @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<Product> getProductsByBrandAndExcludeId(String brand, Long excludeProductId) {
-        Specification<Product> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
+    Specification<Product> spec = (root, query, cb) -> {
+        List<Predicate> predicates = new ArrayList<>();
 
             if (brand != null && !brand.isBlank()) {
                 predicates.add(cb.equal(root.get("brand"), brand));
@@ -101,7 +101,7 @@ public class ProductService {
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
-        };
+    };
 
         return productRepository.findAll(spec);
     }

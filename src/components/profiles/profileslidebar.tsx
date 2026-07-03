@@ -20,7 +20,7 @@ export default function ProfileSidebar({ fullName, role }: ProfileSidebarProps) 
           {role}
         </span>
       </div>
-      <p className="text-xs text-gray-400 italic">Thành viên BikeCyc Store</p>
+      <p className="text-xs text-gray-400 italic">Thành viên BikeCYC Store</p>
     </div>
   );
 }

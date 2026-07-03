@@ -3,7 +3,7 @@ import React from "react";
 interface ProfileInputProps {
   label: string;
   icon: React.ReactNode;
-  type?: "text" | "email";
+  type?: "text" | "email" | "password" | "tel";
   value: string;
   onChange?: (val: string) => void;
   placeholder?: string;

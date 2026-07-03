@@ -35,11 +35,10 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
     fetchReviews();
   }, [productId]);
 
-  // Hàm xử lý gửi data lên API (truyền xuống cho ReviewForm sử dụng)
   const handleAddReview = async (newReview: DBReview): Promise<boolean> => {
     try {
       const res = await axios.post(`http://localhost:8080/api/products/${productId}/reviews`, newReview);
-      setReviews([res.data, ...reviews]); // Thêm đánh giá mới vào đầu danh sách hiển thị
+      setReviews([res.data, ...reviews]); 
       return true;
     } catch (err) {
       console.error("Lỗi gửi API review:", err);
@@ -64,14 +63,11 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
           {reviews.length} Đánh giá cho sản phẩm này
         </h2>
         
-        {/* Component Thống kê sao */}
         <ReviewStats reviews={reviews} />
 
-        {/* Component Danh sách bài đánh giá */}
         <ReviewList reviews={reviews} />
       </div>
 
-      {/* Khối bên phải: Form viết Đánh giá */}
       <div>
         <ReviewForm onSubmitReview={handleAddReview} />
       </div>

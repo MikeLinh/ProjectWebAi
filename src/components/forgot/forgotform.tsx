@@ -1,43 +1,81 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import FormInput from "../common/frominput";
 import SubmitButton from "../common/submitbutton";
 
-export default function ForgotForm(){
+export default function ForgotForm() {
     const [email, setEmail] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
-    const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+    const [isSuccess, setIsSuccess] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>("");
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrorMessage("");
         setLoading(true);
-        try{
-            console.log("Reset password for: ",email);
-            setIsSubmitted(true);
-        }catch(error){
-            console.log(error)
-        }finally{
+
+        try {
+            const res = await fetch("http://localhost:8080/api/auth/forgot-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: email.trim() }),
+            });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(errorText || "Email không tồn tại!");
+            }
+
+            setIsSuccess(true);
+        } catch (error: any) {
+            setErrorMessage(error.message || "Gửi mật khẩu mới thất bại. Vui lòng thử lại.");
+        } finally {
             setLoading(false);
         }
-        
     };
-    if(isSubmitted){
-        return(
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center text-xs text-green-700 mb-4 leading-relaxed">
-                Mã code đặt lại mật khẩu của bạn đã được gửi thành công đến địa chỉ email của bạn. Vui lòng kiểm tra thư hoặc thư rác
+
+    if (isSuccess) {
+        return (
+            <div className="text-center py-12">
+                <div className="mx-auto w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center mb-6">
+                    <span className="text-5xl">📧</span>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">Đã gửi mật khẩu mới!</h3>
+                <p className="text-gray-600 leading-relaxed">
+                    Chúng tôi đã gửi mật khẩu mới đến<br />
+                    <strong className="text-blue-600 break-all">{email}</strong>
+                </p>
+                <p className="text-xs text-gray-500 mt-8">
+                    Vui lòng kiểm tra hộp thư đến.
+                </p>
             </div>
-        )
+        );
     }
-    return(
-        <form onSubmit={handleSubmit} className="space-y-4">
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6">
             <FormInput
                 label="Email Address"
                 type="email"
                 name="email"
-                placeholder="Enter your registered email"
+                placeholder="Nhập email đã đăng ký"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
             />
-            <SubmitButton isLoading={loading}>Gửi mã khôi phục</SubmitButton>
+
+            {errorMessage && (
+                <p className="text-red-500 text-sm bg-red-50 p-4 rounded-2xl border border-red-200 text-center">
+                    {errorMessage}
+                </p>
+            )}
+
+            <SubmitButton isLoading={loading}>
+                Gửi mật khẩu mới
+            </SubmitButton>
+
+            <p className="text-center text-xs text-gray-500 pt-2">
+                Mật khẩu mới sẽ được gửi ngay đến email của bạn
+            </p>
         </form>
-    )
+    );
 }
