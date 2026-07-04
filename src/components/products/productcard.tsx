@@ -28,6 +28,7 @@ export default function Card({ product }: CardProps) {
   const { addToCart } = useCart();
 
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const discountPercent = product.discount || 0;
 
   const handleCardClick = () => {
     navigate(`/product/${product.id}`, { state: { product } }); 
@@ -47,11 +48,18 @@ export default function Card({ product }: CardProps) {
 
   return (
     <div 
-      className="group bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-300 cursor-pointer"
+      className="group bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-300 cursor-pointer relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleCardClick}
     >
+      {/* Badge % Giảm Giá */}
+      {discountPercent > 0 && (
+        <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-10">
+          -{discountPercent}%
+        </div>
+      )}
+
       {/* Khung ảnh */}
       <div className="w-full h-52 bg-gray-50 flex items-center justify-center p-4 relative overflow-hidden">
         <img 
@@ -63,7 +71,7 @@ export default function Card({ product }: CardProps) {
 
       {/* Thông tin nội dung */}
       <div className="p-4">
-        {/* Category + Brand badge cùng hàng */}
+        {/* Category + Brand badge */}
         <div className="flex items-center justify-between gap-2">
           <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider truncate">
             {product.category || "Bicycles"}
@@ -97,9 +105,9 @@ export default function Card({ product }: CardProps) {
               ${product.price.toLocaleString()}
             </span>
             
-            {hasDiscount && (
+            {hasDiscount && product.originalPrice && (
               <span className="text-xs text-gray-400 line-through">
-                ${product.originalPrice?.toLocaleString()}
+                ${product.originalPrice.toLocaleString()}
               </span>
             )}
           </div>

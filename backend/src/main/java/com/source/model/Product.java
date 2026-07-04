@@ -39,11 +39,21 @@ public class Product {
     @Transient  
     private Integer reviewCount = 0;
 
+    @Column(name = "discount_percent")
+    private Integer discountPercent = 0;
+
     public Integer getReviewCount() {
         return reviewCount != null ? reviewCount : 0;
     }
 
     public void setReviewCount(Integer reviewCount) {
         this.reviewCount = reviewCount != null ? reviewCount : 0;
+    }
+    public Integer getDiscountPercent() {
+    return discountPercent != null ? discountPercent : 0;
+    }
+
+    public void setDiscountPercent(Integer discountPercent) {
+        this.discountPercent = discountPercent != null ? discountPercent : 0;
     }
 }

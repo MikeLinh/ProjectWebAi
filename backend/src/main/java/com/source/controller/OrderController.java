@@ -1,8 +1,10 @@
 package com.source.controller;
 
+import com.source.service.ProductService;
 import com.source.model.Order;
 import com.source.model.OrderDetail;
 import com.source.model.Payment;
+import com.source.model.Product;
 import com.source.repository.OrderRepository;
 import com.source.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ public class OrderController {
 
     @Autowired private OrderRepository orderRepository;
     @Autowired private PaymentRepository paymentRepository;
+    @Autowired private ProductService productService;
 
     private final Map<Long, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
@@ -164,5 +167,10 @@ public class OrderController {
         pushStatusUpdate(id, "CANCELLED");
 
         return ResponseEntity.ok(order);
+    }
+    @GetMapping("/sale")
+    public ResponseEntity<List<Product>> getSaleProducts() {
+        List<Product> products = productService.getProductsWithDiscount();
+        return ResponseEntity.ok(products);
     }
 }

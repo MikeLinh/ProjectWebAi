@@ -40,4 +40,5 @@ public class PromotionController {
         promotionRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+   
 }

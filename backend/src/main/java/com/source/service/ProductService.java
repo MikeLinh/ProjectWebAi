@@ -10,10 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
+import java.nio.file.Path;
+
 
 @Service
 public class ProductService {
@@ -24,6 +31,34 @@ public class ProductService {
     public ProductService(ProductRepository productRepository, ProductReviewRepository productReviewRepository) {
         this.productRepository = productRepository;
         this.productReviewRepository = productReviewRepository;
+    }
+    private final String UPLOAD_DIR = "src/assets/images/";
+
+    @Transactional
+    public Product saveProduct(Product product, MultipartFile imageFile) {
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                String fileName = imageFile.getOriginalFilename();
+                Path uploadPath = Paths.get(UPLOAD_DIR);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                Path filePath = uploadPath.resolve(fileName);
+                
+                if (Files.exists(filePath)) {
+                    Files.delete(filePath);
+                }
+
+                Files.copy(imageFile.getInputStream(), filePath);
+
+                product.setImageUrl(fileName);
+                System.out.println("Đã lưu ảnh: " + fileName);
+            } catch (IOException e) {
+                throw new RuntimeException("Lỗi lưu file: " + e.getMessage());
+            }
+        }
+        return productRepository.save(product);
     }
 
     @Transactional(readOnly = true)
@@ -115,5 +150,16 @@ public class ProductService {
         }
         return products;
     }
-    
+    @Transactional(readOnly = true)
+    public List<Product> getProductsWithDiscount() {
+        Specification<Product> spec = (root, query, cb) -> 
+            cb.greaterThan(root.get("discountPercent"), 0);
+        List<Product> products = productRepository.findAll(spec);
+        for (Product p : products) {
+            long count = productReviewRepository.countByProductId(p.getProductId());
+            p.setReviewCount((int) count);
+        }
+        return products;
+    }
+        
 }

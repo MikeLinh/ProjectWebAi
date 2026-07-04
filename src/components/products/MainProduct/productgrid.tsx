@@ -1,6 +1,5 @@
 import ProductCard from "../productcard";
 
-
 interface ProductGridProps {
   currentProducts: any[];
   loading: boolean;
@@ -43,18 +42,24 @@ export default function ProductGrid({ currentProducts, loading }: ProductGridPro
       {currentProducts.map((product) => {
         const imageName = product.imageUrl ? product.imageUrl.trim() : "bike1.png";
         const finalImage = new URL(`../../../assets/images/${imageName}`, import.meta.url).href;
+
+        // Tính toán giảm giá
+        const discountPercent = product.discountPercent || 0;
+        const discountAmount = Math.round(product.price * (discountPercent / 100));
+        const salePrice = product.price - discountAmount;
+
         return (
           <ProductCard
             key={product.productId}
             product={{
               id: product.productId,
               name: product.productName,
-              price: product.price,
+              price: salePrice,                    
+              originalPrice: product.price,        
               image: finalImage,
               rating: 5,
               reviewCount: product.reviewCount || 0,
-              discount: 0,
-              originalPrice: product.price,
+              discount: discountPercent,           
               category: product.category?.categoryName || "Bicycles",
               inStock: product.stockQuantity,
               description: product.description,

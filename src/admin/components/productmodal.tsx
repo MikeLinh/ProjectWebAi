@@ -17,8 +17,11 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     stockQuantity: 0,
     categoryId: "",
     imageUrl: "",
-    description: ""
+    description: "",
+    discountPercent: 0   // Thêm trường giảm giá
   });
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -34,7 +37,6 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     }
   }, [isOpen, editingProduct]);
 
-
   useEffect(() => {
     if (editingProduct) {
       setFormData({
@@ -44,7 +46,8 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
         stockQuantity: editingProduct.stockQuantity || 0,
         categoryId: editingProduct.category ? editingProduct.category.categoryId.toString() : "",
         imageUrl: editingProduct.imageUrl || "",
-        description: editingProduct.description || ""
+        description: editingProduct.description || "",
+        discountPercent: editingProduct.discountPercent || 0
       });
     } else {
       setFormData({
@@ -54,9 +57,11 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
         stockQuantity: 0,
         categoryId: categories.length > 0 ? categories[0].categoryId.toString() : "",
         imageUrl: "",
-        description: ""
+        description: "",
+        discountPercent: 0
       });
     }
+    setSelectedFile(null);
   }, [editingProduct, isOpen, categories]);
 
   if (!isOpen) return null;
@@ -64,17 +69,21 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const bodyData = {
-      productName: formData.productName,
-      brand: formData.brand,
-      price: formData.price,
-      stockQuantity: formData.stockQuantity,
-      imageUrl: formData.imageUrl,
-      description: formData.description,
-      category: {
-        categoryId: parseInt(formData.categoryId)
-      }
-    };
+    const form = new FormData();
+
+    form.append("productName", formData.productName);
+    form.append("brand", formData.brand);
+    form.append("price", formData.price.toString());
+    form.append("stockQuantity", formData.stockQuantity.toString());
+    form.append("categoryId", formData.categoryId);
+    form.append("description", formData.description);
+    form.append("discountPercent", formData.discountPercent.toString());
+
+    if (selectedFile) {
+      form.append("image", selectedFile);
+    } else if (formData.imageUrl) {
+      form.append("imageUrl", formData.imageUrl);
+    }
 
     const url = editingProduct 
       ? `http://localhost:8080/api/products/${editingProduct.productId}` 
@@ -82,17 +91,12 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     const method = editingProduct ? "PUT" : "POST";
 
     try {
-      const res = await fetch(url, {
-        method: method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bodyData)
-      });
-
+      const res = await fetch(url, { method, body: form });
       if (res.ok) {
         alert(editingProduct ? "Cập nhật sản phẩm thành công!" : "Thêm sản phẩm thành công!");
         onSave(); 
       } else {
-        alert("Lưu thất bại! Xin vui lòng kiểm tra lại API.");
+        alert("Lưu thất bại! Xin vui lòng kiểm tra lại.");
       }
     } catch (error) {
       console.error("Lỗi gửi dữ liệu:", error);
@@ -113,20 +117,36 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
               <label className="block font-semibold mb-1 text-gray-700">Tên sản phẩm</label>
               <input type="text" required className="w-full border p-2.5 rounded-lg outline-none focus:border-blue-500" value={formData.productName} onChange={e => setFormData({...formData, productName: e.target.value})} />
             </div>
+
             <div>
-              <label className="block font-semibold mb-1 text-gray-700">Thương hiệu (Brand)</label>
+              <label className="block font-semibold mb-1 text-gray-700">Thương hiệu</label>
               <input type="text" required className="w-full border p-2.5 rounded-lg outline-none focus:border-blue-500" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
             </div>
+
+            <div>
+              <label className="block font-semibold mb-1 text-gray-700">% Giảm giá</label>
+              <input 
+                type="number" 
+                min="0" 
+                max="100" 
+                className="w-full border p-2.5 rounded-lg outline-none focus:border-blue-500" 
+                value={formData.discountPercent} 
+                onChange={e => setFormData({...formData, discountPercent: Number(e.target.value)})} 
+              />
+            </div>
+
             <div>
               <label className="block font-semibold mb-1 text-gray-700">Đơn giá ($)</label>
               <input type="number" required className="w-full border p-2.5 rounded-lg outline-none focus:border-blue-500" value={formData.price} onChange={e => setFormData({...formData, price: Number(e.target.value)})} />
             </div>
+
             <div>
-              <label className="block font-semibold mb-1 text-gray-700">Số lượng tồn kho</label>
+              <label className="block font-semibold mb-1 text-gray-700">Tồn kho</label>
               <input type="number" required className="w-full border p-2.5 rounded-lg outline-none focus:border-blue-500" value={formData.stockQuantity} onChange={e => setFormData({...formData, stockQuantity: Number(e.target.value)})} />
             </div>
+
             <div>
-              <label className="block font-semibold mb-1 text-gray-700">Danh mục sản phẩm</label>
+              <label className="block font-semibold mb-1 text-gray-700">Danh mục</label>
               <select className="w-full border p-2.5 rounded-lg bg-white outline-none focus:border-blue-500" value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value})}>
                 {categories.map((cat) => (
                   <option key={cat.categoryId} value={cat.categoryId}>
@@ -135,12 +155,22 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
                 ))}
               </select>
             </div>
+
             <div className="col-span-2">
-              <label className="block font-semibold mb-1 text-gray-700">Link URL ảnh sản phẩm</label>
-              <input type="text" className="w-full border p-2.5 rounded-lg outline-none focus:border-blue-500" value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} />
+              <label className="block font-semibold mb-1 text-gray-700">Ảnh sản phẩm</label>
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="w-full border p-2.5 rounded-lg" 
+                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} 
+              />
+              {formData.imageUrl && !selectedFile && (
+                <p className="text-xs text-gray-500 mt-1">Ảnh hiện tại: {formData.imageUrl}</p>
+              )}
             </div>
+
             <div className="col-span-2">
-              <label className="block font-semibold mb-1 text-gray-700">Mô tả chi tiết</label>
+              <label className="block font-semibold mb-1 text-gray-700">Mô tả</label>
               <textarea rows={3} className="w-full border p-2.5 rounded-lg outline-none focus:border-blue-500" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
             </div>
           </div>

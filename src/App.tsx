@@ -16,6 +16,8 @@ import { AdminRoute, PrivateRoute } from "./components/private/protectedroute";
 import { AuthProvider } from './components/context/authcontext'
 import Profile from './pages/Profiles'
 import ReviewPage from './pages/ReviewPage'
+import About from './pages/About'
+import Sale from './pages/Sale'
 
 function App() {
   const ClientID = import.meta.env.VITE_GOOGLE_ID as string;
@@ -28,6 +30,8 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/home" element={<Home />}/>
+              <Route path="/about" element={<About />}/>
+              <Route path="/sale" element={<Sale />}/>
               <Route path="/profile" element={<Profile />}/>
               <Route path="/product" element={<Product />}/>
               <Route path="/login" element={<Login />}/>
