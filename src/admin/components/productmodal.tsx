@@ -10,6 +10,7 @@ interface ProductModalProps {
 
 export default function ProductModal({ isOpen, onClose, onSave, editingProduct }: ProductModalProps) {
   const [categories, setCategories] = useState<any[]>([]);
+  const [warehouseProducts, setwarehouseProducts] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     productName: "",
     brand: "",
@@ -18,9 +19,21 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     categoryId: "",
     imageUrl: "",
     description: "",
-    discountPercent: 0   // Thêm trường giảm giá
+    discountPercent: 0   
   });
+    const updateStock = async (productId: number, newStock: number) => {
+    try {
+      await fetch(`http://localhost:8080/api/products/${productId}/stock`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stockQuantity: newStock })
+      });
+    } catch (err) {
+      console.error("Không thể cập nhật tồn kho:", err);
+    }
+  };
 
+ 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
@@ -36,6 +49,12 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
         .catch((err) => console.error("Lỗi lấy danh mục:", err));
     }
   }, [isOpen, editingProduct]);
+  useEffect(()=>{
+    fetch("http://localhost:8080/api/warehouse/available")
+      .then((res) => res.json())
+      .then((data) => setwarehouseProducts(data))
+      .catch((err) => console.log("Lỗi lấy sản phẩm từ kho: ",err));
+  },[isOpen,editingProduct])
 
   useEffect(() => {
     if (editingProduct) {
@@ -93,6 +112,16 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     try {
       const res = await fetch(url, { method, body: form });
       if (res.ok) {
+        const saveProduct = await res.json();
+        if(editingProduct && formData.stockQuantity !== editingProduct.stockQuantity){
+          await updateStock(saveProduct.productId, formData.stockQuantity)
+        }
+        if(!editingProduct && formData.brand){
+          window.dispatchEvent(new CustomEvent('newBrandAdded',{
+            detail: formData.brand
+          }));
+          console.log("Đã gửi brand mới:" , formData.brand);
+        }
         alert(editingProduct ? "Cập nhật sản phẩm thành công!" : "Thêm sản phẩm thành công!");
         onSave(); 
       } else {
@@ -113,6 +142,33 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
+              {!editingProduct &&(
+                <div className="col-span-2">
+                  <label className="block font-semibold mb-1 text-gray-700">Chọn sản phẩm từ kho</label>
+                  <select
+                    className="w-full border p-2.5 rounded-lg bg-white outline-none focus:border-blue-500"
+                    onChange={(e)=>{
+                      const selected = warehouseProducts.find(p => p.productId === Number(e.target.value));
+                      if(selected){
+                        setFormData(prev =>({
+                          ...prev,
+                          productName: selected.productName || "",
+                          brand: selected.brand || "",
+                          price: selected.price || 0,
+                          stockQuantity: selected.stockQuantity || 0
+                        }));
+                      }
+                    }}
+                    >
+                      <option value="">-- Chọn kho để lấy dữ liệu --</option>
+                      {warehouseProducts.map(p=>(
+                        <option key={p.productId} value={p.productId}>
+                          {p.productName} - {p.brand} (Tồn: {p.stockQuantity})
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
             <div className="col-span-2">
               <label className="block font-semibold mb-1 text-gray-700">Tên sản phẩm</label>
               <input type="text" required className="w-full border p-2.5 rounded-lg outline-none focus:border-blue-500" value={formData.productName} onChange={e => setFormData({...formData, productName: e.target.value})} />

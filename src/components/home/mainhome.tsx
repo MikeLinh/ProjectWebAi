@@ -19,6 +19,12 @@ interface DBProduct {
     categoryId: number;
     categoryName: string;
   };
+  discount: number;
+  isNew?: boolean;
+  discountPercent?: number;
+  new?: boolean;
+  reviewCount: number;
+  
 }
 
 export default function MainHome() {
@@ -32,11 +38,14 @@ export default function MainHome() {
         return res.json();
       })
       .then((data) => {
-        setProducts(data.slice(0, 4));
+        const newProducts = data.filter((product: { isNew: boolean; new: boolean; }) => product.isNew === true || product.new === true);
+        newProducts.sort((a: { productId: number; }, b: { productId: number; }) => b.productId - a.productId);
+        setProducts(newProducts.slice(0, 4));
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Lỗi fetch sản phẩm:", err);
+        console.error("Lỗi fetch sản phẩm mới nhất:", err);
+        setProducts([]);
         setLoading(false);
       });
   }, []);
@@ -133,6 +142,9 @@ export default function MainHome() {
               {products.map((product) => {
                 const imageName = product.imageUrl ? product.imageUrl.trim() : "bike1.png";
                 const finalImage = new URL(`../../assets/images/${imageName}`, import.meta.url).href;
+                const discountPercent = product.discountPercent || 0;
+                const discountAmount = Math.round(product.price * (discountPercent/100));
+                const salePrice = product.price - discountAmount;
 
                 return (
                   <ProductCard
@@ -140,16 +152,17 @@ export default function MainHome() {
                     product={{
                       id: product.productId,
                       name: product.productName,
-                      price: product.price,
+                      price: salePrice,
                       image: finalImage,
                       rating: 5,
-                      reviewCount: 4,
-                      discount: 0,
+                      reviewCount: product.reviewCount || 0,
+                      discount: discountPercent,
                       originalPrice: product.price,
                       category: product.category?.categoryName || "Bicycles",
                       inStock: product.stockQuantity,
                       description: product.description,
                       brand: product.brand,
+                      isNew: product.isNew || product.new,
                     }}
                   />
                 );

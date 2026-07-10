@@ -13,6 +13,8 @@ export default function CartPage() {
   const [discount, setDiscount] = useState<number>(0);
   const [appliedCode, setAppliedCode] = useState<string>("");
 
+  const[promoId,setPromoId]= useState<number | null>(null);
+
   const cartTotal = getCartTotal();
   
   useEffect(() => {
@@ -24,11 +26,13 @@ export default function CartPage() {
   const handleResetDiscount = () => {
     setDiscount(0);
     setAppliedCode("");
+    setPromoId(null);
   };
 
-  const handleApplyDiscount = (discountAmount: number, code: string) => {
+  const handleApplyDiscount = (discountAmount: number, code: string, id: number | null = null) => {
     setDiscount(discountAmount);
     setAppliedCode(code);
+    setPromoId(id);
   };
 
   const finalTotal = cartTotal - discount;
@@ -95,6 +99,7 @@ export default function CartPage() {
                     state:{
                       discount: discount,
                       couponCode: appliedCode,
+                      promoId: promoId,
                     }
                   })}
                   className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl uppercase tracking-wider text-xs transition-colors mt-4"

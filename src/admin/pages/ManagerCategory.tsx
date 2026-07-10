@@ -94,7 +94,7 @@ export default function ManageCategories() {
         {/* Form thêm / sửa */}
         <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm h-fit text-black text-xs space-y-4">
           <h2 className="text-sm font-bold border-b pb-3 uppercase tracking-wide">
-            {editingId ? `✏️ Chỉnh sửa danh mục #${editingId}` : "➕ Thêm danh mục mới"}
+            {editingId ? `Chỉnh sửa danh mục #${editingId}` : "Thêm danh mục mới"}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>

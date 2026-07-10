@@ -16,6 +16,8 @@ interface Product {
   category?: string;   
   inStock?: number;     
   description?: string;  
+  isNew? :boolean;
+  new?: boolean;
 }
 
 interface CardProps {
@@ -53,6 +55,11 @@ export default function Card({ product }: CardProps) {
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleCardClick}
     >
+      {(product.isNew || product.new) && (
+        <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-10">
+          Mới
+        </div>
+      )}
       {/* Badge % Giảm Giá */}
       {discountPercent > 0 && (
         <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-10">

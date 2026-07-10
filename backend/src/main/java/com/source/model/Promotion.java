@@ -50,4 +50,10 @@ public class Promotion {
     public void setStartDate(LocalDateTime startDate) { this.startDate = startDate; }
     public LocalDateTime getEndDate() { return endDate; }
     public void setEndDate(LocalDateTime endDate) { this.endDate = endDate; }
+    public boolean isExpired(){
+        if(this.endDate==null){
+            return false;
+        }
+        return java.time.LocalDateTime.now().isAfter(endDate);
+    }
 }

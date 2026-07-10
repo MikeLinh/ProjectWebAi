@@ -16,12 +16,13 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleNormalLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleNormalLogin = async (e: React.FormEvent) => { //Hàm đồng bộ cho phép sử dụng await để gọi API đăng nhập
+  e.preventDefault(); //Sẽ ngăn chặn load trang khi người dùng bấm submit
   setErrorMessage("");
   setLoading(true);
 
   try {
+    // Gọi API đăng nhập ở Back-end bằng phương thức POST
     const res = await fetch("http://localhost:8080/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -31,11 +32,11 @@ export default function Login() {
     if (!res.ok) {
       throw new Error("Email hoặc mật khẩu không chính xác!");
     }
-
+    //Trả về dữ liệu JSON
     const data = await res.json();
     const { user, token, expiresAt } = data;
 
-    
+    // Lưu thông tin vào bộ nhớ trình duyệt (LocalStorage) để duy trì phiên đăng nhập
     localStorage.setItem("currentUser", JSON.stringify(user));
     localStorage.setItem("token", token);
     localStorage.setItem("expiresAt", expiresAt);
@@ -57,23 +58,23 @@ export default function Login() {
 };
 
   const loginWithGoogle = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
+    onSuccess: async (tokenResponse) => { // Chạy khi phía Google xác thực tài khoản thành công và trả về access_token
       try {
         setLoading(true);
         setErrorMessage("");
-
+        // Lấy đường dẫn API Google của Back-end từ file môi trường (.env)
         const googleAuthApi = import.meta.env.VITE_GOOGLE_API as string;
 
         const res = await fetch(googleAuthApi, {
           method: "POST",
           headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${tokenResponse.access_token}` 
+            "Authorization": `Bearer ${tokenResponse.access_token}` // Gửi token trong Header Authorization
           },
         });
 
         const data = await res.json();
-
+        console.log(data);
         if (!res.ok) {
           throw new Error(data.message || "Đăng nhập Google thất bại!");
         }
@@ -125,8 +126,6 @@ export default function Login() {
             value={password} 
             onChange={setPassword} 
           />
-
-          {/* Thông báo lỗi tập trung */}
           {errorMessage && (
             <p className="text-xs text-red-500 font-semibold bg-red-50 p-2.5 rounded-lg border border-red-200">
               !{errorMessage}

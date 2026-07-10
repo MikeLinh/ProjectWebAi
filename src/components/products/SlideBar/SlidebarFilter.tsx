@@ -12,6 +12,7 @@ export interface FilterState {
   priceMax: number;
   sizes: string[];
   rating: number | null;
+
 }
 
 interface SidebarFilterProps {
@@ -25,6 +26,7 @@ const DEFAULT_FILTERS: FilterState = {
   priceMax: 5000,
   sizes: [],
   rating: null,
+
 };
 
 export default function SidebarFilter({ onFilterChange }: SidebarFilterProps) {
@@ -45,6 +47,7 @@ export default function SidebarFilter({ onFilterChange }: SidebarFilterProps) {
     filters.sizes.length +
     (filters.rating !== null ? 1 : 0) +
     (filters.priceMin > 0 || filters.priceMax < 5000 ? 1 : 0);
+
 
   const update = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));

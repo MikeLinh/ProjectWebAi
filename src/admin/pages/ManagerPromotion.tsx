@@ -120,7 +120,7 @@ export default function ManagePromotions() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm h-fit text-black text-xs space-y-4">
-          <h2 className="text-sm font-bold border-b pb-3 uppercase tracking-wide">➕ Tạo mã ưu đãi mới</h2>
+          <h2 className="text-sm font-bold border-b pb-3 uppercase tracking-wide">Tạo mã ưu đãi mới</h2>
 
           {errorMsg && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-lg font-medium">

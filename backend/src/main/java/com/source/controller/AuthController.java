@@ -55,12 +55,12 @@ public class AuthController {
         if (userOpt.isPresent()) {
             User foundUser = userOpt.get();
             foundUser.setPassword(null);
-
+            // Tạo Token đơn giản bằng cách mã hóa chuỗi "Email, thời gian hiện tại" qua định dạng Base64
             String token = java.util.Base64.getEncoder()
                 .encodeToString((foundUser.getEmail() + "|" + System.currentTimeMillis()).getBytes());
 
             LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(10);
-
+            //Đóng gói các dữ liệu cần thiết vào một cấu trúc Map để chuyển đổi thành JSON gửi đi
             Map<String, Object> response = new HashMap<>();
             response.put("user", foundUser);
             response.put("token", token);
@@ -76,13 +76,14 @@ public class AuthController {
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestHeader("Authorization") String authorizationHeader) {
         try {
+            // tách chuỗi để lấy nguyên vẹn mã Access Token được gửi từ Google thông qua Header
             String accessToken = authorizationHeader.replace("Bearer ", "").trim();
-
+            // Khởi tạo một RestTemplate để thực hiện lệnh gọi HTTP từ hệ thống Back-end này sang server của Google
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + accessToken);
             HttpEntity<String> entity = new HttpEntity<>(headers);
-
+            // Gọi sang API của Google nhằm xác thực token và lấy về thông tin tài khoản của người dùng
             String googleUrl = "https://www.googleapis.com/oauth2/v3/userinfo";
             ResponseEntity<Map> googleResponse = restTemplate.exchange(googleUrl, HttpMethod.GET, entity, Map.class);
 
@@ -115,7 +116,7 @@ public class AuthController {
                     .encodeToString((user.getEmail() + "|" + System.currentTimeMillis()).getBytes());
 
             LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(10);
-
+            // Đóng gói dữ liệu JSON phản hồi thành công về phía Front-end ứng dụng  
             Map<String, Object> response = new HashMap<>();
             response.put("user", user);
             response.put("token", token);

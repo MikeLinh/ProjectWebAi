@@ -79,7 +79,7 @@ export default function MainProduct() {
         return res.json();
       })
       .then((data) => {
-        console.log("Số sản phẩm nhận được:", data.length, data.slice(0, 3)); // Debug thêm
+        console.log("Số sản phẩm nhận được:", data.length, data.slice(0, 3)); 
         setDbProducts(data || []);
       })
       .catch((err) => {
@@ -89,9 +89,18 @@ export default function MainProduct() {
       .finally(() => setLoading(false));
   }, [filters]);
 
-  const sortedProducts = [...dbProducts].sort((a, b) => {
-    if (sortBy === "price-asc") return a.price - b.price;
-    if (sortBy === "price-desc") return b.price - a.price;
+  const sortedProducts = [...dbProducts].sort((a: any, b: any) => {
+    if(sortBy === "newest"){
+      const isNewA= a.isNew || a.new ? 1 : 0;
+      const isNewB= b.isNew || b.new ? 1 : 0;
+
+      if(isNewB === isNewA){
+        return b.productId - a.productId;
+      }
+      return isNewB - isNewA;
+    }
+    if(sortBy === "price-asc") return a.price - b.price;
+    if(sortBy === "price-desc") return b.price - a.price;
     return b.productId - a.productId;
   });
 

@@ -48,11 +48,11 @@ export default function Navbar() {
                 </span>
             </div>
             
-            <div className="items-center space-x-8 hidden md:flex text-sm text-blue-400 tracking-wide">
-                <Link to="/" className="hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all duration-300">TRANG CHỦ</Link>
-                <Link to="/product" className="hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all duration-300">SẢN PHẨM</Link>
-                <Link to="/about" className="hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all duration-300">GIỚI THIỆU</Link>
-                <Link to="/sale" className="hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all duration-300">KHUYẾN MÃI</Link>
+            <div className="items-center space-x-8 hidden md:flex text-sm text-white tracking-wide">
+                <Link to="/" className="hover:text-red-500 border-b-2 border-transparent hover:border-blue-500 transition-all duration-300">TRANG CHỦ</Link>
+                <Link to="/product" className="hover:text-red-500 border-b-2 border-transparent hover:border-blue-500 transition-all duration-300">SẢN PHẨM</Link>
+                <Link to="/about" className="hover:text-red-500 border-b-2 border-transparent hover:border-blue-500 transition-all duration-300">GIỚI THIỆU</Link>
+                <Link to="/sale" className="hover:text-red-500 border-b-2 border-transparent hover:border-blue-500 transition-all duration-300">KHUYẾN MÃI</Link>
             </div>
 
             <div className="flex items-center space-x-8">

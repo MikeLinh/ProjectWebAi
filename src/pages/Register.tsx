@@ -83,7 +83,7 @@ export default function RegisterForm() {
                     <FormInput
                         label="Họ và tên" 
                         type="text" 
-                        name="Họ và tên"
+                        name="fullName"
                         placeholder="Nhập đầy đủ họ và tên" 
                         value={formData.fullName}
                         onChange={handleChange} 

@@ -1,6 +1,9 @@
 package com.source.controller;
 
 import com.source.service.ProductService;
+
+import jakarta.transaction.Transactional;
+
 import com.source.model.Order;
 import com.source.model.OrderDetail;
 import com.source.model.Payment;
@@ -51,7 +54,7 @@ public class OrderController {
                 orderRepository.findByUserIdOrderByOrderDateDesc(userId)
         );
     }
-
+    @Transactional
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody Order order) {
 
@@ -62,6 +65,15 @@ public class OrderController {
             for (OrderDetail item : order.getItems()) {
                 item.setOrder(order);
             }
+        }
+         try {
+            if (order.getItems() != null) {
+                for (OrderDetail item : order.getItems()) {
+                    productService.decreaseStockForOrder(item.getProductId(), item.getQuantity());
+                }
+            }
+        } catch (IllegalStateException ex) {
+                return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
         }
 
         Order saved = orderRepository.save(order);
@@ -161,6 +173,11 @@ public class OrderController {
         Order order = opt.get();
         if (!"PENDING".equals(order.getStatus()) && !"CONFIRMED".equals(order.getStatus())) {
             return ResponseEntity.badRequest().body("Không thể hủy đơn hàng ở trạng thái hiện tại");
+        }
+        if(order.getItems() != null) {
+            for(OrderDetail item : order.getItems()){
+                productService.restoreStock(item.getProductId(), item.getQuantity());
+            }
         }
         order.setStatus("CANCELLED");
         orderRepository.save(order);

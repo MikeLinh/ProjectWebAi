@@ -20,10 +20,11 @@ export default function CheckoutPage() {
   const { cart, getCartTotal, clearCart } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
+  
 
-  const discount   = location.state?.discount   || 0;
+  const discount = location.state?.discount || 0;
   const couponCode = location.state?.couponCode || "";
-  const promoId    = location.state?.promoId    || null;
+  const promoId = location.state?.promoId || null;
 
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("COD");
@@ -35,42 +36,51 @@ export default function CheckoutPage() {
     });
   }, []);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
-  const subTotal   = getCartTotal();
+  const subTotal = getCartTotal();
   const finalTotal = subTotal - discount;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (cart.length === 0) { alert("Giỏ hàng rỗng!"); return; }
+    if (cart.length === 0) {
+      alert("Giỏ hàng rỗng!");
+      return;
+    }
     if (submitting) return;
 
     setSubmitting(true);
 
     const payload = buildOrderPayload({
-      cart, formData, paymentMethod, discount, promoId, finalTotal,
+      cart,
+      formData,
+      paymentMethod,
+      discount,
+      promoId,
+      finalTotal,
     });
 
     try {
-      const orderId = await submitOrder(payload);
+      const result = await submitOrder(payload);
 
-      if (paymentMethod === "MOMO") {
-        alert("Hệ thống đang liên kết ứng dụng ví MoMo...");
+      if (paymentMethod === "VNPAY" && result?.payUrl) {
+        alert("Đang chuyển hướng đến VNPay...");
+        window.location.href = result.payUrl;
+        return;
       }
 
       clearCart();
 
       const orderState = {
-        orderId,
+        orderId: result.orderId,
         order: {
           customer: formData,
           discount,
-          total:   finalTotal,
+          total: finalTotal,
           payment: paymentMethod,
-          status:  "PENDING",
+          status: "PENDING",
         },
       };
 
@@ -79,9 +89,9 @@ export default function CheckoutPage() {
       } else {
         navigate("/order-tracking", { state: orderState });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Đặt hàng thất bại. Vui lòng thử lại.");
+      alert(err.message || "Đặt hàng thất bại. Vui lòng thử lại.");
     } finally {
       setSubmitting(false);
     }

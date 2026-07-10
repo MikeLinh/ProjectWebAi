@@ -153,7 +153,7 @@ export default function ManageUsers() {
           onClick={openAdd}
           className="bg-blue-950 hover:bg-blue-900 text-white px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide"
         >
-          ➕ Thêm tài khoản
+          Thêm tài khoản
         </button>
       </div>
 

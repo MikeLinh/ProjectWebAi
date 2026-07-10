@@ -306,7 +306,7 @@ export default function AIChatbot() {
                   {aiContext === null ? (
                     <span className="text-amber-400 animate-pulse">Đang tải dữ liệu...</span>
                   ) : contextError ? (
-                    <span className="text-red-400">⚠ Chế độ offline</span>
+                    <span className="text-red-400">Chế độ offline</span>
                   ) : (
                     <>
                       <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse inline-block" />

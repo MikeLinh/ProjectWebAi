@@ -19,6 +19,8 @@ import ReviewPage from './pages/ReviewPage'
 import About from './pages/About'
 import Sale from './pages/Sale'
 
+import VNPayReturn from './pages/VnpayReturn'
+
 function App() {
   const ClientID = import.meta.env.VITE_GOOGLE_ID as string;
   return (
@@ -42,6 +44,7 @@ function App() {
               <Route path="/cart" element={<CartPage />}/>
               <Route path="/checkout" element={<CheckoutPage />}/>
               <Route path="/checkout/success" element={<PrivateRoute><CheckoutSuccessPage /></PrivateRoute>}/>
+              <Route path="/vnpay-return" element={<VNPayReturn />} />
               <Route path="/order-tracking" element={<PrivateRoute><OrderTrackingPage /></PrivateRoute>}/>
               <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>
         } />

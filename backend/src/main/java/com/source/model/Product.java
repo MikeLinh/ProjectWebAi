@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import jakarta.persistence.PrePersist;
 
 @Entity
 @Table(name = "PRODUCTS")
@@ -42,6 +44,26 @@ public class Product {
     @Column(name = "discount_percent")
     private Integer discountPercent = 0;
 
+    @Column(name = "is_new", nullable = false)
+    private Boolean isNew = false;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    public LocalDateTime getCratedAt(){
+        return createdAt;
+    }
+    public void setCreatedAt(LocalDateTime createdAt){
+        this.createdAt = createdAt;
+    }
+
+    public Boolean getIsNew(){
+        return isNew != null ? isNew : false;
+    }
+    public void setIsNew(Boolean isNew){
+        this.isNew = isNew != null ? isNew : false;
+    }
+
     public Integer getReviewCount() {
         return reviewCount != null ? reviewCount : 0;
     }
@@ -55,5 +77,11 @@ public class Product {
 
     public void setDiscountPercent(Integer discountPercent) {
         this.discountPercent = discountPercent != null ? discountPercent : 0;
+    }
+
+    @PrePersist
+    protected void onCreate(){
+        this.createdAt = LocalDateTime.now();
+        this.isNew = true;
     }
 }

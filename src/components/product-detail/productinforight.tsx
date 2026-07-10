@@ -93,7 +93,7 @@ export default function ProductInfoRight({ id, image, name, price, originalPrice
 
       {/* Tình trạng kho */}
       <div className={`text-xs font-bold pt-2 ${inStock > 0 ? 'text-green-600' : 'text-red-500'}`}>
-        {inStock > 0 ? `✓ Còn lại ${inStock} sản phẩm trong kho` : `✕ Hết hàng`}
+        {inStock > 0 ? `Còn lại ${inStock} sản phẩm trong kho` : `Đã Hết hàng`}
       </div>
 
       {/* Tăng giảm số lượng, thêm vào giỏ hàng */}

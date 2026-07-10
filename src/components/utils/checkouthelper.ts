@@ -19,26 +19,23 @@ export const EMPTY_FORM: CheckoutFormData = {
   name: "", phone: "", email: "", address: "", note: "",
 };
 
-
 function readRawUser(): string | null {
   return (
     localStorage.getItem("current_user") ||
-    localStorage.getItem("currentUser")  ||
+    localStorage.getItem("currentUser") ||
     localStorage.getItem("user")
   );
 }
 
-
 function mapUserToFormData(user: Record<string, string>): CheckoutFormData {
   return {
-    name:    user.fullName    || "",
-    phone:   user.phoneNumber || "",
-    email:   user.email       || "",
-    address: user.address     || "",
-    note:    "",
+    name: user.fullName || "",
+    phone: user.phoneNumber || "",
+    email: user.email || "",
+    address: user.address || "",
+    note: "",
   };
 }
-
 
 export async function fetchAutofillData(): Promise<CheckoutFormData | null> {
   const rawUser = readRawUser();
@@ -81,41 +78,67 @@ interface BuildPayloadParams {
   finalTotal: number;
 }
 
-
 export function buildOrderPayload({
   cart, formData, paymentMethod, discount, promoId, finalTotal,
 }: BuildPayloadParams) {
   return {
     userId: getCurrentUserId(),
     promoId,
-    receiverName:    formData.name,
-    receiverPhone:   formData.phone,
+    receiverName: formData.name,
+    receiverPhone: formData.phone,
     shippingAddress: formData.address,
-    note:            formData.note,
+    note: formData.note,
     paymentMethod,
     discount,
     totalAmount: finalTotal,
     items: cart.map((item) => ({
-      productId:   item.id,
+      productId: item.id,
       productName: item.name,
-      quantity:    item.quantity,
-      price:       item.price,
+      quantity: item.quantity,
+      price: item.price,
     })),
   };
 }
 
-
 export async function submitOrder(
   payload: ReturnType<typeof buildOrderPayload>
-): Promise<number> {
+): Promise<{ orderId: number; payUrl?: string }> {
   const res = await fetch("http://localhost:8080/api/orders", {
-    method:  "POST",
+    method: "POST",
     headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify(payload),
+    body: JSON.stringify(payload),
   });
 
-  if (!res.ok) throw new Error("Không thể tạo đơn hàng");
+  if (!res.ok) {
+    let message = "Không thể tạo đơn hàng";
+    try {
+      const errData = await res.json();
+      message = errData.message || message;
+    } catch {
+      // body không phải JSON hợp lệ, giữ message mặc định
+    }
+    throw new Error(message);
+  }
 
-  const createdOrder = await res.json();
-  return createdOrder.orderId ?? createdOrder.order_id;
+  const result = await res.json();
+  const orderId = result.orderId ?? result.order_id;
+
+    if (payload.paymentMethod === "VNPAY") {  
+    const vnpayRes = await fetch("http://localhost:8080/api/vnpay/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId,
+        amount: payload.totalAmount,
+        orderInfo: `Thanh toan don hang ${orderId}`,
+      }),
+    });
+
+    if (!vnpayRes.ok) throw new Error("Không thể tạo link VNPay");
+
+    const vnpayData = await vnpayRes.json();
+    return { orderId, payUrl: vnpayData.payUrl };
+  }
+
+  return { orderId };
 }

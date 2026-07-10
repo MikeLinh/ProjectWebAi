@@ -64,6 +64,7 @@ export default function ProductGrid({ currentProducts, loading }: ProductGridPro
               inStock: product.stockQuantity,
               description: product.description,
               brand: product.brand,
+              isNew: product.isNew
             }}
           />
         );

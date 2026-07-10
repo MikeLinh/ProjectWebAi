@@ -25,7 +25,6 @@ public class Payment {
     @Column(name = "amount", precision = 15, scale = 2)
     private BigDecimal amount;
 
-    // PENDING | PAID | FAILED
     @Column(name = "payment_status", length = 50)
     private String paymentStatus;
 

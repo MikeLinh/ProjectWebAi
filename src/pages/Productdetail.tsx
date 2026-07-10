@@ -42,8 +42,7 @@ export default function ProductDetail() {
         axios.get(`http://localhost:8080/api/products/related-by-brand?brand=${encodeURIComponent(product.brand)}&excludeId=${product.id}`)
           .then(res => {
             const relatedData = res.data || [];
-            
-            // Lấy tối đa 4 sản phẩm
+          
             const topRelated = relatedData.slice(0, 4);
 
             const mappedProducts = topRelated.map((p: any) => {

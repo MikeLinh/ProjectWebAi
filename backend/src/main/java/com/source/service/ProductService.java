@@ -5,7 +5,7 @@ import com.source.repository.ProductRepository;
 import com.source.repository.ProductReviewRepository;
 
 import jakarta.persistence.criteria.Predicate;
-
+import java.nio.file.StandardCopyOption;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,17 +47,21 @@ public class ProductService {
 
                 Path filePath = uploadPath.resolve(fileName);
                 
-                if (Files.exists(filePath)) {
-                    Files.delete(filePath);
+                try (var inputStream = imageFile.getInputStream()) {
+                    Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
                 }
 
-                Files.copy(imageFile.getInputStream(), filePath);
-
                 product.setImageUrl(fileName);
-                System.out.println("Đã lưu ảnh: " + fileName);
+                System.out.println("Đã lưu ảnh thành công: " + fileName);
             } catch (IOException e) {
-                throw new RuntimeException("Lỗi lưu file: " + e.getMessage());
+                throw new RuntimeException("Lỗi lưu file: " + e.getMessage(), e);
             }
+        }
+        if(product.getIsNew() == null){
+            product.setIsNew(true);
+        }
+        if(product.getCreatedAt() == null){
+            product.setCreatedAt(LocalDateTime.now());
         }
         return productRepository.save(product);
     }
@@ -161,5 +166,21 @@ public class ProductService {
         }
         return products;
     }
-        
+    @Transactional
+    public void decreaseStockForOrder(Long productId, int quantity) {
+        int updatedRows = productRepository.decreaseStock(productId, quantity);
+        if (updatedRows == 0) {
+            Product product = productRepository.findById(productId).orElse(null);
+            String name = product != null ? product.getProductName() : "ID " + productId;
+            throw new IllegalStateException("Sản phẩm \"" + name + "\" không đủ số lượng trong kho");
+        }
+    }
+    @Transactional
+    public void restoreStock(Long productId, int quantity) {
+        productRepository.findById(productId).ifPresent(p -> {
+            p.setStockQuantity(p.getStockQuantity() + quantity);
+            productRepository.save(p);
+        });
+    }
+            
 }

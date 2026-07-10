@@ -1,6 +1,7 @@
 package com.source.controller;
 
 import com.source.model.Product;
+import com.source.model.Category;
 import com.source.model.WarehouseReceipt;
 import com.source.repository.ProductRepository;
 import com.source.repository.WarehouseReceiptRepository;
@@ -8,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/warehouse")
@@ -40,14 +43,25 @@ public class WarehouseController {
     @PostMapping
     public ResponseEntity<?> importStock(@RequestBody WarehouseReceipt receipt) {
         Optional<Product> opt = productRepository.findById(receipt.getProductId());
+        Product product;
         if (opt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Không tìm thấy sản phẩm trong hệ thống.");
-        }
+            product = new Product();
+            product.setProductName("Sản phẩm " + receipt.getProductId());
+            product.setBrand(receipt.getManufacturer());
+            product.setPrice(BigDecimal.valueOf(0));
+            product.setStockQuantity(0);
+            product.setIsNew(true);
 
-        Product product = opt.get();
+            Category defaultCategory = new Category();
+            product.setCategory(defaultCategory);
+
+            product = productRepository.save(product);
+            receipt.setProductId(product.getProductId().longValue());
+        }else{
+            product = opt.get();
+        }
         product.setStockQuantity(product.getStockQuantity() + receipt.getQuantityAdded());
         productRepository.save(product);
-
         receipt.setImportedAt(LocalDateTime.now());
         WarehouseReceipt saved = warehouseReceiptRepository.save(receipt);
 
@@ -87,5 +101,9 @@ public class WarehouseController {
         }
         warehouseReceiptRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/available")
+    public ResponseEntity<List<Product>> getAvailableForProduct() {
+        return ResponseEntity.ok(productRepository.findAll());
     }
 }

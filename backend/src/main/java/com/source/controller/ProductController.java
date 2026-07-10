@@ -2,6 +2,7 @@ package com.source.controller;
 
 import com.source.model.Category;
 import com.source.model.Product;
+import com.source.repository.ProductRepository;
 import com.source.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -12,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController 
 @RequestMapping("/api/products")
@@ -21,6 +24,8 @@ public class ProductController {
     
     @Autowired
     private ProductService productService;
+    @Autowired
+    private ProductRepository productRepository;
     
 
     @GetMapping
@@ -60,23 +65,29 @@ public class ProductController {
             @RequestParam("discountPercent") Integer discountPercent,
             @RequestParam(value = "image", required = false) MultipartFile image) {
 
-        Product product = new Product();
-        product.setProductName(productName);
-        product.setBrand(brand);
-        product.setPrice(price);
-        product.setStockQuantity(stockQuantity);
-        product.setDescription(description);
-        product.setDiscountPercent(discountPercent);
+        try {
+            Product product = new Product();
+            product.setProductName(productName);
+            product.setBrand(brand);
+            product.setPrice(price);
+            product.setStockQuantity(stockQuantity);
+            product.setDescription(description);
+            product.setDiscountPercent(discountPercent);
+            product.setIsNew(true);
 
-        Category category = new Category();
-        category.setCategoryId(categoryId);
-        product.setCategory(category);
+            Category category = new Category();
+            category.setCategoryId(categoryId);
+            product.setCategory(category);
 
-        Product saved = productService.saveProduct(product, image);
-        return ResponseEntity.ok(saved);
+            Product saved = productService.saveProduct(product, image);
+            return ResponseEntity.ok(saved);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+   @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Product> updateProduct(
             @PathVariable Integer id,
             @RequestParam("productName") String productName,
@@ -88,26 +99,27 @@ public class ProductController {
             @RequestParam("discountPercent") Integer discountPercent,
             @RequestParam(value = "image", required = false) MultipartFile image) {
 
-        Product product = new Product();
-        product.setProductId(id);
-        product.setProductName(productName);
-        product.setBrand(brand);
-        product.setPrice(price);
-        product.setStockQuantity(stockQuantity);
-        product.setDescription(description);
-        product.setDiscountPercent(discountPercent);
+        try {
+            Product product = new Product();
+            product.setProductId(id);
+            product.setProductName(productName);
+            product.setBrand(brand);
+            product.setPrice(price);
+            product.setStockQuantity(stockQuantity);
+            product.setDescription(description);
+            product.setDiscountPercent(discountPercent);
+            product.setIsNew(false); // Đây là cập nhật, không phải hàng mới tinh
 
-        com.source.model.Category category = new com.source.model.Category();
-        category.setCategoryId(categoryId);
-        product.setCategory(category);
-
-        if (image != null && !image.isEmpty()) {
-            String fileName = image.getOriginalFilename();
-            product.setImageUrl(fileName);
+            com.source.model.Category category = new com.source.model.Category();
+            category.setCategoryId(categoryId);
+            product.setCategory(category);
+            Product saved = productService.saveProduct(product, image);
+            return ResponseEntity.ok(saved);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
         }
-
-        Product saved = productService.saveProduct(product);
-        return ResponseEntity.ok(saved);
     }
 
     @DeleteMapping("/{id}")
@@ -124,5 +136,22 @@ public class ProductController {
         List<Product> products = productService.getProductsByBrandAndExcludeIdWithReviewCount(brand, excludeId);
         return ResponseEntity.ok(products);
     }
+    
+    @PatchMapping("/{id}/stock")
+    public ResponseEntity<Product> updateStock(@PathVariable Integer id, @RequestBody Map<String, Integer> request){
+        Integer newStock= request.get("stockQuantity");
+        if(newStock == null){
+            return ResponseEntity.badRequest().build();
+        }
+        Optional<Product> opt = productRepository.findById(id.longValue());
+        if(opt.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        Product product= opt.get();
+        product.setStockQuantity(newStock);
+        Product saved = productRepository.save(product);
+        return ResponseEntity.ok(saved);
+    }
+    
     
 }

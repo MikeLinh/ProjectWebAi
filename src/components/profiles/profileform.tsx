@@ -54,7 +54,7 @@ export default function ProfileForm() {
       const updatedUser = await res.json();
       login(updatedUser); 
 
-      setMessage({ type: "success", text: "Cập nhật thông tin tài khoản thành công! 🎉" });
+      setMessage({ type: "success", text: "Cập nhật thông tin tài khoản thành công!" });
     } catch (error: any) {
       setMessage({ type: "error", text: error.message });
     } finally {
@@ -77,7 +77,7 @@ export default function ProfileForm() {
             ? "bg-green-50 text-green-700 border-green-200"
             : "bg-red-50 text-red-500 border-red-200"
         }`}>
-          {message.type === "success" ? "✓ " : "! "} {message.text}
+          {message.type === "success" ? "" : "! "} {message.text}
         </div>
       )}
 

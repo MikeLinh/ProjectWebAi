@@ -8,6 +8,7 @@ interface Product {
   stockQuantity: number;
   price: number;
   imageUrl?: string;
+  brand?: string;
 }
 
 interface Receipt {
@@ -30,7 +31,6 @@ const EMPTY_FORM = {
   manufacturer: "",
 };
 
-const MANUFACTURERS = ["Giant", "Specialized", "Trek", "Shimano", "Maxxis", "Trinx"];
 const SUPPLIERS = ["Công ty Xe đạp Toàn Cầu", "Nhà phân phối Đại Nam", "XNK Thể Thao Việt", "Phụ tùng Chợ Lớn"];
 
 export default function ManagerWarehouse() {
@@ -43,9 +43,29 @@ export default function ManagerWarehouse() {
   const [successMsg, setSuccessMsg]   = useState<string | null>(null);
   const [isEditing, setIsEditing]     = useState(false);
 
+  const[manufacturers, setManufacturers] = useState<string[]>([
+    "Giant", "Specialized", "Trek", "Cannondale", "Bianchi"
+  ]);
+  const addNewManufacturer = (newBrand : string) =>{
+    const trimmed = newBrand?.trim();
+    if(trimmed && !manufacturers.includes(trimmed)){
+      setManufacturers(prev => [...prev, trimmed].sort((a,b) => a.localeCompare(b)));
+      console.log(`Đã tự động thêm thương hiệu mới: ${trimmed}`);
+    }
+  }
+
   useEffect(() => {
     fetchAll();
   }, []);
+  useEffect(()=>{
+    const handleNewBrand = (e:any) =>{
+      addNewManufacturer(e.detail);
+    };
+    window.addEventListener('newBrandAdded', handleNewBrand);
+    return () =>{
+      window.removeEventListener('newBrandAdded',handleNewBrand);
+    };
+  },[manufacturers]);
 
   const fetchAll = async () => {
     try {
@@ -63,7 +83,17 @@ export default function ManagerWarehouse() {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+      if (name === "productId" && value) {
+      const selectedProduct = products.find(p => p.productId === Number(value));
+      if (selectedProduct) {
+        setForm(prev => ({ 
+          ...prev, 
+          manufacturer: selectedProduct.brand || "" 
+        }));
+      }
+    }
   };
 
 
@@ -236,11 +266,28 @@ export default function ManagerWarehouse() {
                   className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-400 focus:outline-none"
                 >
                   <option value="">-- Chọn Nhà Sản Xuất --</option>
-                  {MANUFACTURERS.map((m) => (
+                  {manufacturers.map((m) => (
                     <option key={m} value={m}>{m}</option>
                   ))}
                 </select>
+                <input
+                  type="text"
+                  placeholder="Thêm NSX mới"
+                  className="w-40 mt-5 border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-400 focus:outline-none"
+                  onKeyDown={(e) => {
+                    if(e.key === 'Enter'){
+                      const newBrand= (e.target as HTMLInputElement).value.trim();
+                      if(newBrand){
+                        addNewManufacturer(newBrand);
+                        setForm(prev => ({...prev, manufacturer: newBrand}));
+                        (e.target as HTMLInputElement).value = '';
+                      }
+                    }
+                  }}
+                >
+                </input>
               </div>
+              <p className="text-[10px] text-gray-500 mt-1">Nhấn Enter để thêm NSX mới</p>
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Nhà cung cấp (Supplier)</label>
                 <select

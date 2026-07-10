@@ -14,6 +14,7 @@ interface Product {
   discountPercent: number;
   stockQuantity: number;
   description?: string;
+  reviewCount: number;
 }
 
 export default function Sale() {
@@ -92,7 +93,7 @@ export default function Sale() {
                     originalPrice: product.price,
                     image: getImageUrl(product.imageUrl),
                     rating: 5,
-                    reviewCount: 0,
+                    reviewCount: product.reviewCount || 0,
                     discount: product.discountPercent,
                     category: "Khuyến mãi",
                     inStock: product.stockQuantity,
