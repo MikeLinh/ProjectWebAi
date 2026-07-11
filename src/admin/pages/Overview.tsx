@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-hooks/immutability */
 import React, { useState, useEffect } from "react";
 import MonetizationOnIcon  from "@mui/icons-material/MonetizationOn";
@@ -30,6 +31,16 @@ export default function DashboardOverview() {
   const [month, setMonth]       = useState<string>("ALL");
   const [year, setYear]         = useState<string>(String(CURRENT_YEAR));
 
+  const [animateChart, setAnimateChart] = useState(false);
+
+  useEffect(()=> {
+    if(stats){
+      setAnimateChart(false);
+      const timer = setTimeout(()=> setAnimateChart(true),150);
+      return () => clearTimeout(timer);
+    }
+  },[stats])
+
   useEffect(() => {
     fetchStats();
   }, [month, year]);
@@ -53,11 +64,18 @@ export default function DashboardOverview() {
   const barHeight = (value: number, max: number) =>
     max === 0 ? 0 : Math.max(4, Math.round((value / max) * 100));
 
+  const getVal = (obj: Record<string, number> | undefined, monthIndex: number) => {
+    if (!obj) return 0;
+    const m1 = String(monthIndex + 1);
+    const m2 = m1.padStart(2, "0");
+    return Number(obj[m1] ?? obj[m2] ?? 0);
+  };
+
   const revenueMax = stats
-    ? Math.max(...Object.values(stats.revenueByMonth).map(Number), 1)
+    ? Math.max(...Object.values(stats.revenueByMonth || {}).map(Number), 1)
     : 1;
   const ordersMax = stats
-    ? Math.max(...Object.values(stats.ordersByMonth).map(Number), 1)
+    ? Math.max(...Object.values(stats.ordersByMonth || {}).map(Number), 1)
     : 1;
 
   return (
@@ -147,28 +165,33 @@ export default function DashboardOverview() {
               Doanh thu theo tháng — {stats.chartYear}
             </h2>
             <p className="text-xs text-gray-400 mb-5">Chỉ tính đơn hàng đã giao (DELIVERED)</p>
-            <div className="flex items-end gap-1.5 h-40">
+            {/* Đã xóa items-end ở lớp ngoài cùng, thêm cấu trúc flex-1 bên trong */}
+            <div className="flex gap-1.5 h-48 pt-4">
               {MONTHS.map((label, i) => {
-                const val = Number(stats.revenueByMonth[String(i + 1)] ?? 0);
+                const val = getVal(stats.revenueByMonth, i);
                 const h   = barHeight(val, revenueMax);
                 const isCurrentMonth = month !== "ALL"
                   ? parseInt(month) === i + 1
                   : new Date().getMonth() === i;
                 return (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                  <div key={i} className="flex-1 flex flex-col items-center group relative h-full">
                     {/* Tooltip */}
                     {val > 0 && (
-                      <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-0.5 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                         ${val.toLocaleString()}
                       </div>
                     )}
-                    <div
-                      className={`w-full rounded-t-lg transition-all ${
-                        isCurrentMonth ? "bg-blue-600" : "bg-blue-300"
-                      } ${val === 0 ? "bg-gray-100" : ""}`}
-                      style={{ height: `${h}%` }}
-                    />
-                    <span className="text-[9px] text-gray-400 font-medium">{label}</span>
+                    {/* Cột biểu đồ */}
+                    <div className="w-full flex-1 flex items-end justify-center">
+                      <div
+                        className={`w-full rounded-t-lg transition-all duration-1000 ease-out ${
+                          isCurrentMonth ? "bg-blue-600" : "bg-blue-300"
+                        } ${val === 0 ? "bg-gray-100" : ""}`}
+                        style={{ height: animateChart ? `${h}%` : '0%' }}
+                      />
+                    </div>
+                    {/* Label tháng */}
+                    <span className="text-[9px] text-gray-400 font-medium mt-2">{label}</span>
                   </div>
                 );
               })}
@@ -181,22 +204,24 @@ export default function DashboardOverview() {
                 Đơn hàng theo tháng — {stats.chartYear}
               </h2>
               <p className="text-xs text-gray-400 mb-5">Tất cả trạng thái</p>
-              <div className="flex items-end gap-1.5 h-28">
+              <div className="flex gap-1.5 h-36 pt-4">
                 {MONTHS.map((label, i) => {
-                  const val = Number(stats.ordersByMonth[String(i + 1)] ?? 0);
+                  const val = getVal(stats.ordersByMonth, i);
                   const h   = barHeight(val, ordersMax);
                   return (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                    <div key={i} className="flex-1 flex flex-col items-center group relative h-full">
                       {val > 0 && (
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                        <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                           {val}
                         </div>
                       )}
-                      <div
-                        className={`w-full rounded-t-lg ${val === 0 ? "bg-gray-100" : "bg-emerald-400"}`}
-                        style={{ height: `${h}%` }}
-                      />
-                      <span className="text-[9px] text-gray-400">{label}</span>
+                      <div className="w-full flex-1 flex items-end justify-center">
+                        <div
+                          className={`w-full rounded-t-lg transition-all duration-1000 ease-out ${val === 0 ? "bg-gray-100" : "bg-emerald-400"}`}
+                          style={{ height: animateChart ? `${h}%` : '0%' }}
+                        />
+                      </div>
+                      <span className="text-[9px] text-gray-400 mt-2">{label}</span>
                     </div>
                   );
                 })}

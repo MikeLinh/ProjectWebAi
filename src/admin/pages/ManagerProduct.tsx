@@ -9,6 +9,12 @@ export default function ManageProducts() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredProducts = products.filter(p => 
+    p.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.productId.toString().includes(searchTerm)
+  )
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -51,12 +57,21 @@ export default function ManageProducts() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Quản lý kho sản phẩm</h1>
-        <button
-          onClick={handleOpenAdd}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide"
-        >
-          Thêm sản phẩm
-        </button>
+        <div className="flex gap-4">
+            <input
+              type="text"
+              placeholder="Tìm mã hoặc tên sản phẩm"
+              className="border border-gray-300 rounded-xl px-4 py-2 text-[15px] outline-none focus:border-green-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          <button
+            onClick={handleOpenAdd}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide"
+          >
+            Thêm sản phẩm
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-black">
@@ -78,7 +93,7 @@ export default function ManageProducts() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {products.map((p) => (
+              {filteredProducts.map((p) => (
                 <tr key={p.productId} className="hover:bg-gray-50 transition-colors">
                   <td className="p-4 font-bold text-gray-400">#{p.productId}</td>
                   <td className="p-4 font-semibold text-gray-900">{p.productName}</td>

@@ -63,6 +63,16 @@ export default function ManageOrders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  const displayOrders = orders.filter((o) => {
+    const matchStatus = statusFilter === "ALL" || o.status === statusFilter;
+    const matchSearch = o.receiverName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        o.orderId.toString().includes(searchTerm);
+    return matchSearch && matchStatus;
+  })
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -74,7 +84,7 @@ export default function ManageOrders() {
       if (!res.ok) throw new Error("Lỗi tải đơn hàng");
       const data = await res.json();
       setOrders(data);
-    } catch (err) {
+    } catch (err) { 
       console.error(err);
     } finally {
       setLoading(false);
@@ -110,12 +120,34 @@ export default function ManageOrders() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Quản lý hóa đơn mua hàng</h1>
-        <button
-          onClick={fetchOrders}
-          className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg font-semibold text-gray-700"
-        >
-          ↻ Tải lại
-        </button>
+        <div className="flex gap-3 items-center text-[15px]"> 
+            <input
+              type="text"
+              placeholder="Tìm kiếm tên khách, mã đơn"
+              className="border border-gray-300 rounded-xl px-3 py-2 outline-none focus:border-blue-500"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="border border-gray-300 rounded-xl px-3 py-2 outline-none focus:border-blue-500 bg-white"
+            >
+              <option value="ALL">Tất cả trạng thái</option>
+              <option value="PENDING">Chờ xử lý</option>
+              <option value="CONFIRMED">Đã xác nhận</option>
+              <option value="PACKING">Đang đóng gói</option>
+              <option value="SHIPPING">Đang vận chuyển</option>
+              <option value="DELIVERED">Đã nhận hàng</option>
+              <option value="CANCELLED">Đã hủy</option>
+            </select>
+            <button
+                  onClick={fetchOrders}
+                  className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg font-semibold text-gray-700"
+                >
+                  ↻ Tải lại
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-black">
@@ -137,7 +169,7 @@ export default function ManageOrders() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {orders.map((o) => {
+              {displayOrders.map((o) => {
                 const action = NEXT_ACTION[o.status];
                 const isUpdating = updatingId === o.orderId;
                 return (
