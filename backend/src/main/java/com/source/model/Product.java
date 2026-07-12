@@ -58,7 +58,11 @@ public class Product {
     }
 
     public Boolean getIsNew(){
-        return isNew != null ? isNew : false;
+        if(this.createdAt == null){
+            return this.isNew != null ? this.isNew : false;
+        }
+        java.time.LocalDateTime sixMonthAgo = java.time.LocalDateTime.now().minusMonths(6);
+        return this.createdAt.isAfter(sixMonthAgo);
     }
     public void setIsNew(Boolean isNew){
         this.isNew = isNew != null ? isNew : false;

@@ -2,7 +2,7 @@ import { useLocation, useSearchParams } from "react-router-dom";
 import { useCart } from "../components/context/carcontext";
 import Navbar from "../components/home/navbar";
 import Footer from "../components/home/footer";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 
 export default function CheckoutSuccess() {
@@ -13,11 +13,29 @@ export default function CheckoutSuccess() {
   const responseCode = searchParams.get("vnp_ResponseCode");
 
   const isSuccess = responseCode === "00" || !responseCode; 
+  const isUpdated = useRef(false);
   useEffect(() => {
     if (isSuccess) {
       clearCart();
     }
-  }, [isSuccess, clearCart]);
+    if(responseCode === "00" && orderId && !isUpdated.current){
+      const confirmOrder = async () => {
+        try{
+          isUpdated.current = true;
+          await fetch(`http://localhost:8080/api/orders/{$orderId}/status`,{
+            method: "PATCH",
+            headers: {
+              "Content-Type" : "application/json",
+            },
+            body: JSON.stringify({status : "CONFIRMED"}),
+          });
+        }catch(error){
+          console.log("Lỗi khi cập nhập trạng thái đơn hàng", error)
+        }
+      }
+      confirmOrder();
+    }
+  }, [isSuccess, clearCart, orderId,responseCode]);
   return (
     <div className="bg-[#d6d6d6] min-h-screen text-white flex flex-col justify-between">
       <Navbar />

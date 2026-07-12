@@ -89,7 +89,7 @@ export default function OrderDetailModal({
                  iconBgClass = "bg-blue-600 text-white ring-4 ring-blue-100";
                  textClass = "text-blue-600";
               } else if (isCompleted) {
-                 iconBgClass = "bg-blue-600 text-white"; // Theo ảnh reference các bước qua rồi có thể dùng màu xanh nhẹ hoặc xám, mình để xanh cho đồng bộ
+                 iconBgClass = "bg-blue-600 text-white"; 
                  textClass = "text-blue-600";
               }
 
@@ -114,6 +114,7 @@ export default function OrderDetailModal({
           <p><b>Số điện thoại:</b> {order.receiverPhone}</p>
           <p><b>Địa chỉ nhận:</b> {order.shippingAddress}</p>
           <p><b>Ngày đặt:</b> {new Date(order.orderDate).toLocaleString("vi-VN")}</p>
+          <p><b>Phương thức thanh toán:</b>{order.paymentMethod ? order.paymentMethod : " Chưa cập nhập"}</p>
           {order.note && <p><b>Ghi chú:</b> {order.note}</p>}
         </div>
 

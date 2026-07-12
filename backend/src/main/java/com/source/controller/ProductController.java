@@ -108,7 +108,7 @@ public class ProductController {
             product.setStockQuantity(stockQuantity);
             product.setDescription(description);
             product.setDiscountPercent(discountPercent);
-            product.setIsNew(false); // Đây là cập nhật, không phải hàng mới tinh
+            product.setIsNew(false); 
 
             com.source.model.Category category = new com.source.model.Category();
             category.setCategoryId(categoryId);

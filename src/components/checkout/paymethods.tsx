@@ -17,14 +17,7 @@ export default function PayMethods({selectedMethod, onMethodChange}: PaymentMeth
                         <p className="text-xs text-gray-600">Trả tiền mặt trực tiếp cho nhân viên giao hàng khi nhận xe.</p>
                     </div>
                 </label>
-                <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-colors ${selectedMethod === "BANK" ? "border-green-600 bg-green-50/20" : "border-gray-300"}`}>
-                    <input type="radio" name="paymentMethod" checked={selectedMethod === "BANK"} onChange={() => onMethodChange("BANK")} className="w-4 h-4 accent-green-600" />
-                    <div>
-                        <p className="text-sm font-bold text-black">Thanh toán bằng App ngân hàng (Quét mã VietQR)</p>
-                        <p className="text-xs text-gray-600">Hiển thị thông tin tài khoản ngân hàng và mã QR chuyển khoản tự động.</p>
-                    </div>
-                </label>
-
+       
                 <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-colors ${selectedMethod === "VNPAY" ? "border-green-600 bg-green-50/20" : "border-gray-300"}`}>
                 <input type="radio" name="paymentMethod" checked={selectedMethod === "VNPAY"} onChange={() => onMethodChange("VNPAY")} className="w-4 h-4 accent-green-600" />
                 <div>

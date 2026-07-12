@@ -37,29 +37,47 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<List<Order>> getAllOrders() {
-        return ResponseEntity.ok(orderRepository.findAllByOrderByOrderDateDesc());
+        List<Order> orders = orderRepository.findAllByOrderByOrderDateDesc();
+        for(Order order : orders){
+            paymentRepository.findByOrderId(order.getOrderId()).
+                    ifPresent(payment-> order.setPaymentMethod(payment.getPaymentMethod()));
+        }
+        return ResponseEntity.ok(orders);
     }
 
     
     @GetMapping("/{id}")
     public ResponseEntity<Order> getById(@PathVariable Long id) {
-        return orderRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<Order> orderOpt = orderRepository.findById(id);
+        if(orderOpt.isPresent()){
+            Order order = orderOpt.get();
+            paymentRepository.findByOrderId(order.getOrderId()).
+                ifPresent(payment -> order.setPaymentMethod(payment.getPaymentMethod()));
+            return ResponseEntity.ok(order);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Order>> getByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(
-                orderRepository.findByUserIdOrderByOrderDateDesc(userId)
-        );
+        List<Order> orders = orderRepository.findByUserIdOrderByOrderDateDesc(userId);
+        // Lặp qua từng đơn hàng để lấy thêm phương thức thanh toán
+        for (Order order : orders) {
+            paymentRepository.findByOrderId(order.getOrderId())
+                    .ifPresent(payment -> order.setPaymentMethod(payment.getPaymentMethod()));
+        }
+        return ResponseEntity.ok(orders);
     }
     @Transactional
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody Order order) {
 
         order.setOrderDate(LocalDateTime.now());
-        order.setStatus("PENDING");
+        if("VNPAY".equalsIgnoreCase(order.getPaymentMethod())){
+            order.setStatus("CONFIRMED");
+        }else{
+            order.setStatus("PENDING");
+        }
 
         if (order.getItems() != null) {
             for (OrderDetail item : order.getItems()) {

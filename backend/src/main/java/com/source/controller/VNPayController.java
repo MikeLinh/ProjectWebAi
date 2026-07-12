@@ -1,5 +1,7 @@
 package com.source.controller;
 
+import com.source.repository.OrderRepository;
+import com.source.repository.PaymentRepository;
 import com.source.service.VNPayService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -7,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -15,9 +18,13 @@ import java.util.*;
 public class VNPayController {
 
     private final VNPayService vnpayService;
+    private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
 
-    public VNPayController(VNPayService vnpayService) {
+    public VNPayController(VNPayService vnpayService, OrderRepository orderRepository, PaymentRepository paymentRepository) {
         this.vnpayService = vnpayService;
+        this.paymentRepository = paymentRepository;
+        this.orderRepository = orderRepository;
     }
 
     @PostMapping("/create")
@@ -61,6 +68,20 @@ public class VNPayController {
             String orderId = txnRef != null && txnRef.contains("_") ? txnRef.split("_")[0] : txnRef;
 
             boolean success = "00".equals(responseCode);
+
+            if(success && orderId != null){
+                Long parsedOrderId = Long.parseLong(orderId);
+
+                orderRepository.findById(parsedOrderId).ifPresent(order -> {
+                    order.setStatus("CONFIRMED");
+                    orderRepository.save(order);
+                });
+                paymentRepository.findByOrderId(parsedOrderId).ifPresent(payment -> {
+                    payment.setPaymentStatus("PAID");
+                    payment.setPaidAt(LocalDateTime.now());
+                    paymentRepository.save(payment);
+                });
+            }
 
             Map<String, Object> result = new HashMap<>();
             result.put("success", success);

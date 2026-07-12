@@ -29,7 +29,9 @@ interface Order {
   totalAmount: number;
   status: OrderStatus;
   note?: string;
+  paymentMethod?: string;
   items: OrderItem[];
+
 }
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
@@ -95,7 +97,7 @@ export default function ManageOrders() {
     setUpdatingId(id);
     try {
       const res = await fetch(`http://localhost:8080/api/orders/${id}/status`, {
-        method: "PATCH",
+        method: "PATCH", // sử dụng để cập nhập riêng cho một đối tượng 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
