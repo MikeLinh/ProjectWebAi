@@ -1,10 +1,12 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo} from "react";
 import Navbar from "../components/home/navbar";
+import { useNavigate } from "react-router-dom";
 import Footer from "../components/home/footer";
 import OrderFilter from "../components/ordertracking/orderfilter";
 import OrderList from "../components/ordertracking/orderlist";
 import { type Order, type OrderStatus } from "../components/ordertracking/orderitem";
+import { useNotification } from "../components/context/notificationcontext";
 
 function getCurrentUserId(): number | null {
   const rawUser = localStorage.getItem("current_user") || 
@@ -19,6 +21,7 @@ function getCurrentUserId(): number | null {
 }
 
 export default function OrderTrackingPage() {
+  const {showNotification} = useNotification()
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +31,32 @@ export default function OrderTrackingPage() {
   const [timeSort, setTimeSort] = useState<"NEWEST" | "OLDEST" | "BY_HOUR">("NEWEST");
   const [selectedMonth, setSelectedMonth] = useState<string>("Tất cả");
   const [selectedYear, setSelectedYear] = useState<string>("Tất cả");
+  const navigate = useNavigate();
+  
+  const handleGoToProductDetail = (productItem: any) => {
+    const productId = productItem.productId;
+    if (!productId) {
+      showNotification("Không xác định được sản phẩm để xem chi tiết.","error");
+      return;
+    }
+    navigate(`/product/${productId}`);
+  };
+
+  const handleReviewOrder = (orderId: number) => {
+    const order = orders.find((o) => o.orderId === orderId);
+    if (!order || order.items.length === 0) {
+      showNotification("Không tìm thấy sản phẩm để đánh giá trong đơn hàng này.","error");
+      return;
+    }
+
+    // Đơn hàng có thể có nhiều sản phẩm, mặc định điều hướng tới sản phẩm đầu tiên có productId hợp lệ
+    const reviewableItem = order.items.find((item) => item.productId);
+    if (!reviewableItem || !reviewableItem.productId) {
+      showNotification("Không xác định được sản phẩm để đánh giá.","error");
+      return;
+    }
+    navigate(`/product/${reviewableItem.productId}`);
+  };
 
   const fetchOrders = async (showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -70,13 +99,13 @@ export default function OrderTrackingPage() {
         setOrders(prev => prev.map(order => 
           order.orderId === orderId ? { ...order, status: "CANCELLED" as OrderStatus } : order
         ));
-        alert("Đơn hàng đã được hủy thành công!");
+        showNotification("Đơn hàng đã được hủy thành công!","success");
       } else {
-        alert("Không thể hủy đơn hàng ở trạng thái hiện tại.");
+        showNotification("Không thể hủy đơn hàng ở trạng thái hiện tại.","error");
       }
     } catch (err) {
       console.error(err);
-      alert("Có lỗi xảy ra khi hủy đơn hàng.");
+      showNotification("Có lỗi xảy ra khi hủy đơn hàng.","error");
     }
   };
 
@@ -157,6 +186,8 @@ export default function OrderTrackingPage() {
             <OrderList 
               orders={filteredAndSortedOrders} 
               onCancelOrder={handleCancelOrder}
+              onReviewOrder={handleReviewOrder}
+              onGoToProduct={handleGoToProductDetail}
             />
           </>
         )}

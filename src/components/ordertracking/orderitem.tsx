@@ -1,5 +1,6 @@
 import React from "react";
-
+import { useState } from "react";
+import { useNotification } from "../context/notificationcontext";
 export type OrderStatus =
   | "PENDING"
   | "CONFIRMED"
@@ -15,8 +16,10 @@ export interface Order {
   status: OrderStatus;
   receiverName: string;
   shippingAddress: string;
-  items: { orderDetailId: number; productName: string; quantity: number; price: number }[];
+  paymentMethod: string;
+  items: { orderDetailId: number; productId?: number; productName: string; quantity: number; price: number }[];
 }
+
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
   PENDING:   "Chờ xác nhận",
@@ -39,9 +42,13 @@ const STATUS_BADGE: Record<OrderStatus, string> = {
 interface OrderItemProps {
   order: Order;
   onCancelOrder?: (orderId: number) => void;   
+  onReviewOrder?: (orderId: number) => void;
+  onGoToProduct?: (productItem: any) => void;
 }
 
-export default function OrderItem({ order, onCancelOrder }: OrderItemProps) {
+export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToProduct }: OrderItemProps) {
+  const {showNotification} = useNotification();
+  const [rePaying, setRePaying] = useState(false);
   const formatOrderDate = (dateString: string) => {
     const d = new Date(dateString);
     const giờ  = d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
@@ -49,9 +56,40 @@ export default function OrderItem({ order, onCancelOrder }: OrderItemProps) {
     return { giờ, ngày };
   };
 
+
   const { giờ, ngày } = formatOrderDate(order.orderDate);
   const canCancel = ["PENDING", "CONFIRMED"].includes(order.status);
+  const canReview = order.status === "DELIVERED";
+  const isVnPayPending = order.status === "PENDING" && order.paymentMethod === "VNPAY";
+  const handleRepay = async () => {
+    setRePaying(true);
+    try {
+      const vnpayRes = await fetch("http://localhost:8080/api/vnpay/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: order.orderId,
+          amount: order.totalAmount,
+          orderInfo: `Thanh toán lại đơn hàng ${order.orderId}`,
+        }),
+      });
 
+      if (!vnpayRes.ok) throw new Error("Không thể tạo lại liên kết VNPay");
+
+      const vnpayData = await vnpayRes.json();
+      if (vnpayData.payUrl) {
+        showNotification("Đang chuyển hướng đến cổng thanh toán VNPay...","success");
+        window.location.href = vnpayData.payUrl;
+      } else {
+        throw new Error("Không tìm thấy đường dẫn thanh toán");
+      }
+    } catch (error: any) {
+      console.error(error);
+      showNotification(error.message || "Thanh toán lại thất bại. Vui lòng thử lại sau.","error");
+    } finally {
+      setRePaying(false);
+    }
+  };
   return (
     <div className="border border-gray-200 rounded-xl p-5 hover:shadow-sm transition-shadow space-y-4 bg-white">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-3">
@@ -69,9 +107,12 @@ export default function OrderItem({ order, onCancelOrder }: OrderItemProps) {
       <div className="space-y-2">
         {order.items.map((item) => (
           <div key={item.orderDetailId} className="flex justify-between items-center text-xs">
-            <div className="text-gray-800">
+            <button
+              onClick={() => onGoToProduct && onGoToProduct(item)}
+              className="text-gray-800 hover:text-red-500 font-medium transition-colors text-left"
+            >
               {item.productName} <span className="text-gray-400 font-mono">x{item.quantity}</span>
-            </div>
+            </button>
             <div className="font-medium text-gray-900">
               ${(item.price * item.quantity).toLocaleString()}
             </div>
@@ -83,6 +124,11 @@ export default function OrderItem({ order, onCancelOrder }: OrderItemProps) {
         <span className="text-gray-500">Thành tiền:</span>
         <span className="text-sm font-bold text-red-500">${order.totalAmount.toLocaleString()}</span>
       </div>
+      {isVnPayPending && (
+        <button onClick={handleRepay} disabled = {rePaying} className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50">
+          {rePaying ? "Đang xử lý..." : "Thanh toán lại qua VNPAY"}
+        </button>
+      )}
 
       {canCancel && onCancelOrder && (
         <button 
@@ -90,6 +136,14 @@ export default function OrderItem({ order, onCancelOrder }: OrderItemProps) {
           className="mt-3 w-full py-2.5 text-red-600 border border-red-300 hover:bg-red-50 rounded-xl text-xs font-medium transition-colors"
         >
           Hủy đơn hàng
+        </button>
+      )}
+      {canReview && onReviewOrder && (
+        <button
+          onClick={() => onReviewOrder ? onReviewOrder(order.orderId) : showNotification(`Đánh giá đơn hàng #${order.orderId}`,"info")}
+          className="w-full py-2.5 bg-blue-500 text-white hover:bg-blue-700 rounded-xl text-xs font-medium transition-colors"
+        >
+          Đánh giá đơn hàng
         </button>
       )}
     </div>

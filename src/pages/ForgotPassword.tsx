@@ -15,8 +15,6 @@ export default function ForgotPassword() {
                 <div className="p-8">
                     <ForgotForm />
                 </div>
-
-
                 <div className="px-8 py-6 border-t border-gray-100 bg-gray-50">
                     <ForgotFooter />
                 </div>

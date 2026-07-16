@@ -8,6 +8,7 @@ import Footer from "../components/home/footer";
 import DeliveryForm from "../components/checkout/deliveryform";
 import PaymentMethods, { type PaymentMethodType } from "../components/checkout/paymethods";
 import OrderSummary from "../components/checkout/ordersummary";
+import { useNotification } from "../components/context/notificationcontext";
 
 import {
   EMPTY_FORM,
@@ -20,6 +21,7 @@ export default function CheckoutPage() {
   const { cart, getCartTotal, clearCart } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
+  const { showNotification } = useNotification();
   
 
   const discount = location.state?.discount || 0;
@@ -46,7 +48,7 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) {
-      alert("Giỏ hàng rỗng!");
+      showNotification("Giỏ hàng rỗng!","error");
       return;
     }
     if (submitting) return;
@@ -66,7 +68,7 @@ export default function CheckoutPage() {
       const result = await submitOrder(payload);
 
       if (paymentMethod === "VNPAY" && result?.payUrl) {
-        alert("Đang chuyển hướng đến VNPay...");
+        showNotification("Đang chuyển hướng đến VNPay...","info");
         window.location.href = result.payUrl;
         return;
       }
@@ -84,14 +86,14 @@ export default function CheckoutPage() {
         },
       };
 
-      if (paymentMethod === "BANK") {
+      if (paymentMethod === "COD") {
         navigate("/checkout/success", { state: orderState });
       } else {
         navigate("/order-tracking", { state: orderState });
       }
     } catch (err: any) {
       console.error(err);
-      alert(err.message || "Đặt hàng thất bại. Vui lòng thử lại.");
+      showNotification(err.message || "Đặt hàng thất bại. Vui lòng thử lại.","error");
     } finally {
       setSubmitting(false);
     }

@@ -20,11 +20,12 @@ public class ProductReviewController {
     @Autowired
     private ProductService productService;
 
+    //Lấy dữ liệu review dựa theo productID
     @GetMapping
     public ResponseEntity<List<ProductReview>> getReviews(@PathVariable Integer productId) {
         return ResponseEntity.ok(reviewService.getReviewsByProductId(productId));
     }
-
+    //Tạo 1 review mới
     @PostMapping
     public ResponseEntity<?> createReview(@PathVariable Integer productId, @RequestBody ProductReview review) {
         try {

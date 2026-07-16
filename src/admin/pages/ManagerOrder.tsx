@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/immutability */
 import React, { useState, useEffect } from "react";
 import OrderDetailModal from "../components/orderdetailmodel";
+import { useNotification } from "../../components/context/notificationcontext";
 
 export type OrderStatus =
   | "PENDING"
@@ -60,6 +61,7 @@ const NEXT_ACTION: Partial<Record<OrderStatus, { label: string; next: OrderStatu
 };
 
 export default function ManageOrders() {
+  const {showNotification} = useNotification();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -73,7 +75,7 @@ export default function ManageOrders() {
     const matchSearch = o.receiverName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         o.orderId.toString().includes(searchTerm);
     return matchSearch && matchStatus;
-  })
+  }).slice(0,20);
 
   useEffect(() => {
     fetchOrders();
@@ -111,7 +113,7 @@ export default function ManageOrders() {
         setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : prev));
       }
     } catch (err) {
-      alert("Không thể cập nhật trạng thái. Vui lòng thử lại.");
+      showNotification("Không thể cập nhật trạng thái. Vui lòng thử lại.","error");
       console.error(err);
     } finally {
       setUpdatingId(null);

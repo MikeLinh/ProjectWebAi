@@ -7,6 +7,7 @@ import InputField from "../components/login/inputfield";
 import RememberForgot from "../components/login/rememberforgot";
 import GoogleLoginButton from "../components/login/logingooglebutton";
 import {useAuth} from "../components/context/authcontext"
+import { useNotification } from "../components/context/notificationcontext";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const {showNotification} = useNotification();
 
   const handleNormalLogin = async (e: React.FormEvent) => { //Hàm đồng bộ cho phép sử dụng await để gọi API đăng nhập
   e.preventDefault(); //Sẽ ngăn chặn load trang khi người dùng bấm submit
@@ -44,10 +46,10 @@ export default function Login() {
     login(user);
 
     if (user.role === "ADMIN") {
-      alert("Đăng nhập quyền Quản trị viên thành công!");
+      showNotification("Đăng nhập quyền Quản trị viên thành công!");
       navigate("/admin");
     } else {
-      alert(`Chào mừng quay trở lại, ${user.fullName}!`);
+      showNotification(`Chào mừng quay trở lại, ${user.fullName}!`);
       navigate("/");
     }
   } catch (error: any) {
@@ -87,10 +89,10 @@ export default function Login() {
         login(user);
 
         if (user.role === "ADMIN") {
-          alert("Đăng nhập quyền Quản trị viên thành công!");
+          showNotification("Đăng nhập quyền Quản trị viên thành công!","success");
           navigate("/admin");
         } else {
-          alert(`Chào mừng, ${user.fullName}!`);
+          showNotification(`Chào mừng, ${user.fullName}!`, "success");
           navigate("/");
         }
 

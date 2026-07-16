@@ -1,4 +1,5 @@
-import { useLocation } from "react-router-dom";
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useLocation, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -27,11 +28,59 @@ interface ProductData {
 
 export default function ProductDetail() {
   const location = useLocation();
+  const { id } = useParams<{ id: string }>();
   const state = location.state as { product?: ProductData } | null;
-  const product = state?.product;
 
-  const [reviewCount, setReviewCount] = useState(product?.reviewCount || 0);
+  const [product, setProduct] = useState<ProductData | undefined>(state?.product);
+  const [loadingProduct, setLoadingProduct] = useState<boolean>(!state?.product);
+
+  const [reviewCount, setReviewCount] = useState(state?.product?.reviewCount || 0);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (state?.product) {
+      setProduct(state.product);
+      setLoadingProduct(false);
+      return;
+    }
+
+    if (!id) {
+      setLoadingProduct(false);
+      return;
+    }
+
+    setLoadingProduct(true);
+    axios.get(`http://localhost:8080/api/products/${id}`)
+      .then((res) => {
+        const p = res.data;
+        const imageName = p.imageUrl ? p.imageUrl.trim() : "bike1.png";
+        const finalImage = new URL(`../assets/images/${imageName}`, import.meta.url).href;
+
+        const discountPercent = p.discountPercent || 0;
+        const discountAmount = Math.round(p.price * (discountPercent / 100));
+        const salePrice = p.price - discountAmount;
+
+        setProduct({
+          id: p.productId,
+          name: p.productName,
+          price: salePrice,
+          originalPrice: p.price,
+          image: finalImage,
+          rating: 5,
+          reviewCount: p.reviewCount || 0,
+          discount: discountPercent,
+          category: p.category?.categoryName || "Bicycles",
+          brand: p.brand,
+          inStock: p.stockQuantity,
+          description: p.description,
+        });
+      })
+      .catch((err) => {
+        console.error("Lỗi lấy chi tiết sản phẩm:", err);
+        setProduct(undefined);
+      })
+      .finally(() => setLoadingProduct(false));
+  }, [id]);
 
   useEffect(() => {
     if (product?.id) {
@@ -71,6 +120,18 @@ export default function ProductDetail() {
       }
     }
   }, [product?.id, product?.brand]);
+
+  if (loadingProduct) {
+    return (
+      <div className="flex flex-col min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
+          Đang tải thông tin sản phẩm...
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!product) {
     return (

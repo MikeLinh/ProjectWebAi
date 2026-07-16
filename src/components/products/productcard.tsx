@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
 import { useCart } from "../context/carcontext"; 
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import { useNotification } from "../context/notificationcontext";
 
 interface Product {
   id: number;
@@ -25,6 +26,7 @@ interface CardProps {
 }
 
 export default function Card({ product }: CardProps) {
+  const {showNotification} = useNotification()
   const [, setIsHovered] = useState(false);
   const navigate = useNavigate(); 
   const { addToCart } = useCart();
@@ -45,7 +47,7 @@ export default function Card({ product }: CardProps) {
       image: product.image,
       size: "M"
     }, 1); 
-    alert(`Đã thêm ${product.name} vào giỏ hàng thành công!`);
+    showNotification(`Đã thêm ${product.name} vào giỏ hàng thành công!`);
   };
 
   return (

@@ -20,6 +20,7 @@ import java.util.Optional;
 @RequestMapping("/api/products")
 @CrossOrigin(origins = "http://localhost:5173")
 public class ProductController {
+    //Định nghĩa lưu trữ ảnh khi người dùng upload
     private final String UPLOAD_DIR = "src/assets/images/";
     
     @Autowired
@@ -34,7 +35,7 @@ public class ProductController {
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice) {
-
+        // Nếu tham số danh mục truyền lên không rỗng, tiến hành tách chuỗi bằng dấu phẩy và dọn khoảng trắng
         List<String> categories = null;
         if (categoryName != null && !categoryName.isBlank()) {
             categories = Arrays.stream(categoryName.split(","))
@@ -50,9 +51,17 @@ public class ProductController {
                     .filter(s -> !s.isEmpty())
                     .toList();
         }
-
+        // Gọi tầng Service để thực hiện tìm kiếm, lọc dữ liệu và tính toán số lượng đánh giá
         List<Product> products = productService.getFilteredProductsWithReviewCount(categories, brands, minPrice, maxPrice);
         return ResponseEntity.ok(products);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable Integer id) {
+        Optional<Product> opt = productRepository.findById(id.longValue());
+        if (opt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(opt.get());
     }
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Product> createProduct(
@@ -63,7 +72,7 @@ public class ProductController {
             @RequestParam("categoryId") Integer categoryId,
             @RequestParam("description") String description,
             @RequestParam("discountPercent") Integer discountPercent,
-            @RequestParam(value = "image", required = false) MultipartFile image) {
+            @RequestParam(value = "image", required = false) MultipartFile image) { // File ảnh tải lên (không bắt buộc)
 
         try {
             Product product = new Product();
@@ -75,6 +84,7 @@ public class ProductController {
             product.setDiscountPercent(discountPercent);
             product.setIsNew(true);
 
+            // Liên kết danh mục cho sản phẩm thông qua Category ID
             Category category = new Category();
             category.setCategoryId(categoryId);
             product.setCategory(category);
@@ -110,9 +120,13 @@ public class ProductController {
             product.setDiscountPercent(discountPercent);
             product.setIsNew(false); 
 
-            com.source.model.Category category = new com.source.model.Category();
+
+            // Thiết lập thông tin danh mục mới
+            Category category = new Category();
             category.setCategoryId(categoryId);
             product.setCategory(category);
+
+            //Gọi lớp service để thực hiện lưu dữ liệu
             Product saved = productService.saveProduct(product, image);
             return ResponseEntity.ok(saved);
             
@@ -128,6 +142,7 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+    //Lấy danh sách sản phẩm liên quan theo cùng thương hiệu
     @GetMapping("/related-by-brand")
     public ResponseEntity<List<Product>> getRelatedByBrand(
             @RequestParam String brand,
@@ -136,20 +151,21 @@ public class ProductController {
         List<Product> products = productService.getProductsByBrandAndExcludeIdWithReviewCount(brand, excludeId);
         return ResponseEntity.ok(products);
     }
-    
+    //Cập nhật nhanh số lượng tồn kho
     @PatchMapping("/{id}/stock")
     public ResponseEntity<Product> updateStock(@PathVariable Integer id, @RequestBody Map<String, Integer> request){
-        Integer newStock= request.get("stockQuantity");
+        Integer newStock= request.get("stockQuantity"); // Lấy giá trị tồn kho mới từ Map
         if(newStock == null){
             return ResponseEntity.badRequest().build();
         }
+        // Tìm sản phẩm cần cập nhật trong DB
         Optional<Product> opt = productRepository.findById(id.longValue());
         if(opt.isEmpty()){
             return ResponseEntity.notFound().build();
         }
         Product product= opt.get();
-        product.setStockQuantity(newStock);
-        Product saved = productRepository.save(product);
+        product.setStockQuantity(newStock); //cập nhập số lượng tồn kho mới
+        Product saved = productRepository.save(product); //Lưu sp vào db
         return ResponseEntity.ok(saved);
     }
     

@@ -11,6 +11,7 @@ public class ProductReviewService {
 
     private final ProductReviewRepository reviewRepository;
 
+
     public ProductReviewService(ProductReviewRepository reviewRepository) {
         this.reviewRepository = reviewRepository;
     }
@@ -26,7 +27,6 @@ public class ProductReviewService {
     @Transactional
     public ProductReview addReview(Integer productId, ProductReview review) {
         review.setProductId(productId);  
-        
         if (review.getRating() < 3 && (review.getComment() == null || review.getComment().trim().isBlank())) {
             throw new IllegalArgumentException("Đánh giá dưới 3 sao bắt buộc phải nhập nội dung nhận xét lý do.");
         }

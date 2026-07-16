@@ -28,25 +28,29 @@ public class ProductService {
 
     protected final ProductRepository productRepository;
     private final ProductReviewRepository productReviewRepository;
-
+    
+    //Khởi tạo các Repository thông qua Constructor
     public ProductService(ProductRepository productRepository, ProductReviewRepository productReviewRepository) {
         this.productRepository = productRepository;
         this.productReviewRepository = productReviewRepository;
     }
-    private final String UPLOAD_DIR = "src/assets/images/";
+    private final String UPLOAD_DIR = "src/assets/images/"; // Thư mục lưu trữ hình ảnh tải lên 
 
     @Transactional
     public Product saveProduct(Product product, MultipartFile imageFile) {
+        // Kiểm tra xem người dùng có tải lên file ảnh mới hay không
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
                 String fileName = imageFile.getOriginalFilename();
                 Path uploadPath = Paths.get(UPLOAD_DIR);
+                // Nếu thư mục lưu trữ hình ảnh chưa tồn tại trên ổ đĩa, tiến hành tạo mới
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
 
-                Path filePath = uploadPath.resolve(fileName);
+                Path filePath = uploadPath.resolve(fileName); // Xác định đường dẫn file cụ thể
                 
+                // Sao chép luồng dữ liệu (Input Stream) của file tải lên vào thư mục đích, ghi đè nếu file đã tồn tại
                 try (var inputStream = imageFile.getInputStream()) {
                     Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
                 }
@@ -57,9 +61,11 @@ public class ProductService {
                 throw new RuntimeException("Lỗi lưu file: " + e.getMessage(), e);
             }
         }
+        // Thiết lập trạng thái mặc định cho thuộc tính IsNew nếu nó bị null
         if(product.getIsNew() == null){
             product.setIsNew(true);
         }
+        // Thiết lập ngày giờ tạo mặc định nếu chưa được gán
         if(product.getCreatedAt() == null){
             product.setCreatedAt(LocalDateTime.now());
         }
@@ -72,7 +78,7 @@ public class ProductService {
             List<String> brands,
             BigDecimal minPrice,
             BigDecimal maxPrice) {
-
+        // Khởi tạo đối tượng Specification để xây dựng câu truy vấn SQL động
         Specification<Product> spec = (root, query, cb) -> { //CriteriaBuilder = cb, 
             List<Predicate> predicates = new ArrayList<>();
 
@@ -104,6 +110,8 @@ public class ProductService {
     public void deleteProduct(Integer id) {
         productRepository.deleteById(id.longValue());
     }
+
+    //Lấy toàn bộ danh sách sản phẩm đồng thời đếm số lượng đánh giá của từng sản phẩm
     @Transactional(readOnly = true)
     public List<Product> getAllProductsWithReviewCount() {
         List<Product> products = productRepository.findAll();
@@ -113,13 +121,15 @@ public class ProductService {
         }
         return products;
     }
+
+    //Lấy danh sách sản phẩm lọc theo bộ tiêu chí đồng thời đếm số lượng đánh giá
     @Transactional(readOnly = true)
     public List<Product> getFilteredProductsWithReviewCount(
             List<String> categories,
             List<String> brands,
             BigDecimal minPrice,
             BigDecimal maxPrice) {
-        
+        //Gọi hàm lọc danh sách sản phẩm
         List<Product> products = getFilteredProducts(categories, brands, minPrice, maxPrice);
         
         for (Product p : products) {
@@ -128,14 +138,17 @@ public class ProductService {
         }
         return products;
     }
+
+    //Lấy danh sách sản phẩm cùng thương hiệu 
     @Transactional(readOnly = true)
     public List<Product> getProductsByBrandAndExcludeId(String brand, Long excludeProductId) {
     Specification<Product> spec = (root, query, cb) -> {
         List<Predicate> predicates = new ArrayList<>();
-
+            // Lọc các sản phẩm thuộc cùng một thương hiệu
             if (brand != null && !brand.isBlank()) {
                 predicates.add(cb.equal(root.get("brand"), brand));
             }
+            // Loại trừ sản phẩm đang xem chi tiết ra khỏi danh sách gợi ý liên quan
             if (excludeProductId != null) {
                 predicates.add(cb.notEqual(root.get("productId"), excludeProductId));
             }
@@ -146,6 +159,7 @@ public class ProductService {
         return productRepository.findAll(spec);
     }
 
+    //Lấy danh sách sản phẩm liên quan theo thương hiệu kèm theo đếm số lượng đánh giá
     @Transactional(readOnly = true)
     public List<Product> getProductsByBrandAndExcludeIdWithReviewCount(String brand, Long excludeProductId) {
         List<Product> products = getProductsByBrandAndExcludeId(brand, excludeProductId);
@@ -155,9 +169,10 @@ public class ProductService {
         }
         return products;
     }
+    //Lấy danh sách toàn bộ các sản phẩm đang có chương trình giảm giá
     @Transactional(readOnly = true)
     public List<Product> getProductsWithDiscount() {
-        Specification<Product> spec = (root, query, cb) -> 
+        Specification<Product> spec = (root, query, cb) ->  //root đại diện cho Entity, cb công cụ xây dựng các đk so sánh
             cb.greaterThan(root.get("discountPercent"), 0);
         List<Product> products = productRepository.findAll(spec);
         for (Product p : products) {
@@ -168,7 +183,9 @@ public class ProductService {
     }
     @Transactional
     public void decreaseStockForOrder(Long productId, int quantity) {
+        // Thực thi hàm trừ kho tự động trong Repository, trả về số lượng dòng dữ liệu bị ảnh hưởng
         int updatedRows = productRepository.decreaseStock(productId, quantity);
+        // Nếu không có dòng nào bị ảnh hưởng, đồng nghĩa kho thực tế không đủ đáp ứng
         if (updatedRows == 0) {
             Product product = productRepository.findById(productId).orElse(null);
             String name = product != null ? product.getProductName() : "ID " + productId;
@@ -177,9 +194,10 @@ public class ProductService {
     }
     @Transactional
     public void restoreStock(Long productId, int quantity) {
+        // Tìm sản phẩm trong DB, nếu thấy thì cộng trả lại số lượng tương ứng
         productRepository.findById(productId).ifPresent(p -> {
-            p.setStockQuantity(p.getStockQuantity() + quantity);
-            productRepository.save(p);
+            p.setStockQuantity(p.getStockQuantity() + quantity); // Cộng trả số lượng
+            productRepository.save(p); //Lưu db
         });
     }
             

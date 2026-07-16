@@ -2,8 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom"
 import { useGoogleLogin } from "@react-oauth/google";
 import GoogleIcon from '@mui/icons-material/Google';
+import { useNotification } from "../context/notificationcontext";
 
 export default function RegisterFooter(){
+  const {showNotification} = useNotification();
      const loginWithGoogle = useGoogleLogin({
     onSuccess: async (access_token) => {
       try {
@@ -13,7 +15,7 @@ export default function RegisterFooter(){
         });
         const userInfo = await res.json();
         console.log("Thông tin người dùng Google:", userInfo);
-        alert(`Chào mừng ${userInfo.name} đã đăng nhập thành công!`);
+        showNotification(`Chào mừng ${userInfo.name} đã đăng nhập thành công!`,"success");
       } catch (error) {
         console.error("Lỗi lấy thông tin user:", error);
       }

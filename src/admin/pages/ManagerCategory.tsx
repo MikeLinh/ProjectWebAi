@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useCallback } from "react";
+import { useNotification } from "../../components/context/notificationcontext";
 
 const API = "http://localhost:8080/api/categories";
 
@@ -12,6 +13,7 @@ interface Category {
 const emptyForm = { categoryName: "", description: "" };
 
 export default function ManageCategories() {
+  const {showNotification} = useNotification();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
@@ -63,10 +65,10 @@ export default function ManageCategories() {
         await fetchCategories();
         handleCancel();
       } else {
-        alert("Lưu thất bại! Vui lòng kiểm tra lại.");
+        showNotification("Lưu thất bại! Vui lòng kiểm tra lại.","error");
       }
     } catch {
-      alert("Không thể kết nối đến máy chủ.");
+      showNotification("Không thể kết nối đến máy chủ.","warning");
     } finally {
       setSaving(false);
     }
@@ -79,10 +81,10 @@ export default function ManageCategories() {
       if (res.ok) {
         setCategories(categories.filter(c => c.categoryId !== id));
       } else {
-        alert("Xóa thất bại! Danh mục có thể đang được sử dụng.");
+        showNotification("Xóa thất bại! Danh mục có thể đang được sử dụng.","error");
       }
     } catch {
-      alert("Không thể kết nối đến máy chủ.");
+      showNotification("Không thể kết nối đến máy chủ.","warning");
     }
   };
 

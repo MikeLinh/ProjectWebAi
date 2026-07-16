@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useCallback } from "react";
+import { useNotification } from "../../components/context/notificationcontext";
 
 const API = "http://localhost:8080/api/promotions";
 
@@ -37,6 +38,7 @@ function isActive(startDate: string, endDate: string) {
 }
 
 export default function ManagePromotions() {
+  const {showNotification} = useNotification();
   const [promos, setPromos] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
@@ -97,10 +99,10 @@ export default function ManagePromotions() {
       if (res.ok) {
         setPromos(promos.filter(p => p.promoId !== id));
       } else {
-        alert("Xóa thất bại!");
+        showNotification("Xóa thất bại!","error");
       }
     } catch {
-      alert("Không thể kết nối đến máy chủ.");
+      showNotification("Không thể kết nối đến máy chủ.","warning");
     }
   };
 

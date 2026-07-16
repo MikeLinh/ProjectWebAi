@@ -23,6 +23,7 @@ public class WarehouseController {
     @Autowired private WarehouseReceiptRepository warehouseReceiptRepository;
     @Autowired private ProductRepository productRepository;
 
+    // Ngưỡng định mức để cảnh báo sản phẩm sắp hết hàng
     private static final int LOW_STOCK_THRESHOLD = 5;
     @GetMapping
     public ResponseEntity<List<WarehouseReceipt>> getAll() {
@@ -30,7 +31,7 @@ public class WarehouseController {
                 warehouseReceiptRepository.findAllByOrderByImportedAtDesc()
         );
     }
-
+    //Lấy danh sách các sản phẩm đang rơi vào tình trạng sắp hết hàng
     @GetMapping("/low-stock")
     public ResponseEntity<List<Product>> getLowStock() {
         return ResponseEntity.ok(

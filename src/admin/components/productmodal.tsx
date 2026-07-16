@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from "react";
+import { useNotification } from "../../components/context/notificationcontext";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface ProductModalProps {
 }
 
 export default function ProductModal({ isOpen, onClose, onSave, editingProduct }: ProductModalProps) {
+  const {showNotification} = useNotification();
   const [categories, setCategories] = useState<any[]>([]);
   const [warehouseProducts, setwarehouseProducts] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -122,14 +124,14 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
           }));
           console.log("Đã gửi brand mới:" , formData.brand);
         }
-        alert(editingProduct ? "Cập nhật sản phẩm thành công!" : "Thêm sản phẩm thành công!");
+        showNotification(editingProduct ? "Cập nhật sản phẩm thành công!": "Thêm sản phẩm thành công!","success");
         onSave(); 
       } else {
-        alert("Lưu thất bại! Xin vui lòng kiểm tra lại.");
+        showNotification("Lưu thất bại! Xin vui lòng kiểm tra lại.","error");
       }
     } catch (error) {
       console.error("Lỗi gửi dữ liệu:", error);
-      alert("Không thể kết nối đến máy chủ.");
+      showNotification("Không thể kết nối đến máy chủ.","warning");
     }
   };
 

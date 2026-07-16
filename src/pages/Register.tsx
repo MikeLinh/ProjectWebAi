@@ -3,8 +3,10 @@ import FormInput from "../components/common/frominput";
 import SubmitButton from "../components/common/submitbutton";
 import RegisterFooter from "../components/register/registerfooter";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../components/context/notificationcontext";
 
 export default function RegisterForm() {
+    const {showNotification} = useNotification();
     const navigate = useNavigate();
     
     const [formData, setFormData] = useState({
@@ -61,7 +63,7 @@ export default function RegisterForm() {
                 throw new Error(data || "Đăng ký thất bại!");
             }
 
-            alert("Đăng ký thành công! Vui lòng đăng nhập.");
+            showNotification("Đăng ký thành công! Vui lòng đăng nhập.","success");
             navigate("/login");
 
         } catch (error: any) {

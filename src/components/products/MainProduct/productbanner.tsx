@@ -12,6 +12,7 @@ export default function ProductBanner({ backgroundp }: ProductBannerProps) {
       <div className="relative z-10 text-center space-y-2">
         <p className="text-sm md:text-base tracking-[3px] uppercase">Trang chủ/ Sản phẩm</p>
         <h1 className="text-3xl md:text-5xl font-bold tracking-wide">SẢN PHẨM</h1>
+        
       </div>
     </div>
   );

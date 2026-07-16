@@ -5,6 +5,7 @@ import SecurityIcon from "@mui/icons-material/Security";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import LocalAtmIcon from "@mui/icons-material/LocalAtm";
 import { useCart } from "../../components/context/carcontext"
+import { useNotification } from "../context/notificationcontext";
 
 interface ProductInfoRightProps {
   id: number;
@@ -20,6 +21,7 @@ interface ProductInfoRightProps {
 }
 
 export default function ProductInfoRight({ id, image, name, price, originalPrice, category, rating, reviewCount, inStock = 15, description }: ProductInfoRightProps) {
+  const {showNotification} = useNotification();
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedSize, setSelectedSize] = useState<string>("M");
 
@@ -28,11 +30,11 @@ export default function ProductInfoRight({ id, image, name, price, originalPrice
 
   const handleAddToCart = () => {
     if (inStock <= 0) {
-      alert(`Xin lỗi, sản phẩm "${name}" hiện tại đã hết hàng!`);
+      showNotification(`Xin lỗi, sản phẩm "${name}" hiện tại đã hết hàng!`,"warning");
       return;
     }
     if (quantity > inStock) {
-      alert(`Số lượng yêu cầu (${quantity}) vượt quá số lượng còn lại trong kho (${inStock} sản phẩm). Vui lòng điều chỉnh lại!`);
+      showNotification(`Số lượng yêu cầu (${quantity}) vượt quá số lượng còn lại trong kho (${inStock} sản phẩm). Vui lòng điều chỉnh lại!`,"warning");
       return;
     }
 
@@ -43,7 +45,7 @@ export default function ProductInfoRight({ id, image, name, price, originalPrice
       image,
       size: selectedSize
     }, quantity);
-    alert(`Đã thêm thành công ${quantity} sản phẩm "${name}" vào giỏ hàng!`);
+    showNotification(`Đã thêm thành công ${quantity} sản phẩm "${name}" vào giỏ hàng!`,"success");
   }
 
   return (

@@ -1,6 +1,6 @@
 import React from "react";
 
-export type PaymentMethodType = "COD" | "BANK" | "VNPAY"
+export type PaymentMethodType = "COD" | "VNPAY"
 interface PaymentMethodsProps{
     selectedMethod: PaymentMethodType;
     onMethodChange: (method: PaymentMethodType) => void;

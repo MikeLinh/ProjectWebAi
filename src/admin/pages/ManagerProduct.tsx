@@ -1,10 +1,12 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useCallback } from "react";
 import ProductModal from "../components/productmodal";
+import { useNotification } from "../../components/context/notificationcontext";
 
 const API = "http://localhost:8080/api/products";
 
 export default function ManageProducts() {
+  const {showNotification} = useNotification();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,10 +48,10 @@ export default function ManageProducts() {
       if (res.ok) {
         setProducts(products.filter(p => p.productId !== id));
       } else {
-        alert("Xóa thất bại!");
+        showNotification("Xóa thất bại!","error");
       }
     } catch {
-      alert("Không thể kết nối đến máy chủ.");
+      showNotification("Không thể kết nối đến máy chủ.","warning");
     }
   };
 

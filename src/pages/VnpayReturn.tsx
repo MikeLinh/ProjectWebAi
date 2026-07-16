@@ -8,11 +8,28 @@ export default function VNPayReturn() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isSuccess, setIsSuccess] = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     const responseCode = searchParams.get("vnp_ResponseCode");
+    const txnRef = searchParams.get("vnp_TxnRef");
+
     setIsSuccess(responseCode === "00");
+
+    if(txnRef){
+      const extractedId = txnRef.split("_")[0];
+      setOrderId(extractedId);
+    }
   }, [searchParams]);
+  const handlePayAgain = () =>{
+    if(orderId){
+      navigate("/checkout",{
+        state: {retryOrderId: orderId}
+      });
+    }else{
+      navigate("/product")
+    }
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
@@ -45,13 +62,23 @@ export default function VNPayReturn() {
               </p>
             </>
           )}
+       
+              <button
+                onClick={handlePayAgain}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-colors text-lg"
+              >
+                Thanh toán lại
+            </button>
 
-          <button
-            onClick={() => navigate("/product")}
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-xl transition-colors text-lg"
-          >
-            ← Trở về trang sản phẩm
-          </button>
+              <button
+                onClick={() => navigate("/product")}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-xl transition-colors text-lg"
+              >
+                ← Trở về trang sản phẩm
+            </button>
+       
+
+          
         </div>
       </div>
 

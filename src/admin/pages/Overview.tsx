@@ -1,24 +1,24 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-hooks/immutability */
 import React, { useState, useEffect } from "react";
-import MonetizationOnIcon  from "@mui/icons-material/MonetizationOn";
-import LocalShippingIcon   from "@mui/icons-material/LocalShipping";
-import DirectionsBikeIcon  from "@mui/icons-material/DirectionsBike";
-import LocalActivityIcon   from "@mui/icons-material/LocalActivity";
-import CancelIcon          from "@mui/icons-material/Cancel";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import DirectionsBikeIcon from "@mui/icons-material/DirectionsBike";
+import LocalActivityIcon from "@mui/icons-material/LocalActivity";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 interface Stats {
-  totalRevenue:    number;
-  totalOrders:     number;
-  pendingOrders:   number;
+  totalRevenue: number;
+  totalOrders: number;
+  pendingOrders: number;
   cancelledOrders: number;
-  totalProducts:   number;
-  totalUsers:      number;
-  activePromos:    number;
-  revenueByMonth:  Record<string, number>;
-  ordersByMonth:   Record<string, number>;
-  topProducts:     { name: string; sold: number }[];
-  chartYear:       number;
+  totalProducts: number;
+  totalUsers: number;
+  activePromos: number;
+  revenueByMonth: Record<string, number>;
+  ordersByMonth: Record<string, number>;
+  topProducts: { name: string; sold: number }[];
+  chartYear: number;
 }
 
 const MONTHS = ["T1","T2","T3","T4","T5","T6","T7","T8","T9","T10","T11","T12"];
@@ -26,10 +26,10 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = [CURRENT_YEAR, CURRENT_YEAR - 1, CURRENT_YEAR - 2];
 
 export default function DashboardOverview() {
-  const [stats, setStats]       = useState<Stats | null>(null);
-  const [loading, setLoading]   = useState(true);
-  const [month, setMonth]       = useState<string>("ALL");
-  const [year, setYear]         = useState<string>(String(CURRENT_YEAR));
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [month, setMonth] = useState<string>("ALL");
+  const [year, setYear] = useState<string>(String(CURRENT_YEAR));
 
   const [animateChart, setAnimateChart] = useState(false);
 
@@ -48,10 +48,10 @@ export default function DashboardOverview() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams(); // tạo 1 đối tượng chứa query string
       if (month !== "ALL") params.set("month", month);
       if (year  !== "ALL") params.set("year",  year);
-      const res  = await fetch(`http://localhost:8080/api/overview/stats?${params}`);
+      const res = await fetch(`http://localhost:8080/api/overview/stats?${params}`);
       const data = await res.json();
       setStats(data);
     } catch (err) {
@@ -61,8 +61,8 @@ export default function DashboardOverview() {
     }
   };
 
-  const barHeight = (value: number, max: number) =>
-    max === 0 ? 0 : Math.max(4, Math.round((value / max) * 100));
+  const barHeight = (value: number, max: number) => 
+    max === 0 ? 0 : Math.max(4, Math.round((value / max) * 100)); 
 
   const getVal = (obj: Record<string, number> | undefined, monthIndex: number) => {
     if (!obj) return 0;

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useCallback } from "react";
-
+import { useNotification } from "../../components/context/notificationcontext";
 const API = "http://localhost:8080/api/users";
 
 interface User {
@@ -32,6 +32,7 @@ function formatDate(dt: string) {
 }
 
 export default function ManageUsers() {
+  const {showNotification} = useNotification();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -126,10 +127,10 @@ export default function ManageUsers() {
       if (res.ok) {
         setUsers(users.filter(u => u.userId !== id));
       } else {
-        alert("Xóa thất bại!");
+        showNotification("Xóa thất bại!","error");
       }
     } catch {
-      alert("Không thể kết nối đến máy chủ.");
+      showNotification("Không thể kết nối đến máy chủ.","warning");
     }
   };
 

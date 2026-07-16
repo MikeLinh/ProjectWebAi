@@ -25,7 +25,7 @@ public class ChatController {
     @GetMapping("/context")
     public ResponseEntity<String> getAIContext() {
         List<Product> products = productRepository.findAll();
-        String productContext = products.stream().map(p ->
+        String productContext = products.stream().map(p -> //Duyệt qua từng sản phẩm để hiển thị thành chuỗi thông tin định dạng
             String.format("- %s | Hãng: %s | Danh mục: %s | Giá: $%s | Tồn kho: %d xe | Mô tả: %s",
                 p.getProductName(),
                 p.getBrand() != null ? p.getBrand() : "N/A",
@@ -34,15 +34,15 @@ public class ChatController {
                 p.getStockQuantity() != null ? p.getStockQuantity() : 0,
                 p.getDescription() != null ? p.getDescription() : ""
             )
-        ).collect(Collectors.joining("\n"));
+        ).collect(Collectors.joining("\n")); //Nối các dữ liệu thành chuỗi theo thứ tự
 
-        LocalDateTime now = LocalDateTime.now();
-        List<Promotion> activePromos = promotionRepository.findAll().stream()
-            .filter(p -> p.getEndDate() != null && p.getEndDate().isAfter(now))
-            .filter(p -> p.getStartDate() == null || p.getStartDate().isBefore(now))
-            .collect(Collectors.toList());
+        LocalDateTime now = LocalDateTime.now(); //lấy thời gian hiện tại
+        List<Promotion> activePromos = promotionRepository.findAll().stream() //truy vấn tìm mã còn hiệu lực
+            .filter(p -> p.getEndDate() != null && p.getEndDate().isAfter(now)) //ngày kết thúc phải sau ngày hiện tại
+            .filter(p -> p.getStartDate() == null || p.getStartDate().isBefore(now)) //Nếu ngày bắt đầu kh có thì có thì phải trước ngày hiện tại
+            .collect(Collectors.toList()); // đóng gói điều kiện thoả mãn vào 1 danh sách
 
-        String promoContext = activePromos.isEmpty()
+        String promoContext = activePromos.isEmpty() //Chuyển khuyến mãi thành string
             ? "Hiện không có mã khuyến mãi nào đang chạy."
             : activePromos.stream().map(p ->
                 String.format("- Mã: %s | Giảm: $%s | Hạn dùng đến: %s",
@@ -51,7 +51,7 @@ public class ChatController {
                     p.getEndDate().toLocalDate().toString()
                 )
             ).collect(Collectors.joining("\n"));
-
+        //Sử dụng Text Block để xây dựng 1 prompt
         String context = """
                 Bạn là trợ lý AI thông minh của BIKECYC STORE — cửa hàng xe đạp cao cấp.
                 Hãy tư vấn nhiệt tình, ngắn gọn, dùng thông tin thực tế dưới đây.

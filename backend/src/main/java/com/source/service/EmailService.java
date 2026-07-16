@@ -9,22 +9,8 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
     @Autowired
-    private JavaMailSender mailSender;
-
-    public void sendResetPasswordEmail(String toEmail, String resetCode) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("yourgmail@gmail.com"); 
-        message.setTo(toEmail);
-        message.setSubject("Mã khôi phục mật khẩu - Your App");
-        message.setText(
-            "Xin chào,\n\n" +
-            "Mã khôi phục mật khẩu của bạn là: " + resetCode + "\n\n" +
-            "Mã này sẽ hết hạn sau 10 phút.\n\n" +
-            "Trân trọng,\nYour App Team"
-        );
-
-        mailSender.send(message);
-    }
+    private JavaMailSender mailSender; //framework gửi mail tự động của Spring Boot
+    //Gửi mật khẩu mới
     public void sendNewPasswordEmail(String toEmail, String newPassword) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("yourgmail@gmail.com");
