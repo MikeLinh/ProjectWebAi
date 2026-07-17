@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNotification } from "../../components/context/notificationcontext";
 
+// Đinh nghĩa dữ liệu đầu vào
 interface ProductModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -11,8 +12,10 @@ interface ProductModalProps {
 
 export default function ProductModal({ isOpen, onClose, onSave, editingProduct }: ProductModalProps) {
   const {showNotification} = useNotification();
-  const [categories, setCategories] = useState<any[]>([]);
-  const [warehouseProducts, setwarehouseProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]); // Danh sách các danh mục sản phẩm từ API
+  const [warehouseProducts, setwarehouseProducts] = useState<any[]>([]); // Danh sách sản phẩm khả dụng trong kho hàng
+
+  // State lưu trữ dữ liệu của Form nhập liệu
   const [formData, setFormData] = useState({
     productName: "",
     brand: "",
@@ -23,6 +26,7 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     description: "",
     discountPercent: 0   
   });
+    // State lưu trữ file ảnh được người dùng chọn từ máy tính để upload
     const updateStock = async (productId: number, newStock: number) => {
     try {
       await fetch(`http://localhost:8080/api/products/${productId}/stock`, {
@@ -35,15 +39,16 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     }
   };
 
- 
+  // State lưu trữ file ảnh được người dùng chọn từ máy tính để upload
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
+  // Gọi API lấy danh sách danh mục khi Modal được mở
   useEffect(() => {
     if (isOpen) {
       fetch("http://localhost:8080/api/categories")
         .then((res) => res.json())
         .then((data) => {
           setCategories(data);
+          // Nếu ở chế độ THÊM MỚI và có danh mục, tự động chọn danh mục đầu tiên làm mặc định
           if (data.length > 0 && !editingProduct) {
             setFormData((prev) => ({ ...prev, categoryId: data[0].categoryId.toString() }));
           }
@@ -51,6 +56,7 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
         .catch((err) => console.error("Lỗi lấy danh mục:", err));
     }
   }, [isOpen, editingProduct]);
+  //Gọi API lấy danh sách sản phẩm khả dụng trong kho
   useEffect(()=>{
     fetch("http://localhost:8080/api/warehouse/available")
       .then((res) => res.json())
@@ -58,6 +64,7 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
       .catch((err) => console.log("Lỗi lấy sản phẩm từ kho: ",err));
   },[isOpen,editingProduct])
 
+  //dữ liệu vào Form tùy theo chế độ Chỉnh sửa hay Thêm mới
   useEffect(() => {
     if (editingProduct) {
       setFormData({
@@ -85,8 +92,9 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     setSelectedFile(null);
   }, [editingProduct, isOpen, categories]);
 
-  if (!isOpen) return null;
+  if (!isOpen) return null; // Nếu Modal không ở trạng thái mở thì không vẽ bất kỳ giao diện nào
 
+  //Hàm xử lý submit form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -100,12 +108,13 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     form.append("description", formData.description);
     form.append("discountPercent", formData.discountPercent.toString());
 
+    //Ưu tiên file ảnh cục bộ mới upload, nếu không có thì giữ lại URL ảnh cũ
     if (selectedFile) {
       form.append("image", selectedFile);
     } else if (formData.imageUrl) {
       form.append("imageUrl", formData.imageUrl);
     }
-
+    // Định tuyến API: PUT đối với chỉnh sửa (yêu cầu ID), POST đối với thêm mới sản phẩm
     const url = editingProduct 
       ? `http://localhost:8080/api/products/${editingProduct.productId}` 
       : "http://localhost:8080/api/products"; 
@@ -115,9 +124,11 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
       const res = await fetch(url, { method, body: form });
       if (res.ok) {
         const saveProduct = await res.json();
+        //Chỉnh sửa và có thay đổi số lượng tồn kho so với ban đầu
         if(editingProduct && formData.stockQuantity !== editingProduct.stockQuantity){
           await updateStock(saveProduct.productId, formData.stockQuantity)
         }
+        //Thêm mới sản phẩm thành công có thương hiệu mới
         if(!editingProduct && formData.brand){
           window.dispatchEvent(new CustomEvent('newBrandAdded',{
             detail: formData.brand
@@ -138,6 +149,7 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 text-black text-xs">
+        {/* Tiêu đề Modal (Tự động đổi tiêu đề theo chế độ) */}
         <h2 className="text-lg font-bold border-b pb-3 text-gray-800">
           {editingProduct ? `CHỈNH SỬA SẢN PHẨM #${editingProduct.productId}` : "THÊM SẢN PHẨM MỚI"}
         </h2>
@@ -150,6 +162,7 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
                   <select
                     className="w-full border p-2.5 rounded-lg bg-white outline-none focus:border-blue-500"
                     onChange={(e)=>{
+                      // Khi chọn sản phẩm trong kho, tự động điền các thông tin đã có sẵn vào form nhập liệu phía dưới
                       const selected = warehouseProducts.find(p => p.productId === Number(e.target.value));
                       if(selected){
                         setFormData(prev =>({

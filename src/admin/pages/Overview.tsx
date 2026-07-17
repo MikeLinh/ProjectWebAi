@@ -7,6 +7,8 @@ import DirectionsBikeIcon from "@mui/icons-material/DirectionsBike";
 import LocalActivityIcon from "@mui/icons-material/LocalActivity";
 import CancelIcon from "@mui/icons-material/Cancel";
 
+
+// Định nghĩa cấu trúc gói dữ liệu thống kê trả về từ Backend API
 interface Stats {
   totalRevenue: number;
   totalOrders: number;
@@ -21,30 +23,38 @@ interface Stats {
   chartYear: number;
 }
 
+// Danh sách nhãn hiển thị cho 12 tháng trên biểu đồ
 const MONTHS = ["T1","T2","T3","T4","T5","T6","T7","T8","T9","T10","T11","T12"];
+
+// Lấy năm hiện tại của hệ thống máy khách
 const CURRENT_YEAR = new Date().getFullYear();
+
+// Tạo danh sách 3 năm gần nhất để làm tùy chọn lọc
 const YEARS = [CURRENT_YEAR, CURRENT_YEAR - 1, CURRENT_YEAR - 2];
 
 export default function DashboardOverview() {
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [stats, setStats] = useState<Stats | null>(null); // Lưu trữ toàn bộ dữ liệu thống kê lấy từ Server
   const [loading, setLoading] = useState(true);
-  const [month, setMonth] = useState<string>("ALL");
-  const [year, setYear] = useState<string>(String(CURRENT_YEAR));
+  const [month, setMonth] = useState<string>("ALL"); // Bộ lọc Tháng: "ALL" hoặc từ "1" đến "12"
+  const [year, setYear] = useState<string>(String(CURRENT_YEAR)); // Bộ lọc Năm: Mặc định là năm hiện tại
 
+  // State kiểm soát hiệu ứng hoạt họa (Animation) của các cột biểu đồ dâng lên từ 0% -> 100%
   const [animateChart, setAnimateChart] = useState(false);
 
   useEffect(()=> {
     if(stats){
-      setAnimateChart(false);
-      const timer = setTimeout(()=> setAnimateChart(true),150);
-      return () => clearTimeout(timer);
+      setAnimateChart(false); //reset biểu đồ về 0
+      const timer = setTimeout(()=> setAnimateChart(true),150); //tạo độ trễ biểu đồ 150ms 
+      return () => clearTimeout(timer); // Dọn dẹp bộ hẹn giờ khi component bị hủy hoặc stats thay đổi tiếp
     }
   },[stats])
 
+  //Tự động gọi API lấy dữ liệu mới mỗi khi người dùng thay đổi bộ lọc Tháng hoặc Năm
   useEffect(() => {
     fetchStats();
   }, [month, year]);
 
+  //Hàm gọi API gửi kèm tham số lọc lên Backend để nhận về số liệu thống kê
   const fetchStats = async () => {
     setLoading(true);
     try {
@@ -53,27 +63,30 @@ export default function DashboardOverview() {
       if (year  !== "ALL") params.set("year",  year);
       const res = await fetch(`http://localhost:8080/api/overview/stats?${params}`);
       const data = await res.json();
-      setStats(data);
+      setStats(data); // Đổ dữ liệu nhận được vào state
     } catch (err) {
       console.error("Lỗi tải thống kê:", err);
     } finally {
       setLoading(false);
     }
   };
-
+  //Hàm tính toán chiều cao phần trăm (%) của cột biểu đồ dựa trên giá trị lớn nhất trong năm
+  //Parameter(tham số chứa dữ liệu) 
   const barHeight = (value: number, max: number) => 
-    max === 0 ? 0 : Math.max(4, Math.round((value / max) * 100)); 
+    max === 0 ? 0 : Math.max(4, Math.round((value / max) * 100));//Nếu dữ liệu 0 thì sẽ kh vẽ biểu đồ, nếu có dữ liệu thì sẽ lớn hơn 4% để biểu đồ hiện rõ hơn
 
+  //Hàm lấy giá trị an toàn từ Object dạng chuỗi key-value
   const getVal = (obj: Record<string, number> | undefined, monthIndex: number) => {
     if (!obj) return 0;
     const m1 = String(monthIndex + 1);
     const m2 = m1.padStart(2, "0");
-    return Number(obj[m1] ?? obj[m2] ?? 0);
+    return Number(obj[m1] ?? obj[m2] ?? 0); // Tìm khóa phù hợp, nếu cả hai đều không có thì trả về 0
   };
-
+  // Tìm giá trị doanh thu cao nhất trong tất cả các tháng
   const revenueMax = stats
-    ? Math.max(...Object.values(stats.revenueByMonth || {}).map(Number), 1)
-    : 1;
+    ? Math.max(...Object.values(stats.revenueByMonth || {}).map(Number), 1) //Toán tử Math.max(...) lấy gtrị lớn nhất, Object.values chỉ lấy dữ liệu bỏ ký tự
+    : 1; //stats.revenueByMonth nếu backend kh trả gì thì sẽ để rỗng, data mặc định = 1
+  // Tìm số lượng đơn hàng cao nhất trong các tháng
   const ordersMax = stats
     ? Math.max(...Object.values(stats.ordersByMonth || {}).map(Number), 1)
     : 1;
@@ -84,6 +97,7 @@ export default function DashboardOverview() {
         <h1 className="text-2xl font-bold text-gray-900">Tổng quan hệ thống</h1>
 
         <div className="flex gap-2 text-xs">
+          {/* Dropdown chọn Tháng */}
           <select value={month} onChange={(e) => setMonth(e.target.value)}
             className="border border-gray-300 rounded-xl px-3 py-2 outline-none focus:border-blue-500 bg-white font-medium">
             <option value="ALL">Tất cả tháng</option>
@@ -91,6 +105,7 @@ export default function DashboardOverview() {
               <option key={i+1} value={String(i+1)}>{m}</option>
             ))}
           </select>
+          {/* Dropdown chọn Năm */}
           <select value={year} onChange={(e) => setYear(e.target.value)}
             className="border border-gray-300 rounded-xl px-3 py-2 outline-none focus:border-blue-500 bg-white font-medium">
             <option value="ALL">Tất cả năm</option>
@@ -98,6 +113,7 @@ export default function DashboardOverview() {
               <option key={y} value={String(y)}>{y}</option>
             ))}
           </select>
+          {/* Nút bấm gọi lại API bằng tay (Tải lại trang) */}
           <button onClick={fetchStats}
             className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-xl font-semibold text-gray-600">
             ↻
@@ -168,14 +184,14 @@ export default function DashboardOverview() {
             {/* Đã xóa items-end ở lớp ngoài cùng, thêm cấu trúc flex-1 bên trong */}
             <div className="flex gap-1.5 h-48 pt-4">
               {MONTHS.map((label, i) => {
-                const val = getVal(stats.revenueByMonth, i);
-                const h   = barHeight(val, revenueMax);
+                const val = getVal(stats.revenueByMonth, i); // Doanh thu tháng này
+                const h   = barHeight(val, revenueMax); // Chiều cao cột tương ứng (%)
                 const isCurrentMonth = month !== "ALL"
                   ? parseInt(month) === i + 1
                   : new Date().getMonth() === i;
                 return (
                   <div key={i} className="flex-1 flex flex-col items-center group relative h-full">
-                    {/* Tooltip */}
+                    {/* Tooltip hiển thị số tiền chính xác khi rê chuột vào đầu cột */}
                     {val > 0 && (
                       <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                         ${val.toLocaleString()}
@@ -187,6 +203,7 @@ export default function DashboardOverview() {
                         className={`w-full rounded-t-lg transition-all duration-1000 ease-out ${
                           isCurrentMonth ? "bg-blue-600" : "bg-blue-300"
                         } ${val === 0 ? "bg-gray-100" : ""}`}
+                        // Nếu animateChart = true thì gán chiều cao thực tế h%, nếu không thì bằng 0% để tạo hoạt ảnh dâng lên
                         style={{ height: animateChart ? `${h}%` : '0%' }}
                       />
                     </div>
@@ -206,8 +223,8 @@ export default function DashboardOverview() {
               <p className="text-xs text-gray-400 mb-5">Tất cả trạng thái</p>
               <div className="flex gap-1.5 h-36 pt-4">
                 {MONTHS.map((label, i) => {
-                  const val = getVal(stats.ordersByMonth, i);
-                  const h   = barHeight(val, ordersMax);
+                  const val = getVal(stats.ordersByMonth, i); // Tổng đơn của tháng
+                  const h   = barHeight(val, ordersMax); // Tính chiều cao % cột đơn hàng
                   return (
                     <div key={i} className="flex-1 flex flex-col items-center group relative h-full">
                       {val > 0 && (
@@ -231,6 +248,7 @@ export default function DashboardOverview() {
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
               <h2 className="text-base font-bold text-gray-800 mb-4">
                 Top sản phẩm bán chạy
+                {/* Hiển thị động nhãn khoảng thời gian đang lọc ở phần tiêu đề */}
                 {month !== "ALL" && ` — T${month}`}
                 {year  !== "ALL" && `/${year}`}
               </h2>
@@ -241,11 +259,12 @@ export default function DashboardOverview() {
               ) : (
                 <div className="space-y-3">
                   {stats.topProducts.map((p, idx) => {
-                    const maxSold = stats.topProducts[0].sold;
-                    const pct     = maxSold === 0 ? 0 : Math.round((p.sold / maxSold) * 100);
+                    const maxSold = stats.topProducts[0].sold; // Số lượng bán của sản phẩm đứng đầu làm mốc 100%
+                    const pct = maxSold === 0 ? 0 : Math.round((p.sold / maxSold) * 100); // Tính tỷ lệ phần trăm
                     return (
                       <div key={idx} className="space-y-1">
                         <div className="flex justify-between text-xs">
+                          {/* Số thứ tự và Tên sản phẩm */}
                           <span className="font-medium text-gray-800 truncate max-w-[200px]">
                             <span className="text-gray-400 mr-1">#{idx + 1}</span>
                             {p.name}
@@ -254,6 +273,7 @@ export default function DashboardOverview() {
                             {p.sold} xe
                           </span>
                         </div>
+                        {/* Thanh phần trăm trực quan biểu thị tương quan lượng bán giữa các sản phẩm */}
                         <div className="w-full bg-gray-100 rounded-full h-1.5">
                           <div
                             className="h-1.5 rounded-full bg-blue-500 transition-all"

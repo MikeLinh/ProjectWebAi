@@ -2,8 +2,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNotification } from "../../components/context/notificationcontext";
 
+// URL endpoint API để quản lý các chương trình khuyến mãi
 const API = "http://localhost:8080/api/promotions";
 
+// Định nghĩa kiểu dữ liệu (Interface) cho đối tượng Khuyến mãi
 interface Promotion {
   promoId: number;
   couponCode: string;
@@ -12,8 +14,10 @@ interface Promotion {
   endDate: string;
 }
 
+// Khởi tạo thời gian hiện tại theo chuẩn định dạng "YYYY-MM-DDTHH:mm" để điền sẵn vào ô input datetime-local
 const today = new Date().toISOString().slice(0, 16);
 
+// Form rỗng mặc định để reset khi tạo mới thành công
 const emptyForm = {
   couponCode: "",
   discountValue: 0,
@@ -21,17 +25,18 @@ const emptyForm = {
   endDate: "",
 };
 
+// Định dạng chuỗi ngày tháng từ DB thành dạng "DD/MM/YYYY" 
 function formatDateTime(dt: string) {
   if (!dt) return "—";
   return new Date(dt).toLocaleDateString("vi-VN", {
     day: "2-digit", month: "2-digit", year: "numeric",
   });
 }
-
+// Kiểm tra xem mã đã quá ngày kết thúc hay chưa
 function isExpired(endDate: string) {
   return endDate && new Date(endDate) < new Date();
 }
-
+//Kiểm tra xem mã có đang trong thời gian áp dụng hay không
 function isActive(startDate: string, endDate: string) {
   const now = new Date();
   return new Date(startDate) <= now && new Date(endDate) >= now;
@@ -39,18 +44,21 @@ function isActive(startDate: string, endDate: string) {
 
 export default function ManagePromotions() {
   const {showNotification} = useNotification();
-  const [promos, setPromos] = useState<Promotion[]>([]);
+  const [promos, setPromos] = useState<Promotion[]>([]); // Lưu danh sách các mã khuyến mãi
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState(emptyForm);
-  const [saving, setSaving] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [form, setForm] = useState(emptyForm); // Trạng thái dữ liệu trong form nhập liệu
+  const [saving, setSaving] = useState(false); // Trạng thái ngăn spam click khi đang gửi API tạo mới
+  const [errorMsg, setErrorMsg] = useState(""); // Lưu trữ thông báo lỗi trả về từ API khi tạo thất bại
 
+
+  // Hàm gọi API lấy danh sách khuyến mãi
+  // Sử dụng useCallback để lưu trữ định danh hàm, tránh việc kích hoạt re-render vô tận khi đặt làm dependency
   const fetchPromos = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(API);
       const data = await res.json();
-      setPromos(data);
+      setPromos(data); // Đưa dữ liệu nhận được vào state
     } catch (err) {
       console.error("Lỗi tải khuyến mãi:", err);
     } finally {
@@ -58,20 +66,22 @@ export default function ManagePromotions() {
     }
   }, []);
 
+  // Gọi hàm fetchPromos một lần duy nhất
   useEffect(() => { fetchPromos(); }, [fetchPromos]);
 
+  // Xử lý gửi Form tạo mã ưu đãi mới
   const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.couponCode.trim() || !form.endDate) return;
-    setSaving(true);
-    setErrorMsg("");
+    e.preventDefault(); // Ngăn sự kiện submit tải lại trang mặc định
+    if (!form.couponCode.trim() || !form.endDate) return; // Kiểm tra các trường bắt buộc
+    setSaving(true); // Khóa nút submit
+    setErrorMsg(""); // Reset thông báo lỗi cũ
 
     try {
       const res = await fetch(API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          couponCode: form.couponCode.toUpperCase(),
+          couponCode: form.couponCode.toUpperCase(), // Luôn viết hoa mã code khi gửi lên server
           discountValue: form.discountValue,
           startDate: form.startDate,
           endDate: form.endDate,
@@ -79,8 +89,8 @@ export default function ManagePromotions() {
       });
 
       if (res.ok) {
-        await fetchPromos();
-        setForm(emptyForm);
+        await fetchPromos(); // Tải lại danh sách khuyến mãi mới nhất
+        setForm(emptyForm); // Dọn dẹp form về trạng thái trống ban đầu
       } else {
         const text = await res.text();
         setErrorMsg(text || "Tạo mã thất bại!");
@@ -91,13 +101,13 @@ export default function ManagePromotions() {
       setSaving(false);
     }
   };
-
+  // Xử lý xóa mã khuyến mãi
   const handleDelete = async (id: number, code: string) => {
-    if (!confirm(`Xóa mã khuyến mãi "${code}"?`)) return;
+    if (!confirm(`Xóa mã khuyến mãi "${code}"?`)) return; // Yêu cầu người dùng xác nhận lại để tránh bấm nhầm nút
     try {
       const res = await fetch(`${API}/${id}`, { method: "DELETE" });
       if (res.ok) {
-        setPromos(promos.filter(p => p.promoId !== id));
+        setPromos(promos.filter(p => p.promoId !== id)); // Lọc bỏ mã khuyến mãi vừa xóa khỏi state để cập nhật giao diện ngay lập tức
       } else {
         showNotification("Xóa thất bại!","error");
       }
@@ -105,7 +115,7 @@ export default function ManagePromotions() {
       showNotification("Không thể kết nối đến máy chủ.","warning");
     }
   };
-
+  // Hàm helper trả về khối giao diện nhãn trạng thái dựa trên thời gian
   const statusBadge = (start: string, end: string) => {
     if (isExpired(end)) {
       return <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500 border border-gray-200">HẾT HẠN</span>;
@@ -131,6 +141,7 @@ export default function ManagePromotions() {
           )}
 
           <form onSubmit={handleCreate} className="space-y-3">
+            {/* Nhập mã Code */}
             <div>
               <label className="block font-semibold mb-1 text-gray-700">Mã Code</label>
               <input
@@ -142,6 +153,7 @@ export default function ManagePromotions() {
                 placeholder="VD: WELCOME2026"
               />
             </div>
+            {/* Nhập giá trị giảm */}
             <div>
               <label className="block font-semibold mb-1 text-gray-700">Giá trị giảm ($)</label>
               <input
@@ -154,6 +166,7 @@ export default function ManagePromotions() {
                 placeholder="50"
               />
             </div>
+            {/* Chọn ngày bắt đầu */}
             <div>
               <label className="block font-semibold mb-1 text-gray-700">Ngày bắt đầu</label>
               <input
@@ -164,6 +177,7 @@ export default function ManagePromotions() {
                 onChange={e => setForm({ ...form, startDate: e.target.value })}
               />
             </div>
+            {/* Chọn ngày kết thúc */}
             <div>
               <label className="block font-semibold mb-1 text-gray-700">Ngày kết thúc</label>
               <input
@@ -174,6 +188,7 @@ export default function ManagePromotions() {
                 onChange={e => setForm({ ...form, endDate: e.target.value })}
               />
             </div>
+            {/* Nút bấm Submit lưu mã */}
             <button
               type="submit"
               disabled={saving}
@@ -205,12 +220,16 @@ export default function ManagePromotions() {
                 {promos.map((p) => (
                   <tr key={p.promoId} className="hover:bg-gray-50 transition-colors">
                     <td className="p-4 font-bold text-blue-600">{p.couponCode}</td>
+                    {/* Định dạng số tiền giảm giá */}
                     <td className="p-4 font-bold text-green-600">-${Number(p.discountValue).toLocaleString()}</td>
+                    {/* Hiển thị thời gian chạy từ ngày ... đến ngày ... */}
                     <td className="p-4 text-gray-500">
                       {formatDateTime(p.startDate)} ~ {formatDateTime(p.endDate)}
                     </td>
+                    {/* Badge biểu diễn trạng thái động của mã */}
                     <td className="p-4">{statusBadge(p.startDate, p.endDate)}</td>
                     <td className="p-4 text-center">
+                      {/* Nút bấm xóa ưu đãi */}
                       <button
                         onClick={() => handleDelete(p.promoId, p.couponCode)}
                         className="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg font-semibold"

@@ -25,15 +25,22 @@ const CONTEXT_API = "http://localhost:8080/api/chat/context";
 const PRODUCTS_API = "http://localhost:8080/api/products";
 
 
-const harmfulKeywords = [
-  "giết", "kill", "chết", "tự sát", "tự hại", "bomb", "nổ", "đánh", "đâm",
-  "hiếp", "rape", "porn", "sex", "nude", "chửi", "địt", "mẹ mày", "fuck",
-  "đm", "vcl", "vl", "cl", "đmm", "cặc", "lồn", "bú", "sml"
-];
+const ENCRYPTED_KEYWORDS = "Z2nhur90LGtpbGwsY2jhur90LHQresourcevIHPDoXQsdOG7sSBo4bqhaSxi b21iLG7hu58sZMOBbmgsxJHDom0saGnhur9wLHJhcGUscG9ybixzZXgsbnVkZSxjaOG7rWksxJHhu4t0LG3hurUgbcOgeSxmdWNrLSRtLHZjbCx2bCxjbCvxkW1tLGPhurdjLGzhu5NuLGLFAyxzbWw=";
 
+const getHarmfulKeywords = (): string[] => {
+  try {
+    // Giải mã Base64 thành chuỗi UTF-8, sau đó tách ra thành mảng bằng dấu phẩy
+    const decoded = decodeURIComponent(escape(atob(ENCRYPTED_KEYWORDS)));
+    return decoded.split(",");
+  } catch (error) {
+    console.log(error)
+    return [];
+  }
+};
 const isHarmfulContent = (text: string): boolean => {
   const lower = text.toLowerCase().trim();
-  return harmfulKeywords.some((word) => lower.includes(word));
+  const keywords = getHarmfulKeywords(); // Lấy mảng từ khóa đã giải mã
+  return keywords.some((word) => lower.includes(word));
 };
 
 const getFullImageUrl = (imageName?: string): string => {
@@ -208,8 +215,8 @@ export default function AIChatbot() {
       description: product.description || "",
     };
 
-    navigate(`/product/${product.productId}`, { 
-      state: { product: formattedProduct } 
+    navigate(`/product/${product.productId}`, {
+      state: { product: formattedProduct }
     });
   };
 
@@ -324,9 +331,8 @@ export default function AIChatbot() {
           <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#f7f7f7]">
             {messages.map((msg) => (
               <div key={msg.id} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
-                <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
-                  msg.sender === "user" ? "bg-blue-600 text-white rounded-br-none" : "bg-gray-800 text-gray-200 rounded-bl-none"
-                }`}>
+                <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${msg.sender === "user" ? "bg-blue-600 text-white rounded-br-none" : "bg-gray-800 text-gray-200 rounded-bl-none"
+                  }`}>
                   {msg.sender === "bot" ? renderBotText(msg.text) : msg.text}
                 </div>
 
@@ -368,9 +374,8 @@ export default function AIChatbot() {
 
       <button
         onClick={isOpen ? () => setIsOpen(false) : handleOpen}
-        className={`w-14 h-14 rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-300 hover:scale-110 ${
-          isOpen ? "bg-red-500 rotate-90" : "bg-blue-600"
-        }`}
+        className={`w-14 h-14 rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-300 hover:scale-110 ${isOpen ? "bg-red-500 rotate-90" : "bg-blue-600"
+          }`}
       >
         {isOpen ? <CloseIcon style={{ fontSize: 26 }} /> : <SmartToyIcon style={{ fontSize: 26 }} />}
       </button>

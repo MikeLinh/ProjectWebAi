@@ -9,8 +9,12 @@ import ManageWarehouse from "./ManagerWarehouse";
 import User from "./ManageUser"
 
 export default function AdminLayout() {
+  // currentTab lưu tab đang mở
+  // setCurrentTab dùng để thay đổi tab
+  // Mặc định mở Dashboard (overview)
   const [currentTab, setCurrentTab] = useState<string>("overview");
 
+  //Tạo 1 hàm quyết định component nào sẽ được hiển thị
   const renderContent = () => {
     switch (currentTab) {
       case "overview":
@@ -34,6 +38,7 @@ export default function AdminLayout() {
 
   return (
     <div className="flex bg-gray-50 min-h-screen">
+      {/* Sidebar nhận tab hiện tại và hàm đổi tab */}
       <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
       <main className="flex-1 p-8 overflow-y-auto">

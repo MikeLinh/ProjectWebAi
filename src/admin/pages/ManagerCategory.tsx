@@ -2,29 +2,35 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNotification } from "../../components/context/notificationcontext";
 
+// Đường dẫn API Backend dùng để thao tác dữ liệu CRUD danh mục
 const API = "http://localhost:8080/api/categories";
 
-interface Category {
+// Định nghĩa kiểu dữ liệu (TypeScript Interface) cho đối tượng Danh mục
+interface Category { 
   categoryId: number;
   categoryName: string;
   description: string;
 }
 
+// Giá trị mặc định của form khi trống
 const emptyForm = { categoryName: "", description: "" };
+
 
 export default function ManageCategories() {
   const {showNotification} = useNotification();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState(emptyForm);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]); // Danh sách danh mục
+  const [loading, setLoading] = useState(true); // Trạng thái đang tải dữ liệu từ API
+  const [form, setForm] = useState(emptyForm); // Trạng thái dữ liệu của form nhập liệu
+  const [editingId, setEditingId] = useState<number | null>(null); // ID của danh mục đang được chọn để sửa (null = đang thêm mới)
+  const [saving, setSaving] = useState(false); // Trạng thái đang gửi yêu cầu lưu dữ liệu lên server
 
+  // Hàm gọi API lấy danh sách toàn bộ danh mục từ Backend
+  // Dùng useCallback để tối ưu hiệu năng, tránh tạo lại hàm khi render
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(API);
-      const data = await res.json();
+      const res = await fetch(API); // Gửi request GET
+      const data = await res.json(); // Chuyển kết quả thành JSON
       setCategories(data);
     } catch (err) {
       console.error("Lỗi tải danh mục:", err);
@@ -32,29 +38,32 @@ export default function ManageCategories() {
       setLoading(false);
     }
   }, []);
-
+ // Gọi fetchCategories một lần duy nhất khi component được nạp vào DOM
   useEffect(() => { fetchCategories(); }, [fetchCategories]);
-
+  // Khi nhấn nút "Sửa" trên một dòng: chuyển thông tin danh mục đó vào form và đặt editingId
   const handleEdit = (cat: Category) => {
     setEditingId(cat.categoryId);
     setForm({ categoryName: cat.categoryName, description: cat.description || "" });
   };
-
+  // Hủy bỏ chế độ chỉnh sửa, xóa trắng form để quay lại chế độ thêm mới
   const handleCancel = () => {
-    setEditingId(null);
-    setForm(emptyForm);
+    setEditingId(null); // Reset ID chỉnh sửa về null
+    setForm(emptyForm);// Xóa trắng form
   };
 
+ // Xử lý gửi form (cho cả hành động Thêm mới và Cập nhật)
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.categoryName.trim()) return;
+    e.preventDefault(); // Chặn sự kiện tải lại trang
+    if (!form.categoryName.trim()) return; // Không cho phép gửi nếu tên danh mục trống
     setSaving(true);
-
+    
+    // Kiểm tra xem là đang Sửa (PUT) hay Thêm mới (POST)
     const isEdit = editingId !== null;
-    const url = isEdit ? `${API}/${editingId}` : API;
-    const method = isEdit ? "PUT" : "POST";
+    const url = isEdit ? `${API}/${editingId}` : API; // Nếu sửa thì thêm ID vào đường dẫn
+    const method = isEdit ? "PUT" : "POST"; // Chọn phương thức HTTP tương ứng
 
     try {
+      // Thực hiện gửi request lên API
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -62,8 +71,8 @@ export default function ManageCategories() {
       });
 
       if (res.ok) {
-        await fetchCategories();
-        handleCancel();
+        await fetchCategories(); // Tải lại danh sách danh mục mới nhất
+        handleCancel(); // Reset form về trạng thái ban đầu
       } else {
         showNotification("Lưu thất bại! Vui lòng kiểm tra lại.","error");
       }
@@ -73,12 +82,14 @@ export default function ManageCategories() {
       setSaving(false);
     }
   };
-
+  // Xử lý xóa danh mục
   const handleDelete = async (id: number) => {
     if (!confirm("Xóa danh mục này? Các sản phẩm thuộc danh mục sẽ bị ảnh hưởng.")) return;
     try {
+      // Gửi request DELETE tới server
       const res = await fetch(`${API}/${id}`, { method: "DELETE" });
       if (res.ok) {
+        // Nếu xóa thành công, lọc bỏ danh mục vừa xóa khỏi state local để cập nhật giao diện ngay lập tức
         setCategories(categories.filter(c => c.categoryId !== id));
       } else {
         showNotification("Xóa thất bại! Danh mục có thể đang được sử dụng.","error");
@@ -98,6 +109,7 @@ export default function ManageCategories() {
           <h2 className="text-sm font-bold border-b pb-3 uppercase tracking-wide">
             {editingId ? `Chỉnh sửa danh mục #${editingId}` : "Thêm danh mục mới"}
           </h2>
+          {/* Trường nhập tên danh mục */}
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
               <label className="block font-semibold mb-1 text-gray-700">Tên danh mục</label>
@@ -110,6 +122,7 @@ export default function ManageCategories() {
                 placeholder="VD: Xe địa hình"
               />
             </div>
+            {/* Trường nhập mô tả danh mục*/}
             <div>
               <label className="block font-semibold mb-1 text-gray-700">Mô tả</label>
               <textarea
@@ -120,7 +133,9 @@ export default function ManageCategories() {
                 placeholder="Mô tả ngắn về danh mục..."
               />
             </div>
+            {/* Các nút bấm thao tác của form */}
             <div className="flex gap-2 pt-1">
+              {/* Chỉ hiện nút Hủy khi đang ở chế độ Chỉnh sửa*/}
               {editingId && (
                 <button
                   type="button"
@@ -130,6 +145,7 @@ export default function ManageCategories() {
                   Hủy
                 </button>
               )}
+              {/* Nút Submit chính (vô hiệu hóa khi đang trong tiến trình lưu dữ liệu `saving`)*/}
               <button
                 type="submit"
                 disabled={saving}
@@ -144,10 +160,11 @@ export default function ManageCategories() {
         {/* Bảng danh mục */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-black">
           {loading ? (
-            <div className="p-12 text-center text-gray-400 text-sm">Đang tải dữ liệu...</div>
+            <div className="p-12 text-center text-gray-400 text-sm">Đang tải dữ liệu...</div> // Hiển thị trạng thái đang tải dữ liệu
           ) : categories.length === 0 ? (
-            <div className="p-12 text-center text-gray-400 text-sm">Chưa có danh mục nào.</div>
+            <div className="p-12 text-center text-gray-400 text-sm">Chưa có danh mục nào.</div> // Hiển thị trạng thái rỗng khi không có bản ghi nào
           ) : (
+            // Hiển thị bảng danh mục dữ liệu chính
             <table className="w-full text-left border-collapse text-xs">
               <thead className="bg-gray-50 text-gray-600 font-bold uppercase border-b">
                 <tr>

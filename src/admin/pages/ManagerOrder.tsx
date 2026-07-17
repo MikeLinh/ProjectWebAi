@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import OrderDetailModal from "../components/orderdetailmodel";
 import { useNotification } from "../../components/context/notificationcontext";
 
+// Định nghĩa các loại trạng thái mà một đơn hàng có thể có
 export type OrderStatus =
   | "PENDING"
   | "CONFIRMED"
@@ -11,7 +12,7 @@ export type OrderStatus =
   | "DELIVERED"
   | "CANCELLED"
   ;
-
+// Khai báo cấu trúc dữ liệu cho một sản phẩm nằm trong đơn hàng
 interface OrderItem {
   orderDetailId: number;
   productId: number;
@@ -19,7 +20,7 @@ interface OrderItem {
   quantity: number;
   price: number;
 }
-
+// Khai báo cấu trúc dữ liệu tổng quan của một Đơn hàng
 interface Order {
   orderId: number;
   userId: number;
@@ -34,7 +35,7 @@ interface Order {
   items: OrderItem[];
 
 }
-
+// Ánh xạ trạng thái đơn hàng từ mã hệ thống sang hiển thị Tiếng Việt
 const STATUS_LABEL: Record<OrderStatus, string> = {
   PENDING:   "Chờ xử lý",
   CONFIRMED: "Đã xác nhận",
@@ -43,7 +44,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   DELIVERED: "Đã nhận hàng",
   CANCELLED: "Đã hủy",
 };
-
+// Ánh xạ các class Tailwind CSS màu sắc giao diện tương ứng với từng trạng thái
 const STATUS_COLOR: Record<OrderStatus, string> = {
   PENDING:   "bg-amber-50  text-amber-600  border-amber-200",
   CONFIRMED: "bg-blue-50   text-blue-600   border-blue-200",
@@ -52,7 +53,7 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
   DELIVERED: "bg-green-50  text-green-600  border-green-200",
   CANCELLED: "bg-red-50    text-red-600    border-red-200",
 };
-
+// Định nghĩa nút hành động tiếp theo và trạng thái chuyển tiếp tương ứng trong quy trình vận hành đơn hàng
 const NEXT_ACTION: Partial<Record<OrderStatus, { label: string; next: OrderStatus }>> = {
   PENDING:   { label: "Xác nhận đơn",       next: "CONFIRMED" },
   CONFIRMED: { label: "Bắt đầu đóng gói",   next: "PACKING" },
@@ -62,41 +63,46 @@ const NEXT_ACTION: Partial<Record<OrderStatus, { label: string; next: OrderStatu
 
 export default function ManageOrders() {
   const {showNotification} = useNotification();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]); // Danh sách tất cả đơn hàng tải từ API
+  const [loading, setLoading] = useState(true); 
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null); // ID của đơn hàng đang trong tiến trình xử lý cập nhật trạng thái API
   const [updatingId, setUpdatingId] = useState<number | null>(null);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [searchTerm, setSearchTerm] = useState(""); // Từ khóa tìm kiếm (Tên khách hàng / Mã đơn)
+  const [statusFilter, setStatusFilter] = useState("ALL"); // Bộ lọc trạng thái đơn hàng
 
+  // Xử lý bộ lọc dữ liệu đơn hàng
   const displayOrders = orders.filter((o) => {
+    // Kiểm tra trùng khớp bộ lọc trạng thái
     const matchStatus = statusFilter === "ALL" || o.status === statusFilter;
+    // Kiểm tra trùng khớp từ khóa tìm kiếm
     const matchSearch = o.receiverName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         o.orderId.toString().includes(searchTerm);
     return matchSearch && matchStatus;
-  }).slice(0,20);
+  }).slice(0,20); //Tối đa 20 dữ liệu đầu tiên
 
+  // Chạy nạp dữ liệu một lần duy nhất khi component mount
   useEffect(() => {
     fetchOrders();
   }, []);
 
+  // Hàm gọi API lấy danh sách đơn hàng
   const fetchOrders = async () => {
     setLoading(true);
     try {
       const res = await fetch("http://localhost:8080/api/orders");
       if (!res.ok) throw new Error("Lỗi tải đơn hàng");
       const data = await res.json();
-      setOrders(data);
+      setOrders(data); // Cập nhật danh sách đơn hàng vào state
     } catch (err) { 
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
-
+  // Hàm xử lý cập nhật trạng thái đơn hàng bất đồng bộ
   const handleUpdateStatus = async (id: number, newStatus: OrderStatus) => {
-    setUpdatingId(id);
+    setUpdatingId(id); // Đặt ID đang cập nhật để tạm khóa nút, ngăn việc click trùng lặp (spam click)
     try {
       const res = await fetch(`http://localhost:8080/api/orders/${id}/status`, {
         method: "PATCH", // sử dụng để cập nhập riêng cho một đối tượng 
@@ -105,10 +111,11 @@ export default function ManageOrders() {
       });
       if (!res.ok) throw new Error("Cập nhật thất bại");
 
+      // Cập nhật lại mảng danh sách đơn hàng ở Client mà không cần gọi lại fetchOrders
       setOrders((prev) =>
         prev.map((o) => (o.orderId === id ? { ...o, status: newStatus } : o))
       );
-
+      // Nếu người dùng đang mở Modal chi tiết đơn hàng hiện tại, đồng bộ luôn trạng thái mới vào Modal đó
       if (selectedOrder?.orderId === id) {
         setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : prev));
       }
@@ -125,6 +132,7 @@ export default function ManageOrders() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Quản lý hóa đơn mua hàng</h1>
         <div className="flex gap-3 items-center text-[15px]"> 
+          {/* Input tìm kiếm */}
             <input
               type="text"
               placeholder="Tìm kiếm tên khách, mã đơn"
@@ -132,6 +140,7 @@ export default function ManageOrders() {
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
+            {/* Bộ lọc lựa chọn trạng thái đơn */}
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
@@ -145,6 +154,7 @@ export default function ManageOrders() {
               <option value="DELIVERED">Đã nhận hàng</option>
               <option value="CANCELLED">Đã hủy</option>
             </select>
+            {/* Nút refresh tải lại danh sách thủ công */}
             <button
                   onClick={fetchOrders}
                   className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg font-semibold text-gray-700"
@@ -156,12 +166,15 @@ export default function ManageOrders() {
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-black">
         {loading ? (
+          // Trạng thái đang tải từ API
           <div className="text-center py-16 text-gray-400 text-sm">Đang tải...</div>
         ) : orders.length === 0 ? (
+          // Trạng thái mảng rỗng
           <div className="text-center py-16 text-gray-400 text-sm">
             Chưa có đơn hàng nào.
           </div>
         ) : (
+          // Bảng kết quả chính
           <table className="w-full text-left border-collapse text-xs">
             <thead className="bg-gray-50 text-gray-600 font-bold uppercase border-b">
               <tr>
@@ -174,8 +187,8 @@ export default function ManageOrders() {
             </thead>
             <tbody className="divide-y">
               {displayOrders.map((o) => {
-                const action = NEXT_ACTION[o.status];
-                const isUpdating = updatingId === o.orderId;
+                const action = NEXT_ACTION[o.status]; // Lấy thông tin hành động tiếp theo của đơn hàng này
+                const isUpdating = updatingId === o.orderId; // Kiểm tra xem dòng đơn hàng này có đang gửi request PATCH hay không
                 return (
                   <tr key={o.orderId} className="hover:bg-gray-50 transition-colors">
                     <td className="p-4 font-bold">#{o.orderId}</td>
@@ -191,12 +204,14 @@ export default function ManageOrders() {
                       </span>
                     </td>
                     <td className="p-4 flex justify-center gap-2">
+                      {/* Nút xem chi tiết đơn hàng */}
                       <button
                         onClick={() => setSelectedOrder(o)}
                         className="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg font-semibold text-gray-700"
                       >
                         Chi tiết
                       </button>
+                      {/* Chỉ hiển thị nút duyệt bước tiếp theo nếu đơn hàng có cấu hình định nghĩa hành động hợp lệ */}
                       {action && (
                         <button
                           onClick={() => handleUpdateStatus(o.orderId, action.next)}
@@ -216,10 +231,10 @@ export default function ManageOrders() {
       </div>
 
       <OrderDetailModal
-        order={selectedOrder}
-        onClose={() => setSelectedOrder(null)}
-        onUpdateStatus={handleUpdateStatus}
-        updatingId={updatingId}
+        order={selectedOrder} // Truyền dữ liệu chi tiết của đơn hàng đang chọn
+        onClose={() => setSelectedOrder(null)} // Đóng modal bằng cách reset về null
+        onUpdateStatus={handleUpdateStatus} // Cho phép cập nhật trạng thái đơn trực tiếp từ giao diện Modal chi tiết
+        updatingId={updatingId}  // Truyền trạng thái loading để vô hiệu hóa nút bấm trong modal khi đang xử lý API
       />
     </div>
   );

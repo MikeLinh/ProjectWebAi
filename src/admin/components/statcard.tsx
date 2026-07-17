@@ -1,5 +1,6 @@
 import React from "react";
 
+//Định nghĩa dữ liệu đầu vào
 interface StatCardProps {
   title: string;
   value: string | number;

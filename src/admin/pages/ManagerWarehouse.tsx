@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+// Định nghĩa kiểu dữ liệu cho Sản phẩm
 interface Product {
   productId: number;
   productName: string;
@@ -10,7 +11,7 @@ interface Product {
   imageUrl?: string;
   brand?: string;
 }
-
+// Định nghĩa kiểu dữ liệu cho Phiếu Nhập Kho
 interface Receipt {
   receiptId: number;
   productId: number;
@@ -21,7 +22,7 @@ interface Receipt {
   manufacturer?: string;
   importedAt: string;
 }
-
+// Khởi tạo giá trị rỗng mặc định cho form nhập liệu
 const EMPTY_FORM = {
   receiptId: "", 
   productId: "",
@@ -30,30 +31,34 @@ const EMPTY_FORM = {
   supplier: "",
   manufacturer: "",
 };
-
+// Danh sách nhà cung cấp cố định
 const SUPPLIERS = ["Công ty Xe đạp Toàn Cầu", "Nhà phân phối Đại Nam", "XNK Thể Thao Việt", "Phụ tùng Chợ Lớn"];
 
 export default function ManagerWarehouse() {
-  const [products, setProducts]       = useState<Product[]>([]);
-  const [receipts, setReceipts]       = useState<Receipt[]>([]);
-  const [lowStock, setLowStock]       = useState<Product[]>([]);
-  const [form, setForm]               = useState(EMPTY_FORM);
-  const [submitting, setSubmitting]   = useState(false);
-  const [formError, setFormError]     = useState<string | null>(null);
-  const [successMsg, setSuccessMsg]   = useState<string | null>(null);
-  const [isEditing, setIsEditing]     = useState(false);
+  const [products, setProducts] = useState<Product[]>([]); // Danh sách sản phẩm hiện có
+  const [receipts, setReceipts] = useState<Receipt[]>([]); // Lịch sử các phiếu nhập kho
+  const [lowStock, setLowStock] = useState<Product[]>([]); // Danh sách hàng sắp hết (tồn <= 5)
+  const [form, setForm] = useState(EMPTY_FORM); // Dữ liệu của form hiện tại
+  const [submitting, setSubmitting] = useState(false); // Trạng thái gửi API (khóa nút bấm)
+  const [formError, setFormError] = useState<string | null>(null); 
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false); // Đang ở chế độ Sửa hay Tạo mới
 
+  // Danh sách các thương hiệu/nhà sản xuất xe đạp
   const[manufacturers, setManufacturers] = useState<string[]>([
     "Giant", "Specialized", "Trek", "Cannondale", "Bianchi"
   ]);
+
+  // Dùng useCallback để hàm không bị khởi tạo lại
   const addNewManufacturer = (newBrand : string) =>{
     const trimmed = newBrand?.trim();
+    // Chỉ thêm mới nếu thương hiệu chưa tồn tại trong danh sách
     if(trimmed && !manufacturers.includes(trimmed)){
       setManufacturers(prev => [...prev, trimmed].sort((a,b) => a.localeCompare(b)));
       console.log(`Đã tự động thêm thương hiệu mới: ${trimmed}`);
     }
   }
-
+  // Lắng nghe sự kiện bổ sung thương hiệu từ các component khác ngoài window
   useEffect(() => {
     fetchAll();
   }, []);
@@ -62,14 +67,16 @@ export default function ManagerWarehouse() {
       addNewManufacturer(e.detail);
     };
     window.addEventListener('newBrandAdded', handleNewBrand);
+    // Hủy lắng nghe khi component bị unmount để tránh rò rỉ bộ nhớ
     return () =>{
       window.removeEventListener('newBrandAdded',handleNewBrand);
     };
-  },[manufacturers]);
+  },[manufacturers]); // Chỉ chạy lại nếu hàm addNewManufacturer thay đổi
 
+  // Hàm nạp đồng thời toàn bộ dữ liệu từ server
   const fetchAll = async () => {
     try {
-      const [pRes, rRes, lRes] = await Promise.all([
+      const [pRes, rRes, lRes] = await Promise.all([ //Promise.all sẽ lấy nhiều dữ liệu cùng 1 lúc
         axios.get<Product[]>("http://localhost:8080/api/products"),
         axios.get<Receipt[]>("http://localhost:8080/api/warehouse"),
         axios.get<Product[]>("http://localhost:8080/api/warehouse/low-stock")
@@ -82,21 +89,22 @@ export default function ManagerWarehouse() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // Lắng nghe thay đổi của các ô nhập liệu trong form
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => { //Chỉ nhận khi người dùng thao tác trên thẻ Input và Select
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-      if (name === "productId" && value) {
+    setForm({ ...form, [name]: value }); //...sao chép lại toàn bộ dữ liệu cũ của form để tránh làm mất các ô khác.
+      if (name === "productId" && value) { // chọn một sản phẩm(không rỗng)
       const selectedProduct = products.find(p => p.productId === Number(value));
       if (selectedProduct) {
         setForm(prev => ({ 
           ...prev, 
-          manufacturer: selectedProduct.brand || "" 
+          manufacturer: selectedProduct.brand || ""  //Tự gán nsx khi chọn sp
         }));
       }
     }
   };
 
-
+  //chỉnh sửa phiếu nhập kho
   const handleEditClick = (receipt: Receipt) => {
     setIsEditing(true);
     setForm({
@@ -110,39 +118,40 @@ export default function ManagerWarehouse() {
     setFormError(null);
     setSuccessMsg(null);
   };
-
+  // Hủy bỏ chế độ sửa, quay về chế độ thêm mới
   const handleCancelEdit = () => {
     setIsEditing(false);
     setForm(EMPTY_FORM);
   };
 
-
+  // Xử lý yêu cầu Xóa phiếu nhập kho
   const handleDeleteClick = async (receiptId: number) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa phiếu nhập kho này? Số lượng tồn kho sản phẩm sẽ không tự hoàn tác.")) return;
+    if (!window.confirm("Bạn có chắc chắn muốn xóa phiếu nhập kho này? Số lượng tồn kho sản phẩm sẽ không tự hoàn tác.")) return; //yêu cầu tránh người dùng chọn nhầm
     try {
       await axios.delete(`http://localhost:8080/api/warehouse/${receiptId}`);
       setSuccessMsg("Xóa phiếu nhập kho thành công!");
-      fetchAll();
+      fetchAll(); // Nạp lại toàn bộ dữ liệu mới nhất
     } catch (err: any) {
       console.error(err);
       setFormError("Không thể xóa phiếu này.");
     }
   };
 
-
+  // Gửi dữ liệu form (Tạo mới hoặc Cập nhật)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
+    setFormError(null); //Xóa sạch các thông báo lỗi hoặc thông báo thành công của những lần bấm nút trước đó
     setSuccessMsg(null);
 
+    // Kiểm tra tính hợp lệ của dữ liệu đầu vào
     if (!form.productId || !form.quantityAdded || !form.importPrice || !form.manufacturer || !form.supplier) {
       setFormError("Vui lòng điền và chọn đầy đủ thông tin mẫu.");
-      return;
+      return; // Dừng hàm tại đây, không chạy tiếp xuống dưới nữa
     }
 
-    setSubmitting(true);
+    setSubmitting(true); //chuyển trạng thái đang xử lý, tránh user spam submit gửi đơn trùng lặp lên db
     try {
-      const payload = {
+      const payload = { //Dữ liệu sạch được gửi đi
         productId: Number(form.productId),
         quantityAdded: Number(form.quantityAdded),
         importPrice: Number(form.importPrice),
@@ -150,28 +159,30 @@ export default function ManagerWarehouse() {
         manufacturer: form.manufacturer.trim(),
       };
 
-      if (isEditing) {
-
+      if (isEditing) {  
+        // Gửi request cập nhật (PUT)
         await axios.put(`http://localhost:8080/api/warehouse/${form.receiptId}`, payload);
         setSuccessMsg("Cập nhật thông tin phiếu kho thành công!");
-        setIsEditing(false);
+        setIsEditing(false); // Thoát khỏi chế độ Sửa, quay về chế độ Thêm mới thông thường
       } else {
+        // Gửi request tạo mới (POST)
         await axios.post("http://localhost:8080/api/warehouse", payload);
         setSuccessMsg("Tạo phiếu nhập kho và tăng tồn kho thành công!");
       }
 
-      setForm(EMPTY_FORM);
-      fetchAll();
+      setForm(EMPTY_FORM); //clear form
+      fetchAll(); //Gọi fetchAll load lại danh sách
     } catch (err: any) {
       setFormError(err.response?.data || "Có lỗi xảy ra trong quá trình truyền tải.");
     } finally {
       setSubmitting(false);
     }
   };
-
-  const totalInvestment = receipts.reduce((sum, r) => sum + (r.importPrice * r.quantityAdded), 0);
+  // Tổng tiền đầu tư nhập hàng, sử dụng reduce(chức năng gom, cộng dồn)
+  const totalInvestment = receipts.reduce((sum, r) => sum + (r.importPrice * r.quantityAdded), 0); //r phiếu nhập hiện tại
+  // Tổng sản lượng nhập hàng
   const totalQuantityImported = receipts.reduce((sum, r) => sum + r.quantityAdded, 0);
-
+  // Định dạng ngày giờ hiển thị kiểu Việt Nam
   const formatDate = (isoString: string) => {
     if (!isoString) return "—";
     return new Date(isoString).toLocaleString("vi-VN");

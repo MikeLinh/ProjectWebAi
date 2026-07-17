@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNotification } from "../../components/context/notificationcontext";
 const API = "http://localhost:8080/api/users";
 
+// Định nghĩa kiểu dữ liệu Interface cho đối tượng User
 interface User {
   userId: number;
   fullName: string;
@@ -13,18 +14,18 @@ interface User {
   role: string;
   createdAt: string;
 }
-
+// Giá trị mặc định ban đầu để reset biểu mẫu (Form) về trạng thái trống
 const emptyForm = {
   fullName: "",
   email: "",
   password: "",
   phoneNumber: "",
   address: "",
-  role: "USER",
+  role: "USER", // Mặc định tài khoản mới tạo sẽ có vai trò là USER
 };
-
+ // Hàm định dạng ngày giờ hiển thị theo chuẩn Việt Nam (DD/MM/YYYY, HH:MM)
 function formatDate(dt: string) {
-  if (!dt) return "—";
+  if (!dt) return "—"; // Phòng hờ dữ liệu ngày tháng bị trống để tránh lỗi crash
   return new Date(dt).toLocaleString("vi-VN", {
     day: "2-digit", month: "2-digit", year: "numeric",
     hour: "2-digit", minute: "2-digit",
@@ -33,36 +34,40 @@ function formatDate(dt: string) {
 
 export default function ManageUsers() {
   const {showNotification} = useNotification();
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>([]); // Lưu trữ danh sách toàn bộ tài khoản người dùng tải về từ Server
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [form, setForm] = useState(emptyForm);
+  const [editingUser, setEditingUser] = useState<User | null>(null); // Lưu tài khoản đang được chọn để sửa (bằng null nếu là Thêm mới)
+  const [form, setForm] = useState(emptyForm); // Lưu trữ dữ liệu tạm thời mà người dùng đang gõ trên Form nhập liệu
   const [saving, setSaving] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState(""); // Lưu trữ nội dung thông báo lỗi khi thao tác Form thất bại
 
+  //Hàm gọi API để lấy danh sách tài khoản mới, sử dụng useCallBack với dependency để giữ địa chỉ hàm
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(API);
       const data = await res.json();
-      setUsers(data);
+      setUsers(data); // Cập nhật mảng dữ liệu người dùng mới vào State
     } catch (err) {
       console.error("Lỗi tải tài khoản:", err);
     } finally {
       setLoading(false);
     }
   }, []);
-
+  // Tự động chạy một lần duy nhất
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
+  //THÊM TÀI KHOẢN MỚI hiển thị modal
   const openAdd = () => {
-    setEditingUser(null);
-    setForm(emptyForm);
-    setErrorMsg("");
-    setModalOpen(true);
+    setEditingUser(null); // Đảm bảo hệ thống hiểu đây là tạo mới
+    setForm(emptyForm); // Xóa sạch dữ liệu cũ trên Form
+    setErrorMsg(""); // Xóa thông báo lỗi cũ
+    setModalOpen(true); // Mở Modal lên
   };
 
+
+  //@param u Đối tượng Người dùng được click chọn để sửa
   const openEdit = (u: User) => {
     setEditingUser(u);
     setForm({
@@ -76,39 +81,40 @@ export default function ManageUsers() {
     setErrorMsg("");
     setModalOpen(true);
   };
-
+  //Đóng Modal và dọn sạch dữ liệu tạm trên Form
   const handleClose = () => {
     setModalOpen(false);
     setEditingUser(null);
     setForm(emptyForm);
     setErrorMsg("");
   };
-
+   //Xử lý gửi dữ liệu Form lên Server (Hỗ trợ cả Thêm mới và Cập nhật)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setErrorMsg("");
-
+    // Xác định chế độ: Nếu editingUser khác null thì tức là đang Sửa, ngược lại là Thêm mới
     const isEdit = editingUser !== null;
-    const url = isEdit ? `${API}/${editingUser.userId}` : API;
-    const method = isEdit ? "PUT" : "POST";
+    const url = isEdit ? `${API}/${editingUser.userId}` : API; // Đường dẫn API tương ứng
+    const method = isEdit ? "PUT" : "POST"; // Phương thức gửi tương ứng
 
-    // Nếu sửa mà không nhập mật khẩu mới → không gửi field password
+    // Tạo một bản sao dữ liệu từ form để chuẩn bị gửi đi
     const bodyData: any = { ...form };
+    //Nếu đang ở chức năng sửa thì khi người dùng không sửa mật khẩu
     if (isEdit && !form.password) {
-      delete bodyData.password;
+      delete bodyData.password; //Xoá luôn trường dữ liệu password tránh rỗng
     }
 
     try {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bodyData),
+        body: JSON.stringify(bodyData), // Chuyển Object thành chuỗi JSON
       });
 
       if (res.ok) {
-        await fetchUsers();
-        handleClose();
+        await fetchUsers(); // Gọi lại API fetchUsers để cập nhật danh sách mới nhất lên màn hình
+        handleClose(); // Đóng modal và reset for
       } else {
         const text = await res.text();
         setErrorMsg(text || "Lưu thất bại! Vui lòng kiểm tra lại.");
@@ -119,13 +125,14 @@ export default function ManageUsers() {
       setSaving(false);
     }
   };
-
+  //Xử lý xóa một tài khoản ra khỏi hệ thống 
+  //Parameter id và name của user
   const handleDelete = async (id: number, name: string) => {
     if (!confirm(`Xóa tài khoản "${name}"?`)) return;
     try {
-      const res = await fetch(`${API}/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API}/${id}`, { method: "DELETE" }); // Gửi yêu cầu xóa DELETE lên API kèm ID của tài khoản
       if (res.ok) {
-        setUsers(users.filter(u => u.userId !== id));
+        setUsers(users.filter(u => u.userId !== id)); //Nếu khác id thì giữ lại nếu giống thì xoá
       } else {
         showNotification("Xóa thất bại!","error");
       }
@@ -133,7 +140,7 @@ export default function ManageUsers() {
       showNotification("Không thể kết nối đến máy chủ.","warning");
     }
   };
-
+  //Hàm xuất ra giao diện nhãn (Badge) phân biệt vai trò ADMIN hay USER
   const roleBadge = (role: string) => {
     const styles: Record<string, string> = {
       ADMIN: "bg-red-50 text-red-600 border-red-200",
@@ -218,7 +225,7 @@ export default function ManageUsers() {
 
             {errorMsg && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-lg font-medium">
-                ⚠️ {errorMsg}
+                {errorMsg}
               </div>
             )}
 

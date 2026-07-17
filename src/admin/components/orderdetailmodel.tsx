@@ -9,6 +9,8 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
+//Bảng tra cứu nhãn hiển thị
+//Ánh xạ (map) một giá trị mã hóa kỹ thuật sang một chuỗi ký tự thân thiện với người dùng
 const STATUS_LABEL: Record<OrderStatus, string> = {
   PENDING:   "Chờ xử lý",
   CONFIRMED: "Đã xác nhận",
@@ -17,12 +19,13 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   DELIVERED: "Đã nhận hàng",
   CANCELLED: "Đã hủy",
 };
-
+//Bản đồ chuyển trạng thái
+//Chỉ một số trạng thái trung gian mới có bước đi tiếp theo. Mỗi bước đi tiếp theo gồm 1 nhãn nút bấm (label) và 1 điểm đến tiếp theo (next).
 const NEXT_ACTION: Partial<Record<OrderStatus, { label: string; next: OrderStatus }>> = {
-  PENDING:   { label: "Xác nhận đơn",      next: "CONFIRMED" },
-  CONFIRMED: { label: "Bắt đầu đóng gói",   next: "PACKING" },
+  PENDING:   { label: "Xác nhận đơn", next: "CONFIRMED" },
+  CONFIRMED: { label: "Bắt đầu đóng gói", next: "PACKING" },
   PACKING:   { label: "Giao cho vận chuyển", next: "SHIPPING" },
-  SHIPPING:  { label: "Xác nhận đã giao",   next: "DELIVERED" },
+  SHIPPING:  { label: "Xác nhận đã giao", next: "DELIVERED" },
 };
 
 // Mảng quy định thứ tự các bước trạng thái
@@ -36,7 +39,7 @@ const STEP_ICONS: Record<string, React.ElementType> = {
   SHIPPING: LocalShippingIcon,
   DELIVERED: CheckCircleOutlineIcon,
 };
-
+//Định nghĩa dữ liệu đầu vào
 interface OrderDetailModalProps {
   order: any | null;
   onClose: () => void;
@@ -49,9 +52,9 @@ export default function OrderDetailModal({
 }: OrderDetailModalProps) {
   if (!order) return null;
 
-  const action = NEXT_ACTION[order.status as OrderStatus];
-  const isUpdating = updatingId === order.orderId;
-  const canCancel = ["PENDING", "CONFIRMED"].includes(order.status);
+  const action = NEXT_ACTION[order.status as OrderStatus]; // Lấy ra hành động tiếp theo dựa trên trạng thái hiện tại của đơn hàng
+  const isUpdating = updatingId === order.orderId; // Kiểm tra xem đơn hàng này có đang trong quá trình cập nhật trạng thái hay không
+  const canCancel = ["PENDING", "CONFIRMED"].includes(order.status); // Chỉ cho phép hủy đơn hàng khi đơn hàng đang ở trạng thái "Chờ xử lý" hoặc "Đã xác nhận"
 
   return (
     <div

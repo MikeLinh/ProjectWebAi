@@ -3,25 +3,28 @@ import React, { useState, useEffect, useCallback } from "react";
 import ProductModal from "../components/productmodal";
 import { useNotification } from "../../components/context/notificationcontext";
 
+// API Backend dùng để thao tác CRUD(create, read, update, delete) sản phẩm
 const API = "http://localhost:8080/api/products";
 
 export default function ManageProducts() {
-  const {showNotification} = useNotification();
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const {showNotification} = useNotification(); 
+  const [products, setProducts] = useState<any[]>([]); // Danh sách sản phẩm gốc từ API
+  const [loading, setLoading] = useState(true); 
+  const [isModalOpen, setIsModalOpen] = useState(false);// Trạng thái đóng/mở Modal
+  const [editingProduct, setEditingProduct] = useState<any>(null); // Lưu thông tin sản phẩm đang sửa
+  const [searchTerm, setSearchTerm] = useState(""); // Từ khóa tìm kiếm[
 
+  // Lọc danh sách sản phẩm dựa trên từ khóa tìm kiếm
   const filteredProducts = products.filter(p => 
     p.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.productId.toString().includes(searchTerm)
   )
-
+  // Hàm gọi API lấy danh sách sản phẩm từ Backend
+  // Sử dụng useCallback để tránh hàm bị tạo lại sau mỗi lần re-render
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(API);
+      const res = await fetch(API); // Gửi request GET tới API
       const data = await res.json();
       setProducts(data);
     } catch (err) {
@@ -31,16 +34,21 @@ export default function ManageProducts() {
     }
   }, []);
 
+  // Chạy hàm fetchProducts một lần duy nhất khi component được render lần đầu
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
+  // Xử lý khi nhấn nút "Thêm sản phẩm" reset editingProduct về null và mở Modal
   const handleOpenAdd = () => { setEditingProduct(null); setIsModalOpen(true); };
+  // Xử lý khi nhấn nút "Sửa" reset editingProduct về null và mở Modal
   const handleOpenEdit = (p: any) => { setEditingProduct(p); setIsModalOpen(true); };
 
+  // Hàm callback được gọi sau khi lưu thông tin
   const handleSave = () => {
     setIsModalOpen(false);
     fetchProducts(); 
   };
 
+  // Xử lý xóa sản phẩm theo ID
   const handleDelete = async (id: number) => {
     if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
     try {
@@ -60,6 +68,7 @@ export default function ManageProducts() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Quản lý kho sản phẩm</h1>
         <div className="flex gap-4">
+          {/* Input nhập từ khóa tìm kiếm */}
             <input
               type="text"
               placeholder="Tìm mã hoặc tên sản phẩm"
@@ -67,6 +76,7 @@ export default function ManageProducts() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            {/* Nút mở modal thêm sản phẩm */}
           <button
             onClick={handleOpenAdd}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide"
@@ -95,6 +105,7 @@ export default function ManageProducts() {
               </tr>
             </thead>
             <tbody className="divide-y">
+              {/* Duyệt qua mảng danh sách đã được lọc để hiển thị */}
               {filteredProducts.map((p) => (
                 <tr key={p.productId} className="hover:bg-gray-50 transition-colors">
                   <td className="p-4 font-bold text-gray-400">#{p.productId}</td>
@@ -103,6 +114,8 @@ export default function ManageProducts() {
                   <td className="p-4 text-gray-500">{p.category?.categoryName || "—"}</td>
                   <td className="p-4 text-red-600 font-bold">${Number(p.price).toLocaleString()}</td>
                   <td className="p-4 font-medium">{p.stockQuantity} xe</td>
+
+                  {/* Cột các nút thao tác sửa / xóa */}
                   <td className="p-4 flex justify-center gap-2">
                     <button
                       onClick={() => handleOpenEdit(p)}
@@ -125,10 +138,10 @@ export default function ManageProducts() {
       </div>
 
       <ProductModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSave}
-        editingProduct={editingProduct}
+        isOpen={isModalOpen} // Truyền trạng thái đóng/mở modal
+        onClose={() => setIsModalOpen(false)} // Callback xử lý khi người dùng đóng modal
+        onSave={handleSave} // Callback xử lý sau khi lưu thành công
+        editingProduct={editingProduct}  // Truyền dữ liệu sản phẩm đang sửa
       />
     </div>
   );
