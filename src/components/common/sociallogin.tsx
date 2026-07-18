@@ -1,8 +1,8 @@
 import React from "react";
 import GoogleIcon from '@mui/icons-material/Google';
-
+// Cấu trúc Props truyền từ Component cha
 interface SosicalLoginProps{
-    text: string;
+    text: string; //Để tạo dữ liệu trong nút bấm
 }
 export default function SocialLogin({text}:SosicalLoginProps){
     return(

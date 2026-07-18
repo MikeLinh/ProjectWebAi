@@ -12,29 +12,28 @@ export default function CartPage() {
   
   const [discount, setDiscount] = useState<number>(0);
   const [appliedCode, setAppliedCode] = useState<string>("");
-
   const[promoId,setPromoId]= useState<number | null>(null);
-
   const cartTotal = getCartTotal();
   
+  // Lắng nghe sự thay đổi của tổng tiền tạm tính 'cartTotal' thông qua useEffect
   useEffect(() => {
   if (cartTotal === 0) {
     handleResetDiscount();
   }
   }, [cartTotal]);
-
+  // Định nghĩa hàm reset trạng thái giảm giá về ban đầu
   const handleResetDiscount = () => {
     setDiscount(0);
     setAppliedCode("");
     setPromoId(null);
   };
-
+  // Định nghĩa hàm nhận và lưu trữ thông tin mã giảm giá
   const handleApplyDiscount = (discountAmount: number, code: string, id: number | null = null) => {
     setDiscount(discountAmount);
     setAppliedCode(code);
     setPromoId(id);
   };
-
+  // Tính toán số tiền thực tế
   const finalTotal = cartTotal - discount;
 
   return (

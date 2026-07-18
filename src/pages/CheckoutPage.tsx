@@ -20,41 +20,45 @@ import {
 export default function CheckoutPage() {
   const { cart, getCartTotal, clearCart } = useCart();
   const navigate = useNavigate();
+  // Khởi tạo đối tượng location để lấy thông tin giảm giá được truyền sang từ trang giỏ hàng trước đó
   const location = useLocation();
   const { showNotification } = useNotification();
   
 
-  const discount = location.state?.discount || 0;
-  const couponCode = location.state?.couponCode || "";
-  const promoId = location.state?.promoId || null;
+  const discount = location.state?.discount || 0; // Lấy số tiền giảm giá từ state của trang trước
+  const couponCode = location.state?.couponCode || ""; // Lấy tên mã giảm giá đã áp dụng thành công từ trang trước
+  const promoId = location.state?.promoId || null; // Lấy ID của mã giảm giá đã áp dụng
 
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("COD");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    // Gọi hàm fetch dữ liệu cá nhân của người dùng để tự động điền vào form
     fetchAutofillData().then((data) => {
-      if (data) setFormData(data);
+      if (data) setFormData(data); //Hợp lệ, tự điền dữ liệu vào form
     });
   }, []);
-
+  //Hàm xử lý sự kiện khi người dùng nhập form
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    // Cập nhật thuộc tính tương ứng trong state 'formData' dựa trên thuộc tính 'name' của ô nhập liệu
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
-
+  // Tính tiền tạm tính
   const subTotal = getCartTotal();
   const finalTotal = subTotal - discount;
 
+  // Định nghĩa hàm xử lý gửi đơn hàng
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) {
       showNotification("Giỏ hàng rỗng!","error");
       return;
     }
-    if (submitting) return;
-
+    if (submitting) return; //Nếu trong quá trình gửi đơn hàng, thì return tránh bị lặp lại đơn hàng
     setSubmitting(true);
 
+    // Sử dụng hàm helper đóng gói toàn bộ dữ liệu đơn hàng thành cấu trúc payload gửi lên API
     const payload = buildOrderPayload({
       cart,
       formData,
@@ -65,16 +69,18 @@ export default function CheckoutPage() {
     });
 
     try {
-      const result = await submitOrder(payload);
+      // Gọi hàm gửi đơn hàng lên Server thông qua API và nhận kết quả trả về từ cơ sở dữ liệu
+      const result = await submitOrder(payload); 
 
+      //Nếu chọn thanh toán bằng VNPAY thì sẽ chuyển hướng tới trang thanh toán VNPAY
       if (paymentMethod === "VNPAY" && result?.payUrl) {
         showNotification("Đang chuyển hướng đến VNPay...","info");
-        window.location.href = result.payUrl;
+        window.location.href = result.payUrl; // Điều hướng trình duyệt chuyển hẳn sang trang thanh toán bảo mật của cổng VNPay
         return;
       }
 
-      clearCart();
-
+      clearCart(); // Xóa sạch giỏ hàng
+      // Đóng gói thông tin đơn hàng
       const orderState = {
         orderId: result.orderId,
         order: {
@@ -85,7 +91,7 @@ export default function CheckoutPage() {
           status: "PENDING",
         },
       };
-
+      // Nếu phương thức thanh toán là COD
       if (paymentMethod === "COD") {
         navigate("/checkout/success", { state: orderState });
       } else {

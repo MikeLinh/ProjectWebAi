@@ -14,6 +14,7 @@ export default function ForgotForm() {
         setLoading(true);
 
         try {
+            // Thực hiện gọi API bất đồng bộ bằng fetch tới server local chạy ở cổng 8080
             const res = await fetch("http://localhost:8080/api/auth/forgot-password", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

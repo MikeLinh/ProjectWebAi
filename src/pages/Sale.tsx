@@ -5,6 +5,7 @@ import Footer from "../components/home/footer";
 
 import bg from "../assets/images/background.png";
 
+//Định nghĩa dữ liệu Product
 interface Product {
   productId: number;
   productName: string;
@@ -22,6 +23,7 @@ export default function Sale() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    // Thực hiện gửi yêu cầu lấy dữ liệu (GET request) tới API lấy danh sách các sản phẩm đang có chương trình sale
     fetch("http://localhost:8080/api/products?sale=true")
       .then((res) => {
         if (!res.ok) throw new Error("Lỗi khi lấy dữ liệu");
@@ -29,8 +31,8 @@ export default function Sale() {
       })
       .then((data) => {
         const filtered = data
-          .filter((p: Product) => p.discountPercent && p.discountPercent > 15)
-          .sort((a: Product, b: Product) => b.discountPercent - a.discountPercent)
+          .filter((p: Product) => p.discountPercent && p.discountPercent > 15) //Lọc ra các sản phẩm có thuộc tính giảm giá và có mức giảm giá lớn hơn 15%
+          .sort((a: Product, b: Product) => b.discountPercent - a.discountPercent) //Sắp xếp danh sách sản phẩm theo thứ tự giảm giá giảm dần
           .slice(0, 5);
 
         setSaleProducts(filtered);
@@ -41,7 +43,7 @@ export default function Sale() {
       })
       .finally(() => setLoading(false));
   }, []);
-
+  // Định nghĩa hàm xử lý và trả về đường dẫn hình ảnh chính xác của sản phẩm
   const getImageUrl = (imageUrl: string): string => {
     if (!imageUrl) return "/assets/images/bike1.png";
     if (imageUrl.startsWith("http")) return imageUrl;
@@ -60,7 +62,7 @@ export default function Sale() {
       <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 bg-gradient-to-r from-red-600 to-orange-500 text-white px-8 py-3 rounded-3xl mb-6 shadow-xl">
-            <span className="text-4xl">🔥</span>
+            <span className="text-4xl">!</span>
             <span className="font-bold uppercase tracking-[4px] text-xl">SUPER SALE</span>
           </div>
           <h1 className="text-6xl font-bold text-gray-900 mb-4">Giảm Giá Mạnh Nhất</h1>

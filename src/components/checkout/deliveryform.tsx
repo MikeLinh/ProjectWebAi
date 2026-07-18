@@ -1,8 +1,9 @@
 import React from "react";
 
+// Cấu trúc Props truyền từ Component cha
 interface DeliveryFormProps {
   formData: { name: string; phone: string; email: string; address: string; note: string };
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void; // Hàm xử lý khi người dùng gõ phím để cập nhật dữ liệu (State) ở component cha
 }
 export default function DeliveryForm({formData, handleInputChange}:DeliveryFormProps){
     return(

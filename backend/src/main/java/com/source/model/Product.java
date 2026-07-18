@@ -5,7 +5,6 @@ import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import jakarta.persistence.PrePersist;
 
 @Entity
 @Table(name = "PRODUCTS")
@@ -26,6 +25,10 @@ public class Product {
 
     @Column(name = "brand", length = 100)
     private String brand;
+
+    @ManyToOne
+    @JoinColumn(name = "manufacturer_id")
+    private Manufacturer manufacturer;
 
     @Column(name = "price", nullable = false, precision = 15, scale = 2)
     private BigDecimal price;

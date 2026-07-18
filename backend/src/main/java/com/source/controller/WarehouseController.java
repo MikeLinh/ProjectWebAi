@@ -48,7 +48,7 @@ public class WarehouseController {
         if (opt.isEmpty()) {
             product = new Product();
             product.setProductName("Sản phẩm " + receipt.getProductId());
-            product.setBrand(receipt.getManufacturer());
+            product.setManufacturer(receipt.getManufacturer());
             product.setPrice(BigDecimal.valueOf(0));
             product.setStockQuantity(0);
             product.setIsNew(true);

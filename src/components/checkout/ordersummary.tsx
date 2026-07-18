@@ -3,19 +3,20 @@ import CartItemsList from "./ordersummary/cartitem";
 import PriceBreakdown from "./ordersummary/pricebreakdown";
 import ConfirmButton from "./ordersummary/confirmbutton";
 
+// Tái định nghĩa cấu trúc dữ liệu cho một sản phẩm trong giỏ hàng 
 interface CartItem {
   id: number;
   name: string;
   price: number;
   quantity: number;
 }
-
+// Cấu trúc Props truyền từ Component cha
 interface OrderSummaryProps {
-  cart: CartItem[];
-  subTotal: number;
-  discount: number;
-  couponCode?: string;
-  submitting?: boolean;
+  cart: CartItem[]; // Mảng danh sách sản phẩm để truyền xuống cho CartItemsList
+  subTotal: number; // Tiền tạm tính, truyền xuống cho PriceBreakdown
+  discount: number; // Tiền được giảm giá, truyền xuống cho PriceBreakdown
+  couponCode?: string; // Mã giảm giá (nếu có), truyền xuống cho PriceBreakdown
+  submitting?: boolean; // Trạng thái đang gửi đơn hàng, truyền xuống cho ConfirmButton
 }
 
 export default function OrderSummary({

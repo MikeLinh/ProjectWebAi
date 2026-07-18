@@ -27,15 +27,18 @@ public class WarehouseReceipt {
 
     @Column(name = "imported_at")
     private LocalDateTime importedAt;
+    
+    @ManyToOne
+    @JoinColumn(name="supplier_id")
+    private Supplier supplier;
+
+    @ManyToOne
+    @JoinColumn(name="manufacturer_id")
+    private Manufacturer manufacturer;
 
    
     @Transient
     private String productName;
-
-    @Column(name = "supplier", length = 150)
-    private String supplier;
-    @Column(name = "manufacturer", length = 150)
-    private String manufacturer;
 
     public Long getReceiptId()                      { return receiptId; }
     public void setReceiptId(Long receiptId)        { this.receiptId = receiptId; }
@@ -58,9 +61,19 @@ public class WarehouseReceipt {
     public String getProductName()                  { return productName; }
     public void setProductName(String n)            { this.productName = n; }
 
-    public String getSupplier()                     { return supplier; }
-    public void setSupplier(String s)               { this.supplier = s; }
+    public Supplier getSupplier()                   { return supplier; }
+    public void setSupplier(Supplier s)             { this.supplier = s; }
 
-    public String getManufacturer()                 { return manufacturer; }
-    public void setManufacturer(String m)           { this.manufacturer = m; }
+    public Manufacturer getManufacturer()           { return manufacturer; }
+    public void setManufacturer(Manufacturer m)     { this.manufacturer = m; }
+
+    @Transient
+    public String getSupplierName() {
+        return this.supplier != null ? this.supplier.getSupplierName() : null; 
+    }
+
+    @Transient
+    public String getManufacturerName() {
+        return this.manufacturer != null ? this.manufacturer.getManufacturerName() : null; 
+    }
 }

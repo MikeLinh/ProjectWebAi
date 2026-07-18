@@ -1,5 +1,6 @@
 import React from "react";
 
+// Cấu trúc Props truyền từ Component cha vào nút bấm này
 interface ConfirmButtonProps {
   submitting?: boolean;
 }

@@ -1,0 +1,131 @@
+package com.source.model;
+
+import jakarta.persistence.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "warranty_history")
+public class WarrantyHistory {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "history_id")
+    private Integer historyId;
+
+    @ManyToOne
+    @JoinColumn(name = "warranty_id")
+    private Warranty warranty;
+
+    @Column(name = "received_date")
+    private LocalDateTime receivedDate;
+
+    @Column(name = "returned_date")
+    private LocalDateTime returnedDate;
+
+    @Column(name = "problem")
+    private String problem;
+
+    @Column(name = "solution")
+    private String solution;
+
+    @Column(name = "technician")
+    private String technician;
+
+    @Column(name = "repair_cost")
+    private BigDecimal repairCost;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
+
+    public Integer getHistoryId() {
+        return historyId;
+    }
+
+    public void setHistoryId(Integer historyId) {
+        this.historyId = historyId;
+    }
+
+    public Warranty getWarranty() {
+        return warranty;
+    }
+
+    public void setWarranty(Warranty warranty) {
+        this.warranty = warranty;
+    }
+
+    public LocalDateTime getReceivedDate() {
+        return receivedDate;
+    }
+
+    public void setReceivedDate(LocalDateTime receivedDate) {
+        this.receivedDate = receivedDate;
+    }
+
+    public LocalDateTime getReturnedDate() {
+        return returnedDate;
+    }
+
+    public void setReturnedDate(LocalDateTime returnedDate) {
+        this.returnedDate = returnedDate;
+    }
+
+    public String getProblem() {
+        return problem;
+    }
+
+    public void setProblem(String problem) {
+        this.problem = problem;
+    }
+
+    public String getSolution() {
+        return solution;
+    }
+
+    public void setSolution(String solution) {
+        this.solution = solution;
+    }
+
+    public String getTechnician() {
+        return technician;
+    }
+
+    public void setTechnician(String technician) {
+        this.technician = technician;
+    }
+
+    public BigDecimal getRepairCost() {
+        return repairCost;
+    }
+
+    public void setRepairCost(BigDecimal repairCost) {
+        this.repairCost = repairCost;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+}

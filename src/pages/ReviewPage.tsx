@@ -4,6 +4,7 @@ import ReviewStats from "../components/review/reviewstat";
 import ReviewList from "../components/review/reviewlist";
 import ReviewForm from "../components/review/reviewform";
 
+// Định nghĩa cấu trúc kiểu dữ liệu review
 interface DBReview {
   reviewId?: number;
   rating: number;
@@ -12,18 +13,19 @@ interface DBReview {
   comment: string;
   createdAt?: string;
 }
-
+// Định nghĩa kiểu dữ liệu cho các tham số đầu vào
 interface ProductReviewsProps {
   productId: number;
 }
 
 export default function ProductReviews({ productId }: ProductReviewsProps) {
-  const [reviews, setReviews] = useState<DBReview[]>([]);
+  const [reviews, setReviews] = useState<DBReview[]>([]); //Khởi tạo state lưu trữ các danh sách review, dữ liệu đầu là rỗng
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
+        // Sử dụng thư viện axios để gửi một yêu cầu HTTP GET tới endpoint chứa danh sách đánh giá của sản phẩm này
         const res = await axios.get<DBReview[]>(`http://localhost:8080/api/products/${productId}/reviews`);
         setReviews(res.data);
       } catch (err) {
@@ -34,11 +36,13 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
     };
     fetchReviews();
   }, [productId]);
-
+   
+  // Định nghĩa hàm bất đồng bộ handleAddReview xử lý khi người dùng gửi một đánh giá mới, kiểu dữ liệu Promise
   const handleAddReview = async (newReview: DBReview): Promise<boolean> => {
     try {
+      // Gửi một yêu cầu HTTP POST kèm theo Object dữ liệu nhận xét mới 'newReview' lên Server để lưu vào Cơ sở dữ liệu
       const res = await axios.post(`http://localhost:8080/api/products/${productId}/reviews`, newReview);
-      setReviews([res.data, ...reviews]); 
+      setReviews([res.data, ...reviews]);  //Lưu dữ liệu review và giữ lại các review cữ
       return true;
     } catch (err) {
       console.error("Lỗi gửi API review:", err);

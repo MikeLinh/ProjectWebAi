@@ -1,9 +1,13 @@
 import React from "react";
 
+// Định nghĩa kiểu dữ liệu tùy chỉnh (Literal Type) phương thức thanh toán là "COD" hoặc "VNPAY"
+// Từ khóa 'export'  có thể tái sử dụng kiểu dữ liệu này ở component cha
 export type PaymentMethodType = "COD" | "VNPAY"
+
+// Cấu trúc Props truyền từ Component cha
 interface PaymentMethodsProps{
-    selectedMethod: PaymentMethodType;
-    onMethodChange: (method: PaymentMethodType) => void;
+    selectedMethod: PaymentMethodType; //Chọn phương thức
+    onMethodChange: (method: PaymentMethodType) => void; //Hàm callback sẽ được kích hoạt khi người dùng chọn pt khác
 }
 export default function PayMethods({selectedMethod, onMethodChange}: PaymentMethodsProps){
     return(

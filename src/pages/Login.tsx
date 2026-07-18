@@ -19,9 +19,9 @@ export default function Login() {
   const {showNotification} = useNotification();
 
   const handleNormalLogin = async (e: React.FormEvent) => { //Hàm đồng bộ cho phép sử dụng await để gọi API đăng nhập
-  e.preventDefault(); //Sẽ ngăn chặn load trang khi người dùng bấm submit
-  setErrorMessage("");
-  setLoading(true);
+    e.preventDefault(); //Sẽ ngăn chặn load trang khi người dùng bấm submit
+    setErrorMessage("");
+    setLoading(true);
 
   try {
     // Gọi API đăng nhập ở Back-end bằng phương thức POST
@@ -58,7 +58,7 @@ export default function Login() {
     setLoading(false);
   }
 };
-
+  // Cấu hình và khởi tạo hàm đăng nhập qua bên thứ ba bằng Google
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => { // Chạy khi phía Google xác thực tài khoản thành công và trả về access_token
       try {
@@ -80,12 +80,13 @@ export default function Login() {
         if (!res.ok) {
           throw new Error(data.message || "Đăng nhập Google thất bại!");
         }
-
+        // Đồng bộ dữ liệu User: Lấy từ thuộc tính data.user, nếu Server trả thẳng cấu trúc user ở gốc dữ liệu thì lấy chính 'data'
         const user = data.user || data;
         localStorage.setItem("currentUser", JSON.stringify(user));
         localStorage.setItem("token", data.token);
         localStorage.setItem("expiresAt", data.expiresAt);
 
+        // Đồng bộ trạng thái đăng nhập cho toàn bộ ứng dụng bằng hàm login lấy từ AuthContext
         login(user);
 
         if (user.role === "ADMIN") {

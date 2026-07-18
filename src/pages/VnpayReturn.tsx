@@ -11,12 +11,15 @@ export default function VNPayReturn() {
   const [orderId, setOrderId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Lấy mã phản hồi kết quả giao dịch từ VNPay trên URL
     const responseCode = searchParams.get("vnp_ResponseCode");
+    // Lấy mã tham chiếu giao dịch
     const txnRef = searchParams.get("vnp_TxnRef");
 
     setIsSuccess(responseCode === "00");
-
+    //Nếu có mã tham chiếu giao dịch 'txnRef' trả về trên URL
     if(txnRef){
+      // Tiến hành cắt chuỗi lấy phần ký tự trước dấu gạch dưới "_" để khôi phục lại mã ID đơn hàng gốc trong database
       const extractedId = txnRef.split("_")[0];
       setOrderId(extractedId);
     }

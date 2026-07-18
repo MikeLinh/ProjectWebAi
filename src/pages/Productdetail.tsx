@@ -11,6 +11,8 @@ import Navbar from "../components/home/navbar";
 import Footer from "../components/home/footer";
 import Chatbox from "../components/chatbox/chatbox";
 
+
+// Định nghĩa cấu trúc kiểu dữ liệu
 interface ProductData {
   id: number;
   name: string;
@@ -27,8 +29,11 @@ interface ProductData {
 }
 
 export default function ProductDetail() {
+  // Sử dụng hook useLocation để nhận thông tin vị trí URL hiện tại và trích xuất dữ liệu tạm thời được truyền ngầm qua Router (state)
   const location = useLocation();
+  // Sử dụng hook useParams để lấy tham số 'id' động từ trên thanh địa chỉ URL
   const { id } = useParams<{ id: string }>();
+  //kiểm tra xem có sản phẩm được truyền sẵn từ trang trước sang không
   const state = location.state as { product?: ProductData } | null;
 
   const [product, setProduct] = useState<ProductData | undefined>(state?.product);
@@ -38,18 +43,21 @@ export default function ProductDetail() {
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
 
   useEffect(() => {
+    //Nếu sản phẩm đã được truyền sẵn thông qua state
     if (state?.product) {
+      // Gán trực tiếp đối tượng sản phẩm đó vào state 'product' mà không cần gọi API nữa
       setProduct(state.product);
       setLoadingProduct(false);
       return;
     }
-
+    //Nếu kh trích xuất được id hợp lệ
     if (!id) {
       setLoadingProduct(false);
       return;
     }
 
     setLoadingProduct(true);
+    // Sử dụng Axios gửi yêu cầu GET tới API lấy chi tiết một sản phẩm theo ID từ server
     axios.get(`http://localhost:8080/api/products/${id}`)
       .then((res) => {
         const p = res.data;
@@ -77,23 +85,27 @@ export default function ProductDetail() {
       })
       .catch((err) => {
         console.error("Lỗi lấy chi tiết sản phẩm:", err);
-        setProduct(undefined);
+        setProduct(undefined); // Đưa trạng thái sản phẩm về undefined để giao diện hiển thị thông báo không tìm thấy sản phẩm
       })
-      .finally(() => setLoadingProduct(false));
+      .finally(() => setLoadingProduct(false)); // Tắt hiệu ứng loading để hiển thị giao diện chính thức
   }, [id]);
 
   useEffect(() => {
+     // Kiểm tra điều kiện tiên quyết nếu đã có đối tượng sản phẩm và mã id sản phẩm tồn tại hợp lệ
     if (product?.id) {
+      //Gọi API lấy dữ liệu đánh giá
       axios.get(`http://localhost:8080/api/products/${product.id}/reviews`)
         .then(res => setReviewCount(res.data.length))
         .catch(() => setReviewCount(0));
+      //kiểm tra xem sản phẩm có brand liên quan không
       if (product.brand) {
+        // Gửi yêu cầu lấy sản phẩm liên quan cùng hãng
         axios.get(`http://localhost:8080/api/products/related-by-brand?brand=${encodeURIComponent(product.brand)}&excludeId=${product.id}`)
           .then(res => {
-            const relatedData = res.data || [];
-          
-            const topRelated = relatedData.slice(0, 4);
+            const relatedData = res.data || []; // Lấy mảng dữ liệu trả về, nếu không trả về thì là rỗng
+            const topRelated = relatedData.slice(0, 4); // lấy 4 sản phẩm liên đầu tiên
 
+            // duyệt qua từng sản phẩm trong top 4 để chuẩn hóa lại cấu trúc dữ liệu trước khi lưu vào state
             const mappedProducts = topRelated.map((p: any) => {
               const imageName = p.imageUrl ? p.imageUrl.trim() : "bike1.png";
               const finalImage = new URL(`../assets/images/${imageName}`, import.meta.url).href; 

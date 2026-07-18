@@ -6,10 +6,13 @@ import { useEffect, useRef, useState } from "react";
 import { useNotification } from "../components/context/notificationcontext";
 
 export default function CheckoutSuccess() {
+  // Khởi tạo hook lấy thông tin route hiện tại
   const location = useLocation();
-  const [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams(); // Khởi tạo hook lấy các tham số query trên URL
   const { clearCart } = useCart();
+  // Xác định mã đơn hàng (orderId) lấy từ state chuyển trang, nếu không có thì trích xuất từ tham số vnp_TxnRef của VNPay
   const orderId = location.state?.orderId || searchParams.get("vnp_TxnRef")?.split("_")[0];
+  // Lấy mã phản hồi kết quả giao dịch từ VNPay trên URL
   const responseCode = searchParams.get("vnp_ResponseCode");
   const {showNotification}= useNotification();
   
@@ -22,8 +25,9 @@ export default function CheckoutSuccess() {
     if (isSuccess) {
       clearCart();
     }
-    
+    // Nếu là thanh toán VNPay thành công mã "00" có mã đơn hàng hợp lệ và đơn hàng này chưa từng được cập nhật thành công
     if (responseCode === "00" && orderId && !isUpdated.current) {
+      //Sử dụng async để fetch dữ liệu từ FE gọi API lên BE để cập nhập trạng thái
       const confirmOrder = async () => {
         try {
           isUpdated.current = true;
@@ -32,16 +36,17 @@ export default function CheckoutSuccess() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ status: "CONFIRMED" }),
+            body: JSON.stringify({ status: "CONFIRMED" }), // Gửi payload cập nhật trạng thái
           });
         } catch (error) {
-          console.log("Lỗi khi cập nhập trạng thái đơn hàng", error);
+          console.log("Lỗi khi cập nhập trạng thái đơn hàng", error); 
         }
       };
       confirmOrder();
     }
-  }, [isSuccess, clearCart, orderId, responseCode]);
-
+  }, [isSuccess, clearCart, orderId, responseCode]); //tự động chạy lại khi một trong các tham số này thay đổi
+  
+  // Định nghĩa hàm xử lý thanh toán lại
   const handleRepay = async () => {
     if (!orderId) {
       showNotification("Không tìm thấy mã đơn hàng để thực hiện thanh toán lại!","error");

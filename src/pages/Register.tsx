@@ -8,7 +8,7 @@ import { useNotification } from "../components/context/notificationcontext";
 export default function RegisterForm() {
     const {showNotification} = useNotification();
     const navigate = useNavigate();
-    
+    // Khởi tạo trạng thái 'formData' bằng useState để quản lý toàn bộ giá trị các ô nhập liệu trong biểu mẫu đăng ký
     const [formData, setFormData] = useState({
         fullName: "",
         email: "",
@@ -21,17 +21,18 @@ export default function RegisterForm() {
     const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
 
+    // Định nghĩa hàm tự động kích hoạt mỗi khi người dùng gõ phím hoặc thay đổi giá trị trong các ô input
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        setFormData({ ...formData, [e.target.name]: e.target.value }); //ghi đè giá trị mới vào trường có thuộc tính 'name' tương ứng với ô input đang nhập liệu
         if (errorMessage) setErrorMessage("");
     };
-
+    //Xử lý khi người dùng bấm submit
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrorMessage("");
         setLoading(true);
 
-        // Validate client-side
+        
         if (formData.password !== formData.confirmPassword) {
             setErrorMessage("Mật khẩu xác nhận không khớp!");
             setLoading(false);
@@ -45,6 +46,7 @@ export default function RegisterForm() {
         }
 
         try {
+            // Sử dụng hàm fetch để gửi một yêu cầu HTTP dạng POST tới endpoint xử lý đăng ký tài khoản của Backend
             const res = await fetch("http://localhost:8080/api/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

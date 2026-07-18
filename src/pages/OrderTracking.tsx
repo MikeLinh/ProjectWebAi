@@ -8,6 +8,7 @@ import OrderList from "../components/ordertracking/orderlist";
 import { type Order, type OrderStatus } from "../components/ordertracking/orderitem";
 import { useNotification } from "../components/context/notificationcontext";
 
+// Định nghĩa hàm để lấy ID người dùng hiện tại từ bộ nhớ cục bộ
 function getCurrentUserId(): number | null {
   const rawUser = localStorage.getItem("current_user") || 
                   localStorage.getItem("currentUser") || 
@@ -33,6 +34,7 @@ export default function OrderTrackingPage() {
   const [selectedYear, setSelectedYear] = useState<string>("Tất cả");
   const navigate = useNavigate();
   
+  // Định nghĩa hàm xử lý việc chuyển hướng người dùng đến trang chi tiết của một sản phẩm cụ thể trong đơn hàng
   const handleGoToProductDetail = (productItem: any) => {
     const productId = productItem.productId;
     if (!productId) {
@@ -41,7 +43,7 @@ export default function OrderTrackingPage() {
     }
     navigate(`/product/${productId}`);
   };
-
+  // Định nghĩa hàm xử lý việc điều hướng người dùng đi đánh giá sản phẩm của một đơn hàng cụ thể
   const handleReviewOrder = (orderId: number) => {
     const order = orders.find((o) => o.orderId === orderId);
     if (!order || order.items.length === 0) {
@@ -57,7 +59,7 @@ export default function OrderTrackingPage() {
     }
     navigate(`/product/${reviewableItem.productId}`);
   };
-
+  // Định nghĩa hàm bất đồng bộ fetchOrders phụ trách việc gọi API lấy danh sách các đơn hàng từ máy chủ Backend
   const fetchOrders = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     else setRefreshing(true);
@@ -74,7 +76,7 @@ export default function OrderTrackingPage() {
       const res = await fetch(`http://localhost:8080/api/orders/user/${userId}`);
       if (!res.ok) throw new Error("Không thể tải đơn hàng");
       
-      const data: Order[] = await res.json();
+      const data: Order[] = await res.json(); // Chuyển đổi dữ liệu phản hồi thành mảng dữ liệu định dạng JSON kiểu Order[]
       setOrders(data);
       setError(null);
     } catch (err) {
@@ -85,7 +87,7 @@ export default function OrderTrackingPage() {
       setRefreshing(false);
     }
   };
-
+   // Định nghĩa hàm bất đồng bộ handleCancelOrder xử lý việc yêu cầu hủy một đơn hàng từ phía khách hàng
   const handleCancelOrder = async (orderId: number) => {
     if (!window.confirm("Bạn có chắc muốn hủy đơn hàng này không?")) return;
 
@@ -96,6 +98,7 @@ export default function OrderTrackingPage() {
       });
 
       if (res.ok) {
+        //Duyệt qua từng orderId cũ nếu trùng với ID thì sửa lại trạng thái CANCELLED
         setOrders(prev => prev.map(order => 
           order.orderId === orderId ? { ...order, status: "CANCELLED" as OrderStatus } : order
         ));
@@ -108,11 +111,12 @@ export default function OrderTrackingPage() {
       showNotification("Có lỗi xảy ra khi hủy đơn hàng.","error");
     }
   };
-
+  // Hook useEffect tự động gọi hàm tải đơn hàng
   useEffect(() => {
     fetchOrders();
   }, []);
 
+  // Sử dụng useMemo để tự động tính toán, lọc và sắp xếp lại danh sách đơn hàng
   const filteredAndSortedOrders = useMemo(() => {
     let result = [...orders];
 
@@ -133,7 +137,7 @@ export default function OrderTrackingPage() {
         return orderYear === parseInt(selectedYear, 10);
       });
     }
-
+    // Thực hiện hàm sort để sắp xếp mảng kết quả sau khi đã qua tất cả các bộ lọc phía trên
     result.sort((a, b) => {
       const dateA = new Date(a.orderDate);
       const dateB = new Date(b.orderDate);

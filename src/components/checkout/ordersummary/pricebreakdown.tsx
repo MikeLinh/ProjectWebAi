@@ -1,9 +1,11 @@
 import React from "react";
 
+
+// Cấu trúc Props truyền từ Component cha (Checkout hoặc Giỏ hàng)
 interface PriceBreakdownProps {
-  subTotal: number;
-  discount: number;
-  couponCode?: string;
+  subTotal: number; // Số tiền tạm tính
+  discount: number; // Số tiền được giảm giá
+  couponCode?: string; // Mã giảm giá áp dụng
 }
 
 export default function PriceBreakdown({
