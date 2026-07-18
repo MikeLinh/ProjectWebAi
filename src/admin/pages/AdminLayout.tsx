@@ -8,6 +8,7 @@ import ManageCategories from "./ManagerCategory";
 import ManageWarehouse from "./ManagerWarehouse";
 import ManagerManufacturer from "./ManagerManufacturer";
 import ManagerSupplier from "./ManagerSupplier";
+import ManagerWarranty from "./ManagerWarranty";
 import User from "./ManageUser"
 
 export default function AdminLayout() {
@@ -35,6 +36,8 @@ export default function AdminLayout() {
         return <ManagerManufacturer/>;
       case "supplier":
         return <ManagerSupplier/>;
+      case "warranty":
+        return <ManagerWarranty/>;
       case "user":
         return <User/>;
       default:

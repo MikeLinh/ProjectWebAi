@@ -18,6 +18,7 @@ import Profile from './pages/Profiles'
 import ReviewPage from './pages/ReviewPage'
 import About from './pages/About'
 import Sale from './pages/Sale'
+import Warranty from './pages/Warranty'
 import { NotificationProvider } from "./components/context/notificationcontext";
 
 import VNPayReturn from './pages/VnpayReturn'
@@ -44,11 +45,13 @@ function App() {
                 <Route path="/register" element={<Register />}/>
                 <Route path="/product/:id" element={<ProductDetail />}/>
                 <Route path="/cart" element={<CartPage />}/>
+                <Route path="/warranty" element={<Warranty />}/>
                 <Route path="/checkout" element={<CheckoutPage />}/>
                 <Route path="/checkout/success" element={<PrivateRoute><CheckoutSuccessPage /></PrivateRoute>}/>
                 <Route path="/vnpay-return" element={<VNPayReturn />} />
                 <Route path="/order-tracking" element={<PrivateRoute><OrderTrackingPage /></PrivateRoute>}/>
                 <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>
+                
           } />
               </Routes>
             </Router>

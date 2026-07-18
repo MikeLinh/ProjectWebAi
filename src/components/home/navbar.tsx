@@ -6,6 +6,7 @@ import ShoppingCartOutlineIcon from '@mui/icons-material/ShoppingCartOutlined';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 import { Link, useNavigate } from "react-router-dom"; 
 import { useCart } from "../../components/context/carcontext";
+import SafetyCheckIcon from '@mui/icons-material/SafetyCheck';
 import CardModel from "../home/cardmodel"; 
 import SearchPopup from "./searchpopup";
 import { motion, type Variants } from "framer-motion";
@@ -115,6 +116,9 @@ export default function Navbar() {
 
                 <Link to="/order-tracking" className="text-gray-300 hover:text-blue-500 flex items-center hover:scale-110 transition-transform">
                     <LocalMallIcon className="text-xl" />
+                </Link>
+                  <Link to="/warranty" className="text-gray-300 hover:text-blue-500 flex items-center hover:scale-110 transition-transform">
+                    <SafetyCheckIcon className="text-xl" />
                 </Link>
             </div>
 

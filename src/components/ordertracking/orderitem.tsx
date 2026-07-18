@@ -113,6 +113,13 @@ export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToP
             >
               {item.productName} <span className="text-gray-400 font-mono">x{item.quantity}</span>
             </button>
+            {order.status === "DELIVERED" && (
+              <a href={`/warranty?orderDetailId=${item.orderDetailId}`}
+                className="text-[10px] text-green-600 font-semibold hover:underline mt-1 block"
+                >
+                  Xem thẻ bảo hành sản phẩm
+              </a>
+            )}
             <div className="font-medium text-gray-900">
               ${(item.price * item.quantity).toLocaleString()}
             </div>

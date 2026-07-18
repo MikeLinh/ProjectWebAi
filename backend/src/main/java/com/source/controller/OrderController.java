@@ -1,6 +1,7 @@
 package com.source.controller;
 
 import com.source.service.ProductService;
+import com.source.service.WarrantyService;
 
 import jakarta.transaction.Transactional;
 
@@ -32,6 +33,7 @@ public class OrderController {
     @Autowired private OrderRepository orderRepository;
     @Autowired private PaymentRepository paymentRepository;
     @Autowired private ProductService productService;
+    @Autowired private WarrantyService warrantyService;
 
     //Khởi tạo một Map an toàn đa luồng (Thread-safe) để lưu danh sách các kết nối SseEmitter (giám sát trạng thái đơn hàng thời gian thực)
     private final Map<Long, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
@@ -132,6 +134,7 @@ public class OrderController {
                     p.setPaymentStatus("PAID");
                     p.setPaidAt(LocalDateTime.now());
                     paymentRepository.save(p);
+                    warrantyService.createWarrantiesForOrder(order);
                 }
             });
         }
@@ -237,6 +240,7 @@ public class OrderController {
                 if (payment != null) {
                     payment.setPaymentStatus("PAID"); 
                 }
+                warrantyService.createWarrantiesForOrder(order);
             } else {
                 order.setStatus("PENDING"); // Thất bại -> Giữ nguyên PENDING để thanh toán lại
                 if (payment != null) {

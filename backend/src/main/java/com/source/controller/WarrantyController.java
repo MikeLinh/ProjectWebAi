@@ -30,6 +30,11 @@ public class WarrantyController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+   @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Warranty>> getWarrantiesByUser(@PathVariable Integer userId) {
+        List<Warranty> userWarranties = warrantyRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return ResponseEntity.ok(userWarranties);
+    }
     @PostMapping
     public ResponseEntity<Warranty> create(@RequestBody Warranty warranty) {
         // Tự động set ngày bắt đầu nếu chưa có
@@ -53,7 +58,6 @@ public class WarrantyController {
         Warranty existing = opt.get();
         existing.setOrderDetail(updated.getOrderDetail());
         existing.setWarrantyCode(updated.getWarrantyCode());
-        existing.setSerialNumber(updated.getSerialNumber());
         existing.setWarrantyMonth(updated.getWarrantyMonth());
         existing.setStartDate(updated.getStartDate());
         existing.setEndDate(updated.getEndDate());
@@ -71,4 +75,11 @@ public class WarrantyController {
         warrantyRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/detail/{orderDetailId}")
+    public ResponseEntity<Warranty> getByOrderDetailId(@PathVariable Long orderDetailId) {
+        return warrantyRepository.findByOrderDetail_OrderDetailId(orderDetailId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
 }
