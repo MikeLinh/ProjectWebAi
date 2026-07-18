@@ -59,6 +59,7 @@ public class PromotionController {
         responseBody.put("discountValue", promo.getDiscountValue());
         responseBody.put("discountType", promo.getDiscountType());
         responseBody.put("minSpend", promo.getMinSpend() != null ? promo.getMinSpend() : 0); // Bảo vệ chống null
+        responseBody.put("targetProductId", promo.getTargetProductId());
         responseBody.put("message", "Áp dụng mã giảm giá thành công!");
 
         return ResponseEntity.ok(responseBody);

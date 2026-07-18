@@ -12,7 +12,12 @@ import ProductPagination from "./productpagination.tsx";
 interface DBProduct {
   productId: number;
   productName: string;
-  brand: string;
+  manufacturer?: {
+    manufacturerId: number;
+    manufacturerName: string;
+    country?: string;
+    active?: boolean;
+  };
   price: number;
   description: string;
   imageUrl: string;
@@ -60,7 +65,7 @@ export default function MainProduct() {
       params.append("categoryName", filters.categories.join(","));
     }
     if (filters.brands.length > 0) {
-      params.append("brand", filters.brands.join(","));
+      filters.brands.forEach(b => params.append("brand", b));
     }
     if (filters.priceMin > 0) {
       params.append("minPrice", filters.priceMin.toString());

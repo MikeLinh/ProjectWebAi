@@ -4,6 +4,7 @@ import { useNotification } from "../../components/context/notificationcontext";
 
 // URL endpoint API để quản lý các chương trình khuyến mãi
 const API = "http://localhost:8080/api/promotions";
+const API_PRODUCTS = "http://localhost:8080/api/products"; // API lấy danh sách sản phẩm
 
 // Định nghĩa kiểu dữ liệu (Interface) cho đối tượng Khuyến mãi
 interface Promotion {
@@ -12,53 +13,60 @@ interface Promotion {
   discountValue: number;   
   startDate: string;
   endDate: string;
+  targetProductId: number | null; // 🌟 Thêm trường thông tin sản phẩm mục tiêu
 }
 
-// Khởi tạo thời gian hiện tại theo chuẩn định dạng "YYYY-MM-DDTHH:mm" để điền sẵn vào ô input datetime-local
+interface Product {
+  productId: number;
+  productName: string;
+}
+
+// Khởi tạo thời gian hiện tại theo chuẩn định dạng "YYYY-MM-DDTHH:mm"
 const today = new Date().toISOString().slice(0, 16);
 
-// Form rỗng mặc định để reset khi tạo mới thành công
+// Form mặc định bổ sung thêm targetProductId
 const emptyForm = {
   couponCode: "",
   discountValue: 0,
   startDate: today,
   endDate: "",
+  targetProductId: "" as string | number, 
 };
 
-// Định dạng chuỗi ngày tháng từ DB thành dạng "DD/MM/YYYY" 
+// Định dạng chuỗi ngày tháng thành dạng "DD/MM/YYYY" 
 function formatDateTime(dt: string) {
   if (!dt) return "—";
   return new Date(dt).toLocaleDateString("vi-VN", {
     day: "2-digit", month: "2-digit", year: "numeric",
   });
 }
-// Kiểm tra xem mã đã quá ngày kết thúc hay chưa
+
+// Kiểm tra trạng thái hạn sử dụng
 function isExpired(endDate: string) {
   return endDate && new Date(endDate) < new Date();
 }
-//Kiểm tra xem mã có đang trong thời gian áp dụng hay không
+
 function isActive(startDate: string, endDate: string) {
   const now = new Date();
   return new Date(startDate) <= now && new Date(endDate) >= now;
 }
 
 export default function ManagePromotions() {
-  const {showNotification} = useNotification();
-  const [promos, setPromos] = useState<Promotion[]>([]); // Lưu danh sách các mã khuyến mãi
+  const { showNotification } = useNotification();
+  const [promos, setPromos] = useState<Promotion[]>([]); // Danh sách khuyến mãi
+  const [products, setProducts] = useState<Product[]>([]); //Lưu danh sách sản phẩm để chọn
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState(emptyForm); // Trạng thái dữ liệu trong form nhập liệu
-  const [saving, setSaving] = useState(false); // Trạng thái ngăn spam click khi đang gửi API tạo mới
-  const [errorMsg, setErrorMsg] = useState(""); // Lưu trữ thông báo lỗi trả về từ API khi tạo thất bại
-
+  const [form, setForm] = useState(emptyForm); 
+  const [saving, setSaving] = useState(false); 
+  const [errorMsg, setErrorMsg] = useState(""); 
 
   // Hàm gọi API lấy danh sách khuyến mãi
-  // Sử dụng useCallback để lưu trữ định danh hàm, tránh việc kích hoạt re-render vô tận khi đặt làm dependency
   const fetchPromos = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(API);
       const data = await res.json();
-      setPromos(data); // Đưa dữ liệu nhận được vào state
+      setPromos(data); 
     } catch (err) {
       console.error("Lỗi tải khuyến mãi:", err);
     } finally {
@@ -66,31 +74,50 @@ export default function ManagePromotions() {
     }
   }, []);
 
-  // Gọi hàm fetchPromos một lần duy nhất
-  useEffect(() => { fetchPromos(); }, [fetchPromos]);
+  // Hàm gọi API lấy danh sách sản phẩm phục vụ thẻ select lựa chọn
+  const fetchProducts = useCallback(async () => {
+    try {
+      const res = await fetch(API_PRODUCTS);
+      const data = await res.json();
+      setProducts(data || []);
+    } catch (err) {
+      console.error("Lỗi lấy danh sách sản phẩm:", err);
+    }
+  }, []);
+
+  // Gọi nạp dữ liệu ban đầu khi component mounted
+  useEffect(() => { 
+    fetchPromos(); 
+    fetchProducts();
+  }, [fetchPromos, fetchProducts]);
 
   // Xử lý gửi Form tạo mã ưu đãi mới
   const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault(); // Ngăn sự kiện submit tải lại trang mặc định
-    if (!form.couponCode.trim() || !form.endDate) return; // Kiểm tra các trường bắt buộc
-    setSaving(true); // Khóa nút submit
-    setErrorMsg(""); // Reset thông báo lỗi cũ
+    e.preventDefault(); 
+    if (!form.couponCode.trim() || !form.endDate) return; 
+    setSaving(true); 
+    setErrorMsg(""); 
+
+    // Chuẩn hóa dữ liệu targetProductId trước khi gửi đi: Nếu rỗng thì gửi null
+    const finalTargetProductId = form.targetProductId === "" ? null : Number(form.targetProductId);
 
     try {
       const res = await fetch(API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          couponCode: form.couponCode.toUpperCase(), // Luôn viết hoa mã code khi gửi lên server
+          couponCode: form.couponCode.toUpperCase(), 
           discountValue: form.discountValue,
           startDate: form.startDate,
           endDate: form.endDate,
+          targetProductId: finalTargetProductId, //Gửi kèm ID sản phẩm mục tiêu (hoặc null)
         }),
       });
 
       if (res.ok) {
-        await fetchPromos(); // Tải lại danh sách khuyến mãi mới nhất
-        setForm(emptyForm); // Dọn dẹp form về trạng thái trống ban đầu
+        showNotification("Kích hoạt mã giảm giá mới thành công!", "success");
+        await fetchPromos(); 
+        setForm(emptyForm); 
       } else {
         const text = await res.text();
         setErrorMsg(text || "Tạo mã thất bại!");
@@ -101,21 +128,23 @@ export default function ManagePromotions() {
       setSaving(false);
     }
   };
+
   // Xử lý xóa mã khuyến mãi
   const handleDelete = async (id: number, code: string) => {
-    if (!confirm(`Xóa mã khuyến mãi "${code}"?`)) return; // Yêu cầu người dùng xác nhận lại để tránh bấm nhầm nút
+    if (!confirm(`Xóa mã khuyến mãi "${code}"?`)) return; 
     try {
       const res = await fetch(`${API}/${id}`, { method: "DELETE" });
       if (res.ok) {
-        setPromos(promos.filter(p => p.promoId !== id)); // Lọc bỏ mã khuyến mãi vừa xóa khỏi state để cập nhật giao diện ngay lập tức
+        showNotification("Xóa mã khuyến mãi thành công!", "success");
+        setPromos(promos.filter(p => p.promoId !== id)); 
       } else {
-        showNotification("Xóa thất bại!","error");
+        showNotification("Xóa thất bại!", "error");
       }
     } catch {
-      showNotification("Không thể kết nối đến máy chủ.","warning");
+      showNotification("Không thể kết nối đến máy chủ.", "warning");
     }
   };
-  // Hàm helper trả về khối giao diện nhãn trạng thái dựa trên thời gian
+
   const statusBadge = (start: string, end: string) => {
     if (isExpired(end)) {
       return <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500 border border-gray-200">HẾT HẠN</span>;
@@ -131,6 +160,7 @@ export default function ManagePromotions() {
       <h1 className="text-2xl font-bold text-gray-900">Quản lý khuyến mãi</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Khối giao diện thêm mã mới */}
         <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm h-fit text-black text-xs space-y-4">
           <h2 className="text-sm font-bold border-b pb-3 uppercase tracking-wide">Tạo mã ưu đãi mới</h2>
 
@@ -153,6 +183,24 @@ export default function ManagePromotions() {
                 placeholder="VD: WELCOME2026"
               />
             </div>
+
+            {/* Tất cả hoặc Sản phẩm cụ thể */}
+            <div>
+              <label className="block font-semibold mb-1 text-gray-700">Phạm vi áp dụng</label>
+              <select
+                className="w-full border p-2.5 rounded-lg bg-white outline-none focus:border-blue-500 cursor-pointer"
+                value={form.targetProductId}
+                onChange={e => setForm({ ...form, targetProductId: e.target.value })}
+              >
+                <option value="">Áp dụng cho tất cả sản phẩm</option>
+                {products.map((prod) => (
+                  <option key={prod.productId} value={prod.productId}>
+                    [ID #{prod.productId}] - {prod.productName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Nhập giá trị giảm */}
             <div>
               <label className="block font-semibold mb-1 text-gray-700">Giá trị giảm ($)</label>
@@ -188,7 +236,7 @@ export default function ManagePromotions() {
                 onChange={e => setForm({ ...form, endDate: e.target.value })}
               />
             </div>
-            {/* Nút bấm Submit lưu mã */}
+            
             <button
               type="submit"
               disabled={saving}
@@ -199,7 +247,7 @@ export default function ManagePromotions() {
           </form>
         </div>
 
-        {/* Bảng danh sách */}
+        {/* Bảng danh sách các mã đang có */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-black">
           {loading ? (
             <div className="p-12 text-center text-gray-400 text-sm">Đang tải dữ liệu...</div>
@@ -210,6 +258,7 @@ export default function ManagePromotions() {
               <thead className="bg-gray-50 text-gray-600 font-bold uppercase border-b">
                 <tr>
                   <th className="p-4">Mã Code</th>
+                  <th className="p-4">Phạm vi áp dụng</th>
                   <th className="p-4">Giá trị giảm</th>
                   <th className="p-4">Thời gian</th>
                   <th className="p-4">Trạng thái</th>
@@ -217,28 +266,41 @@ export default function ManagePromotions() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {promos.map((p) => (
-                  <tr key={p.promoId} className="hover:bg-gray-50 transition-colors">
-                    <td className="p-4 font-bold text-blue-600">{p.couponCode}</td>
-                    {/* Định dạng số tiền giảm giá */}
-                    <td className="p-4 font-bold text-green-600">-${Number(p.discountValue).toLocaleString()}</td>
-                    {/* Hiển thị thời gian chạy từ ngày ... đến ngày ... */}
-                    <td className="p-4 text-gray-500">
-                      {formatDateTime(p.startDate)} ~ {formatDateTime(p.endDate)}
-                    </td>
-                    {/* Badge biểu diễn trạng thái động của mã */}
-                    <td className="p-4">{statusBadge(p.startDate, p.endDate)}</td>
-                    <td className="p-4 text-center">
-                      {/* Nút bấm xóa ưu đãi */}
-                      <button
-                        onClick={() => handleDelete(p.promoId, p.couponCode)}
-                        className="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg font-semibold"
-                      >
-                        Xóa bỏ
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {promos.map((p) => {
+                  // Khảo sát xem mã này áp dụng riêng hay áp dụng chung
+                  const appliedProduct = products.find(prod => prod.productId === p.targetProductId);
+
+                  return (
+                    <tr key={p.promoId} className="hover:bg-gray-50 transition-colors">
+                      <td className="p-4 font-bold text-blue-600">{p.couponCode}</td>
+                      
+                      {/*Hiển thị thông tin phạm vi áp dụng trên bảng */}
+                      <td className="p-4">
+                        {p.targetProductId ? (
+                          <span className="text-orange-600 font-medium">
+                            {appliedProduct ? appliedProduct.productName : `Sản phẩm #${p.targetProductId}`}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500 font-medium">Toàn bộ giỏ hàng</span>
+                        )}
+                      </td>
+
+                      <td className="p-4 font-bold text-green-600">-${Number(p.discountValue).toLocaleString()}</td>
+                      <td className="p-4 text-gray-500">
+                        {formatDateTime(p.startDate)} ~ {formatDateTime(p.endDate)}
+                      </td>
+                      <td className="p-4">{statusBadge(p.startDate, p.endDate)}</td>
+                      <td className="p-4 text-center">
+                        <button
+                          onClick={() => handleDelete(p.promoId, p.couponCode)}
+                          className="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg font-semibold"
+                        >
+                          Xóa bỏ
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}

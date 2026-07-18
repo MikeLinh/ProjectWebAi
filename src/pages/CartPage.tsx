@@ -107,7 +107,8 @@ export default function CartPage() {
                 </button>
               </div>
               <PromoSection 
-                cartTotal={cartTotal} 
+                cart={cart} 
+                cartTotal={cartTotal}
                 onApplyDiscount={handleApplyDiscount} 
               />
             </div>

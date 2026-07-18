@@ -17,6 +17,8 @@ export default function Siderbar({currentTab, setCurrentTab}:SiderBarProps){
         {id: "categories", label: "Danh mục sản phẩm"},
         {id: "orders", label: "Đơn hàng"},
         {id: "promotions", label: "Khuyến mãi"},
+        {id: "manufacturer", label: "Nhà sản xuất"},
+        {id: "supplier", label: "Nhà cung cấp"},
         {id: "user", label: "Tài khoản"},
     ];
     // Hàm xử lý Đăng xuất

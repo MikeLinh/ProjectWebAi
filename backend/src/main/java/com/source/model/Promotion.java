@@ -32,6 +32,11 @@ public class Promotion {
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
+    @Column(name = "target_product_id")
+    private Integer targetProductId;
+    public Integer getTargetProductId() { return targetProductId; }
+    public void setTargetProductId(Integer targetProductId) { this.targetProductId = targetProductId; }
+
 
     public String getDiscountType() { return discountType; }
     public void setDiscountType(String discountType) { this.discountType = discountType; }

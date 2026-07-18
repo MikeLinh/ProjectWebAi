@@ -110,7 +110,7 @@ export default function ManageProducts() {
                 <tr key={p.productId} className="hover:bg-gray-50 transition-colors">
                   <td className="p-4 font-bold text-gray-400">#{p.productId}</td>
                   <td className="p-4 font-semibold text-gray-900">{p.productName}</td>
-                  <td className="p-4 text-gray-600">{p.brand}</td>
+                  <td className="p-4 font-semibold text-gray-900">{p.manufacturer?.manufacturerName || "-"}</td>
                   <td className="p-4 text-gray-500">{p.category?.categoryName || "—"}</td>
                   <td className="p-4 text-red-600 font-bold">${Number(p.price).toLocaleString()}</td>
                   <td className="p-4 font-medium">{p.stockQuantity} xe</td>

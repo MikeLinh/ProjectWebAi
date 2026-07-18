@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-hooks/immutability */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -11,100 +12,135 @@ interface Product {
   imageUrl?: string;
   brand?: string;
 }
-// Định nghĩa kiểu dữ liệu cho Phiếu Nhập Kho
+
+// Định nghĩa kiểu dữ liệu NSX
+interface Manufacturer {
+  manufacturerId: number;
+  manufacturerName: string;
+  country?: string;
+  active?: boolean;
+}
+// Định nghĩa kiểu dữ liệu NCC
+interface Supplier {
+  supplierId: number;
+  supplierName: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  active?: boolean;
+}
+
 interface Receipt {
   receiptId: number;
   productId: number;
   productName?: string;
   quantityAdded: number;
   importPrice: number;
-  supplier?: string;
-  manufacturer?: string;
+  supplier?: any;         
+  manufacturer?: any;     
+  supplierName?: string;  
+  manufacturerName?: string; 
   importedAt: string;
 }
-// Khởi tạo giá trị rỗng mặc định cho form nhập liệu
+
+// Khởi tạo giá trị rỗng mặc định cho form nhập liệu (Dùng ID để quản lý select)
 const EMPTY_FORM = {
   receiptId: "", 
   productId: "",
   quantityAdded: "",
   importPrice: "",
-  supplier: "",
-  manufacturer: "",
+  supplierId: "", // Quản lý qua ID
+  manufacturerId: "", // Quản lý qua ID
 };
-// Danh sách nhà cung cấp cố định
-const SUPPLIERS = ["Công ty Xe đạp Toàn Cầu", "Nhà phân phối Đại Nam", "XNK Thể Thao Việt", "Phụ tùng Chợ Lớn"];
 
 export default function ManagerWarehouse() {
-  const [products, setProducts] = useState<Product[]>([]); // Danh sách sản phẩm hiện có
-  const [receipts, setReceipts] = useState<Receipt[]>([]); // Lịch sử các phiếu nhập kho
-  const [lowStock, setLowStock] = useState<Product[]>([]); // Danh sách hàng sắp hết (tồn <= 5)
-  const [form, setForm] = useState(EMPTY_FORM); // Dữ liệu của form hiện tại
-  const [submitting, setSubmitting] = useState(false); // Trạng thái gửi API (khóa nút bấm)
+  const [products, setProducts] = useState<Product[]>([]); 
+  const [receipts, setReceipts] = useState<Receipt[]>([]); 
+  const [lowStock, setLowStock] = useState<Product[]>([]); 
+  const [form, setForm] = useState(EMPTY_FORM); 
+  const [submitting, setSubmitting] = useState(false); 
   const [formError, setFormError] = useState<string | null>(null); 
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false); // Đang ở chế độ Sửa hay Tạo mới
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Danh sách các thương hiệu/nhà sản xuất xe đạp
-  const[manufacturers, setManufacturers] = useState<string[]>([
-    "Giant", "Specialized", "Trek", "Cannondale", "Bianchi"
-  ]);
+  // Lưu danh sách Object từ Backend đổ về thay vì mảng String cứng
+  const [dbManufacturers, setDbManufacturers] = useState<Manufacturer[]>([]);
+  const [dbSuppliers, setDbSuppliers] = useState<Supplier[]>([]);
 
-  // Dùng useCallback để hàm không bị khởi tạo lại
-  const addNewManufacturer = (newBrand : string) =>{
-    const trimmed = newBrand?.trim();
-    // Chỉ thêm mới nếu thương hiệu chưa tồn tại trong danh sách
-    if(trimmed && !manufacturers.includes(trimmed)){
-      setManufacturers(prev => [...prev, trimmed].sort((a,b) => a.localeCompare(b)));
-      console.log(`Đã tự động thêm thương hiệu mới: ${trimmed}`);
-    }
-  }
-  // Lắng nghe sự kiện bổ sung thương hiệu từ các component khác ngoài window
   useEffect(() => {
     fetchAll();
   }, []);
-  useEffect(()=>{
-    const handleNewBrand = (e:any) =>{
-      addNewManufacturer(e.detail);
-    };
-    window.addEventListener('newBrandAdded', handleNewBrand);
-    // Hủy lắng nghe khi component bị unmount để tránh rò rỉ bộ nhớ
-    return () =>{
-      window.removeEventListener('newBrandAdded',handleNewBrand);
-    };
-  },[manufacturers]); // Chỉ chạy lại nếu hàm addNewManufacturer thay đổi
 
   // Hàm nạp đồng thời toàn bộ dữ liệu từ server
   const fetchAll = async () => {
     try {
-      const [pRes, rRes, lRes] = await Promise.all([ //Promise.all sẽ lấy nhiều dữ liệu cùng 1 lúc
+      const [pRes, rRes, lRes, mRes, sRes] = await Promise.all([ 
         axios.get<Product[]>("http://localhost:8080/api/products"),
         axios.get<Receipt[]>("http://localhost:8080/api/warehouse"),
-        axios.get<Product[]>("http://localhost:8080/api/warehouse/low-stock")
+        axios.get<Product[]>("http://localhost:8080/api/warehouse/low-stock"),
+        axios.get<Manufacturer[]>("http://localhost:8080/api/manufacturers"), 
+        axios.get<Supplier[]>("http://localhost:8080/api/suppliers") 
       ]);
       setProducts(pRes.data);
       setReceipts(rRes.data);
       setLowStock(lRes.data);
+      setDbManufacturers(mRes.data || []);
+      setDbSuppliers(sRes.data || []);
     } catch (err) {
       console.error("Lỗi khi tải dữ liệu kho:", err);
+      // Fallback nếu chưa có API danh sách riêng, tạm tạo danh sách ảo từ data receipts để tránh sập
     }
   };
 
-  // Lắng nghe thay đổi của các ô nhập liệu trong form
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => { //Chỉ nhận khi người dùng thao tác trên thẻ Input và Select
+  // Tự động gom danh sách từ receipts nếu không có API riêng
+  useEffect(() => {
+    if (receipts.length > 0) {
+      const uniqueManus: Manufacturer[] = [];
+      const uniqueSups: Supplier[] = [];
+      
+      receipts.forEach(r => {
+        if (r.manufacturer && !uniqueManus.some(m => m.manufacturerId === r.manufacturer?.manufacturerId)) {
+          uniqueManus.push(r.manufacturer);
+        }
+        if (r.supplier && !uniqueSups.some(s => s.supplierId === r.supplier?.supplierId)) {
+          uniqueSups.push(r.supplier);
+        }
+      });
+      
+      if (dbManufacturers.length === 0) setDbManufacturers(uniqueManus);
+      if (dbSuppliers.length === 0) setDbSuppliers(uniqueSups);
+    }
+  }, [receipts]);
+
+ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => { 
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value }); //...sao chép lại toàn bộ dữ liệu cũ của form để tránh làm mất các ô khác.
-      if (name === "productId" && value) { // chọn một sản phẩm(không rỗng)
-      const selectedProduct = products.find(p => p.productId === Number(value));
-      if (selectedProduct) {
-        setForm(prev => ({ 
-          ...prev, 
-          manufacturer: selectedProduct.brand || ""  //Tự gán nsx khi chọn sp
-        }));
+    
+    // 1. Cập nhật giá trị ô đang nhập vào form
+    setForm(prev => {
+      const nextForm = { ...prev, [name]: value };
+      
+      // 2. Nếu vừa chọn sản phẩm, tự động tìm Manufacturer gắn liền với sản phẩm đó
+      if (name === "productId" && value) {
+        const selectedProduct = products.find(p => p.productId === Number(value));
+        
+        // Kiểm tra xem sản phẩm có đối tượng manufacturer đính kèm từ Backend không
+        // Đảm bảo kiểm tra qua thuộc tính đối tượng (any) do kiểu Product khai báo thiếu trường này
+        const prodManu = (selectedProduct as any)?.manufacturer;
+        
+        if (prodManu && prodManu.manufacturerId) {
+          // So khớp ID với danh sách hệ thống để đảm bảo an toàn dữ liệu
+          const matched = dbManufacturers.find(m => m.manufacturerId === prodManu.manufacturerId);
+          nextForm.manufacturerId = matched ? String(matched.manufacturerId) : "";
+        } else {
+          nextForm.manufacturerId = "";
+        }
       }
-    }
+      
+      return nextForm;
+    });
   };
 
-  //chỉnh sửa phiếu nhập kho
+  // Chỉnh sửa phiếu nhập kho
   const handleEditClick = (receipt: Receipt) => {
     setIsEditing(true);
     setForm({
@@ -112,77 +148,76 @@ export default function ManagerWarehouse() {
       productId: String(receipt.productId),
       quantityAdded: String(receipt.quantityAdded),
       importPrice: String(receipt.importPrice),
-      supplier: receipt.supplier || "",
-      manufacturer: receipt.manufacturer || "",
+      supplierId: receipt.supplier?.supplierId ? String(receipt.supplier.supplierId) : "",
+      manufacturerId: receipt.manufacturer?.manufacturerId ? String(receipt.manufacturer.manufacturerId) : "",
     });
     setFormError(null);
     setSuccessMsg(null);
   };
-  // Hủy bỏ chế độ sửa, quay về chế độ thêm mới
+
   const handleCancelEdit = () => {
     setIsEditing(false);
     setForm(EMPTY_FORM);
   };
 
-  // Xử lý yêu cầu Xóa phiếu nhập kho
   const handleDeleteClick = async (receiptId: number) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa phiếu nhập kho này? Số lượng tồn kho sản phẩm sẽ không tự hoàn tác.")) return; //yêu cầu tránh người dùng chọn nhầm
+    if (!window.confirm("Bạn có chắc chắn muốn xóa phiếu nhập kho này? Số lượng tồn kho sản phẩm sẽ không tự hoàn tác.")) return; 
     try {
       await axios.delete(`http://localhost:8080/api/warehouse/${receiptId}`);
       setSuccessMsg("Xóa phiếu nhập kho thành công!");
-      fetchAll(); // Nạp lại toàn bộ dữ liệu mới nhất
+      fetchAll(); 
     } catch (err: any) {
       console.error(err);
       setFormError("Không thể xóa phiếu này.");
     }
   };
 
-  // Gửi dữ liệu form (Tạo mới hoặc Cập nhật)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null); //Xóa sạch các thông báo lỗi hoặc thông báo thành công của những lần bấm nút trước đó
+    setFormError(null); 
     setSuccessMsg(null);
 
-    // Kiểm tra tính hợp lệ của dữ liệu đầu vào
-    if (!form.productId || !form.quantityAdded || !form.importPrice || !form.manufacturer || !form.supplier) {
+    if (!form.productId || !form.quantityAdded || !form.importPrice || !form.manufacturerId || !form.supplierId) {
       setFormError("Vui lòng điền và chọn đầy đủ thông tin mẫu.");
-      return; // Dừng hàm tại đây, không chạy tiếp xuống dưới nữa
+      return; 
     }
 
-    setSubmitting(true); //chuyển trạng thái đang xử lý, tránh user spam submit gửi đơn trùng lặp lên db
+    setSubmitting(true); 
     try {
-      const payload = { //Dữ liệu sạch được gửi đi
+      // Xây dựng cấu trúc Object đúng chuẩn gởi lên Backend Java
+      const payload = { 
         productId: Number(form.productId),
         quantityAdded: Number(form.quantityAdded),
         importPrice: Number(form.importPrice),
-        supplier: form.supplier.trim(),
-        manufacturer: form.manufacturer.trim(),
+        supplier: {
+          supplierId: Number(form.supplierId)
+        },
+        manufacturer: {
+          manufacturerId: Number(form.manufacturerId)
+        }
       };
 
       if (isEditing) {  
-        // Gửi request cập nhật (PUT)
         await axios.put(`http://localhost:8080/api/warehouse/${form.receiptId}`, payload);
         setSuccessMsg("Cập nhật thông tin phiếu kho thành công!");
-        setIsEditing(false); // Thoát khỏi chế độ Sửa, quay về chế độ Thêm mới thông thường
+        setIsEditing(false); 
       } else {
-        // Gửi request tạo mới (POST)
         await axios.post("http://localhost:8080/api/warehouse", payload);
         setSuccessMsg("Tạo phiếu nhập kho và tăng tồn kho thành công!");
       }
 
-      setForm(EMPTY_FORM); //clear form
-      fetchAll(); //Gọi fetchAll load lại danh sách
+      setForm(EMPTY_FORM); 
+      fetchAll(); 
     } catch (err: any) {
       setFormError(err.response?.data || "Có lỗi xảy ra trong quá trình truyền tải.");
     } finally {
       setSubmitting(false);
     }
   };
-  // Tổng tiền đầu tư nhập hàng, sử dụng reduce(chức năng gom, cộng dồn)
-  const totalInvestment = receipts.reduce((sum, r) => sum + (r.importPrice * r.quantityAdded), 0); //r phiếu nhập hiện tại
-  // Tổng sản lượng nhập hàng
+
+  const totalInvestment = receipts.reduce((sum, r) => sum + (r.importPrice * r.quantityAdded), 0); 
   const totalQuantityImported = receipts.reduce((sum, r) => sum + r.quantityAdded, 0);
-  // Định dạng ngày giờ hiển thị kiểu Việt Nam
+  
   const formatDate = (isoString: string) => {
     if (!isoString) return "—";
     return new Date(isoString).toLocaleString("vi-VN");
@@ -197,6 +232,7 @@ export default function ManagerWarehouse() {
             <p className="text-sm text-gray-500 mt-1">Theo dõi, nhập xuất nguyên vật liệu thành phẩm xe đạp thể thao.</p>
           </div>
         </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-2xl border shadow-sm flex flex-col justify-between">
             <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">Tổng vốn nhập kho</span>
@@ -271,45 +307,29 @@ export default function ManagerWarehouse() {
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Nhà sản xuất (Brand)</label>
                 <select
-                  name="manufacturer"
-                  value={form.manufacturer}
+                  name="manufacturerId"
+                  value={form.manufacturerId}
                   onChange={handleInputChange}
                   className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-400 focus:outline-none"
                 >
                   <option value="">-- Chọn Nhà Sản Xuất --</option>
-                  {manufacturers.map((m) => (
-                    <option key={m} value={m}>{m}</option>
+                  {dbManufacturers.map((m) => (
+                    <option key={m.manufacturerId} value={m.manufacturerId}>{m.manufacturerName}</option>
                   ))}
                 </select>
-                <input
-                  type="text"
-                  placeholder="Thêm NSX mới"
-                  className="w-40 mt-5 border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-400 focus:outline-none"
-                  onKeyDown={(e) => {
-                    if(e.key === 'Enter'){
-                      const newBrand= (e.target as HTMLInputElement).value.trim();
-                      if(newBrand){
-                        addNewManufacturer(newBrand);
-                        setForm(prev => ({...prev, manufacturer: newBrand}));
-                        (e.target as HTMLInputElement).value = '';
-                      }
-                    }
-                  }}
-                >
-                </input>
               </div>
-              <p className="text-[10px] text-gray-500 mt-1">Nhấn Enter để thêm NSX mới</p>
+
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Nhà cung cấp (Supplier)</label>
                 <select
-                  name="supplier"
-                  value={form.supplier}
+                  name="supplierId"
+                  value={form.supplierId}
                   onChange={handleInputChange}
                   className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-400 focus:outline-none"
                 >
                   <option value="">-- Chọn Nhà Cung Cấp --</option>
-                  {SUPPLIERS.map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                  {dbSuppliers.map((s) => (
+                    <option key={s.supplierId} value={s.supplierId}>{s.supplierName}</option>
                   ))}
                 </select>
               </div>
@@ -350,6 +370,7 @@ export default function ManagerWarehouse() {
               )}
             </div>
           </div>
+
           <div className="lg:col-span-2 bg-white p-6 rounded-2xl border shadow-sm space-y-4">
             <h2 className="text-lg font-bold text-gray-800 border-b pb-2">Lịch Sử Phiếu Nhập Kho</h2>
 
@@ -379,8 +400,8 @@ export default function ManagerWarehouse() {
                           <td className="p-3 text-center font-bold text-blue-600">+{r.quantityAdded}</td>
                           <td className="p-3 text-gray-700 font-semibold">${Number(r.importPrice).toLocaleString()}</td>
                           <td className="p-3 text-gray-500">
-                            <div className="font-medium text-gray-700">{r.manufacturer || "—"}</div>
-                            <div className="text-[10px] text-gray-400">{r.supplier || "—"}</div>
+                            <div className="font-medium text-gray-700">{r.manufacturerName || "—"}</div>
+                            <div className="text-[10px] text-gray-400">{r.supplierName || "—"}</div>
                           </td>
                           <td className="p-3 text-gray-400">{formatDate(r.importedAt)}</td>
                           <td className="p-3 text-center">

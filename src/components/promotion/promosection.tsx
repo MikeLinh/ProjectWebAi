@@ -9,14 +9,16 @@ interface Promotion {
   minSpend: number;
   startDate: string | null;
   endDate: string | null;
+  targetProductId: number | null; // 🌟 Thêm trường: null = tất cả, number = ID sản phẩm cụ thể
 }
 
 interface PromoSectionProps {
+  cart: any[]; // 🌟 Thêm nhận mảng giỏ hàng để duyệt tìm sản phẩm mục tiêu
   cartTotal: number;
   onApplyDiscount: (discountAmount: number, code: string, promoId: number | null) => void;
 }
 
-export default function PromoSection({ cartTotal, onApplyDiscount }: PromoSectionProps) {
+export default function PromoSection({ cart, cartTotal, onApplyDiscount }: PromoSectionProps) {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [selectedCode, setSelectedCode] = useState<string>("");
   const [message, setMessage] = useState<{ text: string; isError: boolean }>({ text: "", isError: false });
@@ -29,12 +31,27 @@ export default function PromoSection({ cartTotal, onApplyDiscount }: PromoSectio
       .catch((err) => console.error("Lỗi khi tải mã giảm giá:", err));
   }, []);
 
-  // SỬA LỖI: Đồng bộ tham số truyền vào chuẩn hóa theo Object Promotion
-  const calculateDiscount = (promo: Promotion, total: number): number => {
-    if (promo.discountType === "PERCENTAGE") {
-      return (total * promo.discountValue) / 100;
+  //Từng sản phẩm hoặc Tất cả
+  const calculateDiscount = (promo: Promotion): number => {
+    if (promo.targetProductId) {
+      // Tìm sản phẩm mục tiêu được áp dụng mã trong giỏ hàng
+      const targetItem = cart.find(item => item.id === promo.targetProductId);
+      if (!targetItem) return 0;
+
+      // Tính tổng giá trị của riêng sản phẩm đó (giá * số lượng)
+      const itemTotalSub = targetItem.price * targetItem.quantity;
+      if (promo.discountType === "PERCENTAGE") {
+        return (itemTotalSub * promo.discountValue) / 100;
+      }
+      // Nếu là FIXED (ví dụ giảm $50), không để số tiền giảm vượt quá tổng giá trị sản phẩm đó
+      return Math.min(promo.discountValue, itemTotalSub);
     }
-    return promo.discountValue; 
+
+    // Nếu áp dụng cho TẤT CẢ sản phẩm (toàn bộ giỏ hàng)
+    if (promo.discountType === "PERCENTAGE") {
+      return (cartTotal * promo.discountValue) / 100;
+    }
+    return Math.min(promo.discountValue, cartTotal); 
   };
 
   // Kiểm tra thời gian hết hạn ngay trên Client để nhuộm màu text
@@ -53,7 +70,8 @@ export default function PromoSection({ cartTotal, onApplyDiscount }: PromoSectio
       ? `Giảm ${safeDiscount}%` 
       : `Giảm $${safeDiscount.toLocaleString()}`;
       
-    return `Mã ${promo.couponCode || "CODE"} - ${detail} (Đơn từ $${safeMinSpend.toLocaleString()})`;
+    const scope = promo.targetProductId ? `[Sản phẩm #${promo.targetProductId}]` : "[Tất cả đơn]";
+    return `Mã ${promo.couponCode || "CODE"} - ${detail} ${scope} (Đơn từ $${safeMinSpend.toLocaleString()})`;
   };
 
   // Xử lý khi người dùng chủ động chọn mã giảm giá
@@ -70,19 +88,29 @@ export default function PromoSection({ cartTotal, onApplyDiscount }: PromoSectio
     const localPromo = promotions.find((p) => p.couponCode === code);
     if (!localPromo) return;
 
-    // Kiểm tra xem mã đã hết hạn chưa
+    //Kiểm tra xem mã đã hết hạn chưa
     if (isExpired(localPromo.endDate)) {
       onApplyDiscount(0, "", null);
       setMessage({ text: "Mã giảm giá này đã hết hạn sử dụng!", isError: true });
       return;
     }
 
-    // Kiểm tra điều kiện giá trị giỏ hàng tối thiểu
+    //Kiểm tra điều kiện giá trị giỏ hàng tối thiểu
     const minSpend = Number(localPromo.minSpend) || 0;
     if (cartTotal < minSpend) {
       onApplyDiscount(0, "", null);
       setMessage({ 
         text: `Giỏ hàng chưa đủ $${minSpend.toLocaleString()} để áp dụng mã này.`, 
+        isError: true 
+      });
+      return;
+    }
+
+    //Kiểm tra điều kiện sản phẩm mục tiêu (Nếu có)
+    if (localPromo.targetProductId && !cart.some(item => item.id === localPromo.targetProductId)) {
+      onApplyDiscount(0, "", null);
+      setMessage({ 
+        text: `Mã này chỉ dành riêng cho một sản phẩm cụ thể hiện chưa có trong giỏ hàng!`, 
         isError: true 
       });
       return;
@@ -94,7 +122,7 @@ export default function PromoSection({ cartTotal, onApplyDiscount }: PromoSectio
       const data = await response.json();
 
       if (response.ok && data.success) {
-        const discountAmount = calculateDiscount(localPromo, cartTotal);
+        const discountAmount = calculateDiscount(localPromo);
         onApplyDiscount(discountAmount, data.couponCode, data.promoId);
         setMessage({ 
           text: `Áp dụng thành công! Đã giảm $${discountAmount.toLocaleString()}`, 
@@ -106,14 +134,13 @@ export default function PromoSection({ cartTotal, onApplyDiscount }: PromoSectio
       }
     } catch (error) {
       console.error("Lỗi validate promotion:", error);
-      // Fallback khi mất mạng
-      const discountAmount = calculateDiscount(localPromo, cartTotal);
+      const discountAmount = calculateDiscount(localPromo);
       onApplyDiscount(discountAmount, localPromo.couponCode, localPromo.promoId);
       setMessage({ text: "Áp dụng tạm thời (Lỗi kết nối kiểm tra hạn dùng)", isError: false });
     }
   };
 
-  // Theo dõi biến động giỏ hàng (khi tăng/giảm số lượng món đồ)
+  // Theo dõi biến động giỏ hàng (khi tăng/giảm số lượng hoặc xóa món đồ khỏi giỏ hàng)
   useEffect(() => {
     if (selectedCode) {
       const promo = promotions.find((p) => p.couponCode === selectedCode);
@@ -132,17 +159,29 @@ export default function PromoSection({ cartTotal, onApplyDiscount }: PromoSectio
             text: `Mã đã bị hủy vì giỏ hàng giảm xuống dưới $${minSpend.toLocaleString()}`, 
             isError: true 
           });
-        } else {
-          const discountAmount = calculateDiscount(promo, cartTotal);
-          onApplyDiscount(discountAmount, promo.couponCode, promo.promoId);
-          setMessage({ 
-            text: `Áp dụng thành công! Đã giảm $${discountAmount.toLocaleString()}`, 
-            isError: false 
-          });
+          return;
         }
+
+        //Kiểm tra nếu sản phẩm bị xóa khỏi giỏ hàng lúc đang áp dụng mã
+        if (promo.targetProductId && !cart.some(item => item.id === promo.targetProductId)) {
+          onApplyDiscount(0, "", null);
+          setMessage({ 
+            text: `Mã bị hủy do sản phẩm được áp dụng ưu đãi không còn trong giỏ hàng.`, 
+            isError: true 
+          });
+          setSelectedCode("");
+          return;
+        }
+
+        const discountAmount = calculateDiscount(promo);
+        onApplyDiscount(discountAmount, promo.couponCode, promo.promoId);
+        setMessage({ 
+          text: `Áp dụng thành công! Đã giảm $${discountAmount.toLocaleString()}`, 
+          isError: false 
+        });
       }
     }
-  }, [cartTotal, selectedCode, promotions]);
+  }, [cartTotal, cart, selectedCode, promotions]); // Thêm 'cart' vào mảng dependency
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 mt-4 space-y-3 shadow-sm">
@@ -165,24 +204,30 @@ export default function PromoSection({ cartTotal, onApplyDiscount }: PromoSectio
           <option value="">-- Chọn mã giảm giá phù hợp --</option>
           {promotions.map((promo) => {
             const hasExpired = isExpired(promo.endDate);
-            const isEligible = cartTotal >= promo.minSpend && !hasExpired;
+            const hasTargetProduct = promo.targetProductId ? cart.some(item => item.id === promo.targetProductId) : true;
+            const isEligible = cartTotal >= promo.minSpend && !hasExpired && hasTargetProduct;
             
-            // Hết hạn -> màu xám, Còn hạn sử dụng được -> màu xanh lá
             const optionClass = hasExpired 
               ? "text-gray-400 line-through" 
               : isEligible 
                 ? "text-green-600 font-medium" 
-                : "text-orange-500"; // Có màu cam cảnh báo nếu chưa đủ min_spend
+                : "text-orange-500";
 
             return (
               <option 
                 key={promo.promoId} 
                 value={promo.couponCode}
                 className={optionClass}
-                disabled={hasExpired} // Khóa không cho chọn nếu mã đã hết hạn hẳn
+                disabled={hasExpired}
               >
                 {getPromoText(promo)} 
-                {hasExpired ? " (Hết hạn)" : !isEligible ? " (Chưa đủ điều kiện đơn hàng)" : " (Sẵn sàng)"}
+                {hasExpired 
+                  ? " (Hết hạn)" 
+                  : !hasTargetProduct 
+                    ? " (Thiếu sản phẩm áp dụng)" 
+                    : !isEligible 
+                      ? " (Chưa đủ điều kiện đơn)" 
+                      : " (Sẵn sàng)"}
               </option>
             );
           })}

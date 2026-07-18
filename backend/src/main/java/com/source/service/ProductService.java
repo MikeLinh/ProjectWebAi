@@ -86,7 +86,7 @@ public class ProductService {
                 predicates.add(root.get("category").get("categoryName").in(categories));
             }
             if (brands != null && !brands.isEmpty()) {
-                predicates.add(root.get("brand").in(brands));
+                predicates.add(root.get("manufacturer").get("manufacturerName").in(brands));
             }
             if (minPrice != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("price"), minPrice));
@@ -146,7 +146,7 @@ public class ProductService {
         List<Predicate> predicates = new ArrayList<>();
             // Lọc các sản phẩm thuộc cùng một thương hiệu
             if (brand != null && !brand.isBlank()) {
-                predicates.add(cb.equal(root.get("brand"), brand));
+                predicates.add(cb.equal(root.get("manufacturer").get("manufacturerName"), brand));
             }
             // Loại trừ sản phẩm đang xem chi tiết ra khỏi danh sách gợi ý liên quan
             if (excludeProductId != null) {

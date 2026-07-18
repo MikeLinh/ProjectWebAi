@@ -14,11 +14,12 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
   const {showNotification} = useNotification();
   const [categories, setCategories] = useState<any[]>([]); // Danh sách các danh mục sản phẩm từ API
   const [warehouseProducts, setwarehouseProducts] = useState<any[]>([]); // Danh sách sản phẩm khả dụng trong kho hàng
+  const [manufacturers, setManufacturers] = useState<any[]>([]);
 
   // State lưu trữ dữ liệu của Form nhập liệu
   const [formData, setFormData] = useState({
     productName: "",
-    brand: "",
+    manufacturerName: "",
     price: 0,
     stockQuantity: 0,
     categoryId: "",
@@ -63,13 +64,20 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
       .then((data) => setwarehouseProducts(data))
       .catch((err) => console.log("Lỗi lấy sản phẩm từ kho: ",err));
   },[isOpen,editingProduct])
-
+  useEffect(()=>{
+    fetch("http://localhost:8080/api/manufacturers")
+      .then((res) => res.json())
+      .then((data) =>{
+        setManufacturers(data);
+      })
+      .catch((err)=>console.log("Lỗi lấy danh sách thương hiệu",err))
+  },[isOpen])
   //dữ liệu vào Form tùy theo chế độ Chỉnh sửa hay Thêm mới
   useEffect(() => {
     if (editingProduct) {
       setFormData({
         productName: editingProduct.productName || "",
-        brand: editingProduct.brand || "",
+        manufacturerName: editingProduct.manufacturer?.manufacturerName || editingProduct.manufacturerName || "",
         price: editingProduct.price || 0,
         stockQuantity: editingProduct.stockQuantity || 0,
         categoryId: editingProduct.category ? editingProduct.category.categoryId.toString() : "",
@@ -80,7 +88,7 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     } else {
       setFormData({
         productName: "",
-        brand: "",
+        manufacturerName: "",
         price: 0,
         stockQuantity: 0,
         categoryId: categories.length > 0 ? categories[0].categoryId.toString() : "",
@@ -99,22 +107,34 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     e.preventDefault();
 
     const form = new FormData();
-
     form.append("productName", formData.productName);
-    form.append("brand", formData.brand);
     form.append("price", formData.price.toString());
     form.append("stockQuantity", formData.stockQuantity.toString());
     form.append("categoryId", formData.categoryId);
     form.append("description", formData.description);
     form.append("discountPercent", formData.discountPercent.toString());
+    form.append("manufacturerName", formData.manufacturerName);
 
-    //Ưu tiên file ảnh cục bộ mới upload, nếu không có thì giữ lại URL ảnh cũ
+    // Tìm kiếm ID từ mảng danh sách hãng xe dựa theo tên hãng đang lưu trong state
+    const currentManu = manufacturers.find(m => m.manufacturerName === formData.manufacturerName);
+    
+    if (currentManu) {
+      const idToAppend = currentManu.manufacturerId || currentManu.id;
+      form.append("manufacturerId", idToAppend.toString());
+    } else if (editingProduct && editingProduct.manufacturer?.manufacturerId) {
+      // Dự phòng nếu không tìm thấy trong danh sách nạp động, lấy trực tiếp ID gốc của đối tượng đang chỉnh sửa
+      form.append("manufacturerId", editingProduct.manufacturer.manufacturerId.toString());
+    } else {
+      showNotification("Vui lòng chọn hoặc kiểm tra lại Thương hiệu hợp lệ!", "warning");
+      return;
+    }
+
     if (selectedFile) {
       form.append("image", selectedFile);
     } else if (formData.imageUrl) {
       form.append("imageUrl", formData.imageUrl);
     }
-    // Định tuyến API: PUT đối với chỉnh sửa (yêu cầu ID), POST đối với thêm mới sản phẩm
+
     const url = editingProduct 
       ? `http://localhost:8080/api/products/${editingProduct.productId}` 
       : "http://localhost:8080/api/products"; 
@@ -124,21 +144,21 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
       const res = await fetch(url, { method, body: form });
       if (res.ok) {
         const saveProduct = await res.json();
-        //Chỉnh sửa và có thay đổi số lượng tồn kho so với ban đầu
+        
         if(editingProduct && formData.stockQuantity !== editingProduct.stockQuantity){
-          await updateStock(saveProduct.productId, formData.stockQuantity)
+          await updateStock(saveProduct.productId, formData.stockQuantity);
         }
-        //Thêm mới sản phẩm thành công có thương hiệu mới
-        if(!editingProduct && formData.brand){
+        
+        if(!editingProduct && formData.manufacturerName){
           window.dispatchEvent(new CustomEvent('newBrandAdded',{
-            detail: formData.brand
+            detail: formData.manufacturerName
           }));
-          console.log("Đã gửi brand mới:" , formData.brand);
         }
+        
         showNotification(editingProduct ? "Cập nhật sản phẩm thành công!": "Thêm sản phẩm thành công!","success");
         onSave(); 
       } else {
-        showNotification("Lưu thất bại! Xin vui lòng kiểm tra lại.","error");
+        showNotification("Lưu thất bại! Xin vui lòng kiểm tra dữ liệu hoặc log Server.","error");
       }
     } catch (error) {
       console.error("Lỗi gửi dữ liệu:", error);
@@ -168,17 +188,17 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
                         setFormData(prev =>({
                           ...prev,
                           productName: selected.productName || "",
-                          brand: selected.brand || "",
+                          manufacturerName: selected.manufacturer?.manufacturerName || selected.manufacturerName || "",
                           price: selected.price || 0,
                           stockQuantity: selected.stockQuantity || 0
                         }));
                       }
                     }}
                     >
-                      <option value="">-- Chọn kho để lấy dữ liệu --</option>
+                      <option value="" className="text-gray-400">Chọn kho để lấy dữ liệu</option>
                       {warehouseProducts.map(p=>(
                         <option key={p.productId} value={p.productId}>
-                          {p.productName} - {p.brand} (Tồn: {p.stockQuantity})
+                          {p.productName} - {p.manufacturer?.manufacturerName || "Không rõ"} (Tồn: {p.stockQuantity})
                         </option>
                       ))}
                   </select>
@@ -191,7 +211,31 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
 
             <div>
               <label className="block font-semibold mb-1 text-gray-700">Thương hiệu</label>
-              <input type="text" required className="w-full border p-2.5 rounded-lg outline-none focus:border-blue-500" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
+              {editingProduct ? (
+                <input 
+                  type="text" 
+                  disabled
+                  className="w-full border p-2.5 rounded-lg outline-none bg-gray-100 cursor-not-allowed font-medium text-gray-500" 
+                  value={formData.manufacturerName} 
+                />
+              ) : (
+               <select 
+                  required 
+                  className="w-full border p-2.5 rounded-lg bg-white outline-none focus:border-blue-500" 
+                  value={manufacturers.find(m => m.manufacturerName === formData.manufacturerName)?.manufacturerId || ""} 
+                  onChange={e => {
+                    const selectedManu = manufacturers.find(m => (m.manufacturerId || m.id).toString() === e.target.value);
+                    setFormData({...formData, manufacturerName: selectedManu ? selectedManu.manufacturerName : ""});
+                  }}
+                >
+                  <option value="" >Chọn thương hiệu</option>
+                  {manufacturers.map((manu) => (
+                    <option key={manu.manufacturerId || manu.id} value={manu.manufacturerId || manu.id}>
+                      {manu.manufacturerName}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div>

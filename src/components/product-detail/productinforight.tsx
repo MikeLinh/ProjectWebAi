@@ -20,7 +20,7 @@ interface ProductInfoRightProps {
   description?: string;
 }
 
-export default function ProductInfoRight({ id, image, name, price, originalPrice, category, rating, reviewCount, inStock = 15, description }: ProductInfoRightProps) {
+export default function ProductInfoRight({ id, image, name, price, originalPrice, category, rating, reviewCount, inStock = 0, description }: ProductInfoRightProps) {
   const {showNotification} = useNotification();
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedSize, setSelectedSize] = useState<string>("M");

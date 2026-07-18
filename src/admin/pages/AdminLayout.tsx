@@ -6,6 +6,8 @@ import ManageOrders from "./ManagerOrder";
 import ManagePromotions from "./ManagerPromotion";
 import ManageCategories from "./ManagerCategory";
 import ManageWarehouse from "./ManagerWarehouse";
+import ManagerManufacturer from "./ManagerManufacturer";
+import ManagerSupplier from "./ManagerSupplier";
 import User from "./ManageUser"
 
 export default function AdminLayout() {
@@ -29,6 +31,10 @@ export default function AdminLayout() {
         return <ManagePromotions />;
       case "categories":
         return <ManageCategories/>;
+      case "manufacturer":
+        return <ManagerManufacturer/>;
+      case "supplier":
+        return <ManagerSupplier/>;
       case "user":
         return <User/>;
       default:

@@ -63,7 +63,7 @@ export default function ProductGrid({ currentProducts, loading }: ProductGridPro
               category: product.category?.categoryName || "Bicycles",
               inStock: product.stockQuantity,
               description: product.description,
-              brand: product.brand,
+              manufacturer: product.manufacturer?.manufacturerName || product.brand || "",
               isNew: product.isNew
             }}
           />

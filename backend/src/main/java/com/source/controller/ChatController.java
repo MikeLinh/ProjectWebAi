@@ -28,7 +28,7 @@ public class ChatController {
         String productContext = products.stream().map(p -> //Duyệt qua từng sản phẩm để hiển thị thành chuỗi thông tin định dạng
             String.format("- %s | Hãng: %s | Danh mục: %s | Giá: $%s | Tồn kho: %d xe | Mô tả: %s",
                 p.getProductName(),
-                p.getBrand() != null ? p.getBrand() : "N/A",
+                p.getManufacturer() != null ? p.getManufacturer() : "N/A",
                 p.getCategory() != null ? p.getCategory().getCategoryName() : "N/A",
                 p.getPrice().toPlainString(),
                 p.getStockQuantity() != null ? p.getStockQuantity() : 0,

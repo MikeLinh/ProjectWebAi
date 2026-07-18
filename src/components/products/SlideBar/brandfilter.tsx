@@ -15,7 +15,7 @@ export default function BrandFilter({ filters, update }: BrandFilterProps) {
     fetch("http://localhost:8080/api/products")
       .then(res => res.json())
       .then((products: any[]) => {
-        const uniqueBrands = [...new Set(products.map((p: any) => p.brand).filter(Boolean))];
+        const uniqueBrands = [...new Set(products.map((p: any) => p.manufacturer?.manufacturerName).filter(Boolean))];
         setBrands(uniqueBrands);
       })
       .catch(err => {

@@ -7,7 +7,7 @@ import { useNotification } from "../context/notificationcontext";
 interface Product {
   id: number;
   name: string;
-  brand?: string;
+  manufacturer?: string,
   price: number;
   originalPrice?: number;
   image: string;
@@ -76,6 +76,13 @@ export default function Card({ product }: CardProps) {
           alt={product.name} 
           className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
         />
+        {product.inStock === 0 && (
+          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+            <span className="bg-gray-800/90 text-white text-xs font-bold px-3 py-1.5 rounded-md shadow-md uppercase tracking-wider">
+              Hết hàng
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Thông tin nội dung */}
@@ -85,9 +92,9 @@ export default function Card({ product }: CardProps) {
           <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider truncate">
             {product.category || "Bicycles"}
           </span>
-          {product.brand && (
+          {product.manufacturer && (
             <span className="text-[11px] bg-blue-50 text-blue-700 font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md shrink-0">
-              {product.brand}
+              {product.manufacturer}
             </span>
           )}
         </div>
@@ -121,12 +128,17 @@ export default function Card({ product }: CardProps) {
             )}
           </div>
           
-          <button
-            onClick={handleAddToCart}
-            className="bg-blue-950 text-sm text-white hover:bg-blue-900 p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center focus:outline-none shrink-0"
-          >
-            <ShoppingCartIcon style={{ fontSize: 18 }} />
-          </button>
+         <button
+          onClick={handleAddToCart}
+          disabled={product.inStock === 0} // Vô hiệu hóa hành động click khi hết hàng
+          className={`text-sm text-white p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center focus:outline-none shrink-0 ${
+            product.inStock === 0 
+              ? 'bg-gray-300 cursor-not-allowed text-gray-500' // Giao diện khi hết hàng
+              : 'bg-blue-950 hover:bg-blue-900' // Giao diện bình thường
+          }`}
+        >
+          <ShoppingCartIcon style={{ fontSize: 18 }} />
+        </button>
         </div>
       </div>
     </div>

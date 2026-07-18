@@ -78,7 +78,7 @@ export default function ProductDetail() {
           reviewCount: p.reviewCount || 0,
           discount: discountPercent,
           category: p.category?.categoryName || "Bicycles",
-          brand: p.brand,
+          brand: p.manufacturer?.manufacturerName || p.brand || "",
           inStock: p.stockQuantity,
           description: p.description,
         });
@@ -178,7 +178,7 @@ export default function ProductDetail() {
               category={product.category || "Bicycles"}
               rating={product.rating}
               reviewCount={reviewCount}
-              inStock={product.inStock || 15}
+              inStock={product.inStock ?? 0}
               description={product.description || "Dòng xe đạp cao cấp với thiết kế hiện đại, độ bền vượt trội vượt mọi địa hình."}
             />
           </div>

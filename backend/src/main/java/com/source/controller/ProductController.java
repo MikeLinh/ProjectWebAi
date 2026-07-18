@@ -1,6 +1,7 @@
 package com.source.controller;
 
 import com.source.model.Category;
+import com.source.model.Manufacturer;
 import com.source.model.Product;
 import com.source.repository.ProductRepository;
 import com.source.service.ProductService;
@@ -66,7 +67,8 @@ public class ProductController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Product> createProduct(
             @RequestParam("productName") String productName,
-            @RequestParam("brand") String brand,
+            @RequestParam("manufacturerName") String manufacturerName,
+            @RequestParam("manufacturerId") Integer manufacturerId,
             @RequestParam("price") BigDecimal price,
             @RequestParam("stockQuantity") Integer stockQuantity,
             @RequestParam("categoryId") Integer categoryId,
@@ -77,7 +79,6 @@ public class ProductController {
         try {
             Product product = new Product();
             product.setProductName(productName);
-            product.setBrand(brand);
             product.setPrice(price);
             product.setStockQuantity(stockQuantity);
             product.setDescription(description);
@@ -88,6 +89,10 @@ public class ProductController {
             Category category = new Category();
             category.setCategoryId(categoryId);
             product.setCategory(category);
+            
+            Manufacturer manufacturer = new Manufacturer();
+            manufacturer.setManufacturerId(manufacturerId); 
+            product.setManufacturer(manufacturer);
 
             Product saved = productService.saveProduct(product, image);
             return ResponseEntity.ok(saved);
@@ -101,7 +106,8 @@ public class ProductController {
     public ResponseEntity<Product> updateProduct(
             @PathVariable Integer id,
             @RequestParam("productName") String productName,
-            @RequestParam("brand") String brand,
+            @RequestParam("manufacturerName") String manufacturerName,
+            @RequestParam("manufacturerId") Integer manufacturerId,
             @RequestParam("price") BigDecimal price,
             @RequestParam("stockQuantity") Integer stockQuantity,
             @RequestParam("categoryId") Integer categoryId,
@@ -110,23 +116,28 @@ public class ProductController {
             @RequestParam(value = "image", required = false) MultipartFile image) {
 
         try {
-            Product product = new Product();
-            product.setProductId(id);
+            Optional<Product> opt = productRepository.findById(id.longValue());
+            if (opt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            Product product = opt.get(); 
+            
             product.setProductName(productName);
-            product.setBrand(brand);
             product.setPrice(price);
             product.setStockQuantity(stockQuantity);
             product.setDescription(description);
             product.setDiscountPercent(discountPercent);
             product.setIsNew(false); 
 
-
-            // Thiết lập thông tin danh mục mới
+          
             Category category = new Category();
             category.setCategoryId(categoryId);
             product.setCategory(category);
 
-            //Gọi lớp service để thực hiện lưu dữ liệu
+            Manufacturer manufacturer = new Manufacturer();
+            manufacturer.setManufacturerId(manufacturerId); 
+            product.setManufacturer(manufacturer); 
+
             Product saved = productService.saveProduct(product, image);
             return ResponseEntity.ok(saved);
             
@@ -168,6 +179,7 @@ public class ProductController {
         Product saved = productRepository.save(product); //Lưu sp vào db
         return ResponseEntity.ok(saved);
     }
+    
     
     
 }

@@ -19,7 +19,6 @@ export default function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-
   useEffect(() => {
     if (isOpen) {
       inputRef.current?.focus();
@@ -43,6 +42,7 @@ export default function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
     return () => { document.body.style.overflow = "unset"; };
   }, [isOpen]);
 
+  //Đồng bộ dữ liệu từ db
   useEffect(() => {
     if (!searchTerm.trim()) {
       setSuggestions([]);
@@ -50,10 +50,13 @@ export default function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
     }
 
     const keyword = searchTerm.toLowerCase();
-    const filtered = products.filter(item => 
-      item.productName?.toLowerCase().includes(keyword) || 
-      item.brand?.toLowerCase().includes(keyword)
-    );
+    const filtered = products.filter(item => {
+      const brandName = item.manufacturer?.manufacturerName || item.brand || "";
+      return (
+        item.productName?.toLowerCase().includes(keyword) || 
+        brandName.toLowerCase().includes(keyword)
+      );
+    });
 
     setSuggestions(filtered.slice(0, 6));
   }, [searchTerm, products]);
@@ -62,15 +65,23 @@ export default function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
     const imageName = product.imageUrl ? product.imageUrl.trim() : "bike1.png";
     const finalImage = new URL(`../../assets/images/${imageName}`, import.meta.url).href;
 
+    // Tính toán lại giá sale và discount thực tế từ DB để truyền sang trang chi tiết
+    const discountPercent = product.discountPercent || 0;
+    const discountAmount = Math.round(product.price * (discountPercent / 100));
+    const salePrice = product.price - discountAmount;
+
+    //Các trường dữ liệu hiển thị
     const formattedProduct = {
       id: product.productId,
       name: product.productName,
-      price: product.price,
+      price: salePrice,
       originalPrice: product.price,
-      discount: 0,
+      discount: discountPercent,
       rating: 5,
       reviewCount: product.reviewCount || 0,
       category: product.category?.categoryName || "Bicycles",
+      brand: product.manufacturer?.manufacturerName || product.brand || "", 
+      inStock: product.stockQuantity, 
       image: finalImage,
       description: product.description
     };
@@ -133,26 +144,33 @@ export default function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
                     Sản phẩm gợi ý ({suggestions.length})
                   </div>
                   <ul>
-                    {suggestions.map((item) => (
-                      <li 
-                        key={item.productId}
-                        onClick={() => handleSelectProduct(item)}
-                        className="flex items-center justify-between px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-50 transition-colors last:border-none"
-                      >
-                        <div className="flex items-center gap-3">
-                          <SearchIcon className="text-gray-300 !text-base" />
-                          <div>
-                            <p className="text-sm font-semibold text-gray-800 hover:text-blue-600">
-                              {item.productName}
-                            </p>
-                            <span className="text-xs text-gray-400">Thương hiệu: {item.brand}</span>
+                    {suggestions.map((item) => {
+                      const itemBrand = item.manufacturer?.manufacturerName || item.brand || "Đang cập nhật";
+                      const discountPercent = item.discountPercent || 0;
+                      const discountAmount = Math.round(item.price * (discountPercent / 100));
+                      const finalPrice = item.price - discountAmount;
+
+                      return (
+                        <li 
+                          key={item.productId}
+                          onClick={() => handleSelectProduct(item)}
+                          className="flex items-center justify-between px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-50 transition-colors last:border-none"
+                        >
+                          <div className="flex items-center gap-3">
+                            <SearchIcon className="text-gray-300 !text-base" />
+                            <div>
+                              <p className="text-sm font-semibold text-gray-800 hover:text-blue-600">
+                                {item.productName}
+                              </p>
+                              <span className="text-xs text-gray-400">Thương hiệu: {itemBrand}</span>
+                            </div>
                           </div>
-                        </div>
-                        <span className="text-sm font-bold text-red-500">
-                          ${item.price?.toLocaleString()}
-                        </span>
-                      </li>
-                    ))}
+                          <span className="text-sm font-bold text-red-500">
+                            ${finalPrice.toLocaleString()}
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               ) : (
@@ -167,4 +185,4 @@ export default function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
       </div>
     </>
   );
-}		
+}

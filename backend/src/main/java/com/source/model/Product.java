@@ -23,9 +23,6 @@ public class Product {
     @Column(name = "product_name", nullable = false, length = 150)
     private String productName;
 
-    @Column(name = "brand", length = 100)
-    private String brand;
-
     @ManyToOne
     @JoinColumn(name = "manufacturer_id")
     private Manufacturer manufacturer;
