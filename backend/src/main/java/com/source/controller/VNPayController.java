@@ -3,10 +3,14 @@ package com.source.controller;
 import com.source.repository.OrderRepository;
 import com.source.repository.PaymentRepository;
 import com.source.service.VNPayService;
+import com.source.service.WarrantyService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -20,12 +24,14 @@ public class VNPayController {
     private final VNPayService vnpayService;
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
+    private final WarrantyService warrantyService;
 
     // Hàm khởi tạo 
-    public VNPayController(VNPayService vnpayService, OrderRepository orderRepository, PaymentRepository paymentRepository) {
+    public VNPayController(VNPayService vnpayService, OrderRepository orderRepository, PaymentRepository paymentRepository, WarrantyService warrantyService) {
         this.vnpayService = vnpayService;
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
+        this.warrantyService = warrantyService;
     }
 
     @PostMapping("/create")
@@ -54,7 +60,7 @@ public class VNPayController {
         }
     }
 
-
+    @Transactional
     @GetMapping("/return")
     public ResponseEntity<Map<String, Object>> paymentReturn(HttpServletRequest request) {
         try {
@@ -92,6 +98,7 @@ public class VNPayController {
                     orderRepository.findById(parsedOrderId).ifPresent(order -> {
                         order.setStatus("CONFIRMED"); 
                         orderRepository.save(order);  
+                        warrantyService.createWarrantiesForOrder(order);
                     });
                     
                         // Tìm kiếm thông tin bản ghi giao dịch trong bảng Payments theo ID đơn hàng

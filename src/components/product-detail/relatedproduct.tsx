@@ -17,6 +17,7 @@ interface RelatedProductProps{
 }
 
 export default function RelatedProducts({products} : RelatedProductProps){
+    console.log("Danh sách sản phẩm trong RelatedProducts:", products);
     return(
         <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-gray-200 pb-3">

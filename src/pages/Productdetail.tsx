@@ -16,6 +16,7 @@ import Chatbox from "../components/chatbox/chatbox";
 interface ProductData {
   id: number;
   name: string;
+  manufacturerId?: number;
   price: number;
   originalPrice?: number;
   image: string;
@@ -43,13 +44,6 @@ export default function ProductDetail() {
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
 
   useEffect(() => {
-    //Nếu sản phẩm đã được truyền sẵn thông qua state
-    if (state?.product) {
-      // Gán trực tiếp đối tượng sản phẩm đó vào state 'product' mà không cần gọi API nữa
-      setProduct(state.product);
-      setLoadingProduct(false);
-      return;
-    }
     //Nếu kh trích xuất được id hợp lệ
     if (!id) {
       setLoadingProduct(false);
@@ -71,6 +65,7 @@ export default function ProductDetail() {
         setProduct({
           id: p.productId,
           name: p.productName,
+          manufacturerId: p.manufacturer ? p.manufacturer.manufacturerId : undefined,
           price: salePrice,
           originalPrice: p.price,
           image: finalImage,
@@ -98,9 +93,14 @@ export default function ProductDetail() {
         .then(res => setReviewCount(res.data.length))
         .catch(() => setReviewCount(0));
       //kiểm tra xem sản phẩm có brand liên quan không
-      if (product.brand) {
+      if (product.manufacturerId) {
         // Gửi yêu cầu lấy sản phẩm liên quan cùng hãng
-        axios.get(`http://localhost:8080/api/products/related-by-brand?brand=${encodeURIComponent(product.brand)}&excludeId=${product.id}`)
+        axios.get(`http://localhost:8080/api/products/related-by-brand`,{
+          params:{
+            brand: product.manufacturerId,
+            excludeId: product.id
+          }
+        })
           .then(res => {
             const relatedData = res.data || []; // Lấy mảng dữ liệu trả về, nếu không trả về thì là rỗng
             const topRelated = relatedData.slice(0, 4); // lấy 4 sản phẩm liên đầu tiên
@@ -131,7 +131,8 @@ export default function ProductDetail() {
           });
       }
     }
-  }, [product?.id, product?.brand]);
+  }, [product?.id, product?.manufacturerId]);
+  
 
   if (loadingProduct) {
     return (

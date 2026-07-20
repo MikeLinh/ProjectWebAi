@@ -1,36 +1,45 @@
+import { useState, useEffect } from "react";
 import FilterSection from "./filtersection";
 import type { FilterState } from "./SlidebarFilter";
+
+interface Category {
+  categoryId: number;
+  categoryName: string;
+}
 
 interface CategoryFilterProps {
   filters: FilterState;
   update: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
 }
 
-const CATEGORIES: { value: string; label: string }[] = [
-  { value: "Mountain Bike", label: "Xe đạp địa hình" },
-  { value: "Road Bike", label: "Xe đạp đường trường" },
-  { value: "Electric Bike", label: "Xe đạp điện" },
-  { value: "Hybrid", label: "Xe đạp Hybrid" },
-  { value: "City", label: "Xe đạp thành phố" },
-];
-
 export default function CategoryFilter({ filters, update }: CategoryFilterProps) {
-  const toggleCategory = (value: string) => {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/categories")
+      .then((res) => res.json())
+      .then((data) => setCategories(data))
+      .catch((err) => console.error("Lỗi khi tải danh mục:", err));
+  }, []);
+
+  const toggleCategory = (id: number) => {
+    const value = id.toString();
     const current = filters.categories;
     update("categories", 
       current.includes(value) 
         ? current.filter(v => v !== value) 
         : [...current, value]
     );
+    console.log(filters.categories)
   };
 
   return (
     <FilterSection title="Danh mục">
       <ul className="space-y-0.5">
-        {CATEGORIES.map((cat) => {
-          const active = filters.categories.includes(cat.value);
+        {categories.map((cat) => {
+          const active = filters.categories.includes(cat.categoryId.toString());
           return (
-            <li key={cat.value}>
+            <li key={cat.categoryId}>
               <label className={`flex items-center gap-2.5 cursor-pointer rounded-lg px-2 py-1.5 transition-colors ${active ? "bg-red-50" : "hover:bg-gray-50"}`}>
                 <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${active ? "bg-red-500 border-red-500" : "border-gray-300"}`}>
                   {active && (
@@ -43,10 +52,10 @@ export default function CategoryFilter({ filters, update }: CategoryFilterProps)
                   type="checkbox"
                   className="sr-only"
                   checked={active}
-                  onChange={() => toggleCategory(cat.value)}
+                  onChange={() => toggleCategory(cat.categoryId)}
                 />
                 <span className={`text-[15px] transition-colors ${active ? "text-red-600 font-medium" : "text-gray-600"}`}>
-                  {cat.label}
+                  {cat.categoryName}
                 </span>
               </label>
             </li>

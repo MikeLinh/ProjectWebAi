@@ -1,14 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/home/navbar";
 import Footer from "../components/home/footer";
+import axios from "axios";
 
 export default function VNPayReturn() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isSuccess, setIsSuccess] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [updating, setUpdating] = useState(true);
 
   useEffect(() => {
     // Lấy mã phản hồi kết quả giao dịch từ VNPay trên URL
@@ -22,6 +25,18 @@ export default function VNPayReturn() {
       // Tiến hành cắt chuỗi lấy phần ký tự trước dấu gạch dưới "_" để khôi phục lại mã ID đơn hàng gốc trong database
       const extractedId = txnRef.split("_")[0];
       setOrderId(extractedId);
+      if(responseCode){
+        axios.patch(`http://localhost:8080/api/orders/${extractedId}/payment-result`, null,{
+          params: {vnp_ResponseCode: responseCode}
+        })
+          .then(()=> console.log("Đã cập nhập thanh toán"))
+          .catch((err) => console.log("Lỗi thanh toán không thành công",err))
+          .finally(()=> setUpdating(false))
+      }else{
+        setUpdating(false);
+      }
+    }else{
+      setUpdating(false);
     }
   }, [searchParams]);
   const handlePayAgain = () =>{

@@ -35,6 +35,9 @@ public class AuthController {
         if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Mật khẩu không được để trống!");
         }
+        if(user.getPassword().trim().length() < 6){
+            return ResponseEntity.badRequest().body("Mật khẩu phải có ít nhất 6 ký tự!");
+        }
 
         if (user.getRole() == null || user.getRole().isBlank()) {
             user.setRole("USER");

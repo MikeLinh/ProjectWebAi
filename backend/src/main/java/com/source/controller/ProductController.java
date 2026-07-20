@@ -156,8 +156,8 @@ public class ProductController {
     //Lấy danh sách sản phẩm liên quan theo cùng thương hiệu
     @GetMapping("/related-by-brand")
     public ResponseEntity<List<Product>> getRelatedByBrand(
-            @RequestParam String brand,
-            @RequestParam(required = false) Long excludeId) {
+            @RequestParam Integer brand,
+            @RequestParam(required = false) Integer excludeId) {    
         
         List<Product> products = productService.getProductsByBrandAndExcludeIdWithReviewCount(brand, excludeId);
         return ResponseEntity.ok(products);
@@ -179,7 +179,7 @@ public class ProductController {
         Product saved = productRepository.save(product); //Lưu sp vào db
         return ResponseEntity.ok(saved);
     }
-    
+
     
     
 }

@@ -23,8 +23,9 @@ public class Product {
     @Column(name = "product_name", nullable = false, length = 150)
     private String productName;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "manufacturer_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Manufacturer manufacturer;
 
     @Column(name = "price", nullable = false, precision = 15, scale = 2)

@@ -110,7 +110,7 @@ public class OrderController {
 
         return ResponseEntity.ok(saved);
     }
-
+    @Transactional
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> updateStatus(
             @PathVariable Long id,
@@ -134,9 +134,10 @@ public class OrderController {
                     p.setPaymentStatus("PAID");
                     p.setPaidAt(LocalDateTime.now());
                     paymentRepository.save(p);
-                    warrantyService.createWarrantiesForOrder(order);
+                    
                 }
             });
+            warrantyService.createWarrantiesForOrder(order);
         }
 
     
@@ -240,7 +241,7 @@ public class OrderController {
                 if (payment != null) {
                     payment.setPaymentStatus("PAID"); 
                 }
-                warrantyService.createWarrantiesForOrder(order);
+             
             } else {
                 order.setStatus("PENDING"); // Thất bại -> Giữ nguyên PENDING để thanh toán lại
                 if (payment != null) {

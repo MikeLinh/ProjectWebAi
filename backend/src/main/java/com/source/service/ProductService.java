@@ -1,5 +1,6 @@
 package com.source.service;
 
+import java.util.stream.Collectors;
 import com.source.model.Product;
 import com.source.repository.ProductRepository;
 import com.source.repository.ProductReviewRepository;
@@ -78,12 +79,17 @@ public class ProductService {
             List<String> brands,
             BigDecimal minPrice,
             BigDecimal maxPrice) {
+
+        //Chuyển đổi danh sách String (từ frontend) sang danh sách Integer (để khớp với categoryId)
+        List<Integer> categoryIds = (categories == null || categories.isEmpty()) 
+            ? null 
+            : categories.stream().map(Integer::parseInt).collect(Collectors.toList());
         // Khởi tạo đối tượng Specification để xây dựng câu truy vấn SQL động
         Specification<Product> spec = (root, query, cb) -> { //CriteriaBuilder = cb, 
             List<Predicate> predicates = new ArrayList<>();
 
-            if (categories != null && !categories.isEmpty()) {
-                predicates.add(root.get("category").get("categoryName").in(categories));
+            if (categoryIds != null && !categoryIds.isEmpty()) {
+                predicates.add(root.get("category").get("categoryId").in(categories));
             }
             if (brands != null && !brands.isEmpty()) {
                 predicates.add(root.get("manufacturer").get("manufacturerName").in(brands));
@@ -141,12 +147,12 @@ public class ProductService {
 
     //Lấy danh sách sản phẩm cùng thương hiệu 
     @Transactional(readOnly = true)
-    public List<Product> getProductsByBrandAndExcludeId(String brand, Long excludeProductId) {
+    public List<Product> getProductsByBrandAndExcludeId(Integer manufacturerId, Integer excludeProductId) {
     Specification<Product> spec = (root, query, cb) -> {
         List<Predicate> predicates = new ArrayList<>();
             // Lọc các sản phẩm thuộc cùng một thương hiệu
-            if (brand != null && !brand.isBlank()) {
-                predicates.add(cb.equal(root.get("manufacturer").get("manufacturerName"), brand));
+            if(manufacturerId != null){
+                predicates.add(cb.equal(root.get("manufacturer").get("manufacturerId"), manufacturerId));
             }
             // Loại trừ sản phẩm đang xem chi tiết ra khỏi danh sách gợi ý liên quan
             if (excludeProductId != null) {
@@ -161,8 +167,8 @@ public class ProductService {
 
     //Lấy danh sách sản phẩm liên quan theo thương hiệu kèm theo đếm số lượng đánh giá
     @Transactional(readOnly = true)
-    public List<Product> getProductsByBrandAndExcludeIdWithReviewCount(String brand, Long excludeProductId) {
-        List<Product> products = getProductsByBrandAndExcludeId(brand, excludeProductId);
+    public List<Product> getProductsByBrandAndExcludeIdWithReviewCount(Integer manufacturerId, Integer excludeProductId) {
+        List<Product> products = getProductsByBrandAndExcludeId(manufacturerId, excludeProductId);
         for (Product p : products) {
             long count = productReviewRepository.countByProductId(p.getProductId());
             p.setReviewCount((int) count);

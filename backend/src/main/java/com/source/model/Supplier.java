@@ -11,7 +11,7 @@ public class Supplier {
     @Column(name = "supplier_id")
     private Integer supplierId;
 
-    @Column(name = "supplier_name", nullable = false, unique = true)
+    @Column(name = "supplier_name", nullable = false, length = 191)
     private String supplierName;
 
     @Column(name = "phone")

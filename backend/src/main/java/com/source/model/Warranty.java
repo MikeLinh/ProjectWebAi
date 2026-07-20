@@ -18,7 +18,7 @@ public class Warranty {
     @JoinColumn(name = "order_detail_id")
     private OrderDetail orderDetail;
 
-    @Column(name = "warranty_code", unique = true)
+    @Column(name = "warranty_code", length = 191)
     private String warrantyCode;
 
     @Column(name = "serial_number")
