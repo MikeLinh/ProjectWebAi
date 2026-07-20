@@ -1,0 +1,358 @@
+### extension "REST Client" 
+@baseUrl = http://localhost:8080/api
+
+
+### TC-01: Đăng ký tài khoản hợp lệ
+# Kết quả mong đợi: 200 OK, trả về user vừa tạo (password = null)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Nguyen Van Test",
+  "email": "test01@example.com",
+  "password": "123456",
+  "phoneNumber": "0901234567",
+  "address": "123 Nguyen Trai, Q5, TP.HCM"
+}
+
+### TC-02: Đăng ký với email đã tồn tại 
+# Kết quả mong đợi: 400 Bad Request, body: "Email đã tồn tại!"
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Nguyen Van Test",
+  "email": "test01@example.com",
+  "password": "123456",
+  "phoneNumber": "0901234567",
+  "address": "123 Nguyen Trai, Q5, TP.HCM"
+}
+
+### TC-03: Mật khẩu xác nhận không khớp
+# Đây là validate phía CLIENT (Register.tsx) trước khi gọi API -> test trực tiếp
+
+### TC-04: Mật khẩu ngắn hơn 6 ký tự
+# Kết quả mong đợi: 400 Bad Request, body: "Mật khẩu phải có ít nhất 6 ký tự!"
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Test Ngan Mat Khau",
+  "email": "test04@example.com",
+  "password": "123",
+  "phoneNumber": "0900000000",
+  "address": "Test"
+}
+
+### TC-05: Đăng nhập đúng thông tin
+  POST {{baseUrl}}/auth/login
+  Content-Type: application/json
+
+  {
+    "email": "prodution14@gmail.com",
+    "password": ""
+  }
+
+### TC-06: Đăng nhập tài khoản ADMIN
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@gmail.com",
+  "password": "123"
+}
+
+### TC-07: Đăng nhập sai mật khẩu
+# Kết quả mong đợi: 401 Unauthorized, body: "Sai email hoặc mật khẩu!"
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test01@example.com",
+  "password": "sai-mat-khau"
+}
+
+### TC-08: Đăng nhập Google
+# Test trực tiếp trên UI: bấm nút "Đăng nhập với Google" tại /login
+
+### TC-09: Quên mật khẩu với email tồn tại
+# Kết quả mong đợi: 200 OK, "Mật khẩu mới đã được gửi đến email của bạn."
+POST {{baseUrl}}/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "test01@example.com"
+}
+
+### TC-10: Quên mật khẩu với email không tồn tại
+# Kết quả mong đợi: 400 Bad Request, "Email không tồn tại trong hệ thống!"
+POST {{baseUrl}}/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "khong-ton-tai@example.com"
+}
+
+
+
+### TC-11, TC-12: Xem giỏ hàng / cập nhật số lượng
+# Giỏ hàng được lưu trong React Context (CartContext) ở phía trình duyệt,
+# không có API backend tương ứng -> chỉ test được trên UI tại /cart
+
+### Lấy danh sách sản phẩm để lấy productId dùng cho các request bên dưới
+GET {{baseUrl}}/products
+
+### TC-13: Áp dụng mã giảm giá còn hiệu lực
+# Kết quả mong đợi: 200 OK, success: true
+GET {{baseUrl}}/promotions/validate?code=WELCOME2026
+
+### TC-14: Áp dụng mã giảm giá không tồn tại
+# Kết quả mong đợi: 400 Bad Request, "Mã giảm giá không tồn tại!"
+GET {{baseUrl}}/promotions/validate?code=CODE2026
+
+### TC-15: Áp dụng mã đã hết hạn / chưa tới ngày áp dụng
+# Thay bằng mã có endDate < hôm nay (hoặc startDate > hôm nay) trong DB
+GET {{baseUrl}}/promotions/validate?code=CODE2025
+
+### TC-16: Đặt hàng COD hợp lệ
+# Kết quả mong đợi: 200 OK, đơn hàng status = "PENDING"
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "receiverName": "Lĩnh Nguyễn",
+  "receiverPhone": "0123321123",
+  "shippingAddress": "123 Đường Trần Phú Thọ",
+  "paymentMethod": "COD",
+  "totalAmount": 1200,
+  "note": "Giao trong giờ hành chính",
+  "items": [
+    { "productId": 1, "productName": "Xe Đạp Giant Touring", "quantity": 1, "price": 1200 }
+  ]
+}
+
+### TC-17: Đặt hàng khi giỏ hàng rỗng
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "receiverName": "Lĩnh Nguyễn",
+  "receiverPhone": "0123321123",
+  "shippingAddress": "123 Đường Trần Phú Thọ",
+  "paymentMethod": "COD",
+  "totalAmount": 0,
+  "items": []
+}
+
+### TC-18: Đặt hàng vượt quá tồn kho
+# Kết quả mong đợi: 500 Bad Request,
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "receiverName": "Lĩnh Nguyễn",
+  "receiverPhone": "0123321123",
+  "shippingAddress": "123 Đường Trần Phú Thọ",
+  "paymentMethod": "COD",
+  "totalAmount": 999999999,
+  "items": [
+    { "productId": 1, "productName": "Xe Đạp Giant Touring", "quantity": 999999, "price": 5000000 }
+  ]
+}
+
+### TC-19: Tạo đơn thanh toán VNPay
+# Kết quả mong đợi: 200 OK, trả về payUrl để redirect sang cổng VNPay (sandbox)
+POST {{baseUrl}}/vnpay/create
+Content-Type: application/json
+
+{
+  "orderId": 1,
+  "amount": 5000000,
+  "orderInfo": "Thanh toan don hang test"
+}
+
+### TC-20: VNPay trả kết quả thất bại (giả lập callback trả về mã lỗi)
+# Kết quả mong đợi: 200 OK, order.status vẫn giữ "PENDING", payment.status = "FAILED"
+PATCH {{baseUrl}}/orders/1/payment-result?vnp_ResponseCode=24
+
+
+
+
+### TC-21: Theo dõi trạng thái đơn hàng real-time (SSE)
+#Xem trực tiếp trên UI
+
+### TC-22: Huỷ đơn khi đang PENDING/CONFIRMED
+# Tạo đơn hàng ở TC-16 trước
+# Kết quả mong đợi: 200 OK, status = "CANCELLED", tồn kho được hoàn trả
+PATCH {{baseUrl}}/orders/18/cancel
+
+### TC-23: Huỷ đơn khi đã DELIVERED/CANCELLED
+# Kết quả mong đợi: 400 Bad Request, "Không thể hủy đơn hàng ở trạng thái hiện tại"
+PATCH {{baseUrl}}/orders/1/cancel
+
+### TC-24: Admin cập nhật đơn COD sang DELIVERED
+# Kết quả mong đợi: 200 OK, tự động PAID + tạo phiếu bảo hành
+PATCH {{baseUrl}}/orders/1/status
+Content-Type: application/json
+
+{
+  "status": "DELIVERED"
+}
+
+### TC-25: Gửi đánh giá sản phẩm
+# Kết quả mong đợi: 200 OK, review được lưu, xuất hiện trong GET reviews bên dưới
+POST {{baseUrl}}/products/1/reviews
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "rating": 5,
+  "reviewerName": "Lĩnh Nguyễn",
+  "reviewerEmail": "production14@gmail.com",
+  "comment": "San pham chat luong tot, giao hang nhanh."
+}
+
+### Kiểm tra lại danh sách review vừa tạo
+GET {{baseUrl}}/products/1/reviews
+
+
+### TC-26: Thêm sản phẩm mới 
+POST {{baseUrl}}/products
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="productName"
+
+Xe đạp thể thao Giant XTC 2026
+--WebAppBoundary
+Content-Disposition: form-data; name="manufacturerName"
+
+Giant
+--WebAppBoundary
+Content-Disposition: form-data; name="manufacturerId"
+
+1
+--WebAppBoundary
+Content-Disposition: form-data; name="price"
+
+12500000
+--WebAppBoundary
+Content-Disposition: form-data; name="stockQuantity"
+
+20
+--WebAppBoundary
+Content-Disposition: form-data; name="categoryId"
+
+1
+--WebAppBoundary
+Content-Disposition: form-data; name="description"
+
+Xe đạp địa hình, khung nhôm, phanh đĩa thủy lực.
+--WebAppBoundary
+Content-Disposition: form-data; name="discountPercent"
+
+0
+--WebAppBoundary
+Content-Disposition: form-data; name="image"; filename="bike.jpg"
+Content-Type: image/jpeg
+
+< ./test-data/bike.jpg
+--WebAppBoundary--
+
+### TC-27: Cập nhật số lượng tồn kho sản phẩm (PATCH riêng, không cần multipart)
+PATCH {{baseUrl}}/products/1/stock
+Content-Type: application/json
+
+{
+  "stockQuantity": 50
+}
+
+### TC-28: Admin xem & cập nhật trạng thái đơn hàng
+GET {{baseUrl}}/orders
+
+###
+PATCH {{baseUrl}}/orders/1/status
+Content-Type: application/json
+
+{
+  "status": "CONFIRMED"
+}
+
+### TC-29: Xem / tìm kiếm danh sách người dùng
+GET {{baseUrl}}/users
+
+### TC-30a: Thêm danh mục sản phẩm mới
+# Kết quả mong đợi: 200 OK, danh mục mới xuất hiện trong GET /categories
+POST {{baseUrl}}/categories
+Content-Type: application/json
+
+{
+  "categoryName": "Xe đạp đua",
+  "description": "Dòng xe đạp thi đấu tốc độ cao"
+}
+
+### TC-30b: Thêm hãng sản xuất mới
+POST {{baseUrl}}/manufacturers
+Content-Type: application/json
+
+{
+  "manufacturerName": "ASIAN",
+  "country": "VIETNAM",
+  "active": true
+}
+
+### TC-30c: Thêm nhà cung cấp mới
+POST {{baseUrl}}/suppliers
+Content-Type: application/json
+
+{
+  "supplierName": "Công ty TNHH Thiết Bị Xe Đạp ABC",
+  "phone": "0281234567",
+  "address": "789 Cach Mang Thang 8, TP.HCM"
+}
+
+### TC-31: Tạo mã khuyến mãi mới (mã code chưa tồn tại)
+# Kết quả mong đợi: 200 OK, khuyến mãi được tạo
+POST {{baseUrl}}/promotions
+Content-Type: application/json
+
+{
+  "couponCode": "SUMMER2026",
+  "discountValue": 300,
+  "discountType": "FIXED",
+  "minSpend": 2000,
+  "startDate": "2026-07-01T00:00:00",
+  "endDate": "2026-08-31T23:59:59"
+}
+
+### TC-32: Tạo mã khuyến mãi trùng code (chạy lại request TC-31 y hệt)
+# Kết quả mong đợi: 400 Bad Request, "Mã code đã tồn tại!"
+POST {{baseUrl}}/promotions
+Content-Type: application/json
+
+{
+  "couponCode": "SUMMER2026",
+  "discountValue": 300,
+  "discountType": "FIXED",
+  "minSpend": 2000,
+  "startDate": "2026-07-01T00:00:00",
+  "endDate": "2026-08-31T23:59:59"
+}
+
+### TC-33: Xem tồn kho / cảnh báo sắp hết hàng
+GET {{baseUrl}}/warehouse
+
+###
+GET {{baseUrl}}/warehouse/low-stock
+
+### TC-34: Tra cứu phiếu bảo hành
+GET {{baseUrl}}/warranties
+
+###
+GET {{baseUrl}}/warranties/user/2
+
+### TC-35: Xem thống kê tổng quan (Dashboard)
+GET {{baseUrl}}/overview/stats
