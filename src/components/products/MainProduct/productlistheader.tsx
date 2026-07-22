@@ -2,11 +2,11 @@
 import type { SortOption } from "./mainproduct";
 
 interface ProductListHeaderProps {
-  sortedProductsLength: number;
-  startIndex: number;
-  PRODUCTS_PER_PAGE: number;
-  sortBy: SortOption;
-  onSortChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  sortedProductsLength: number; // Tổng số lượng sp khi sắp xếp
+  startIndex: number; 
+  PRODUCTS_PER_PAGE: number; //SL sản phẩm hiển thị
+  sortBy: SortOption; //Sắp xếp
+  onSortChange: (e: React.ChangeEvent<HTMLSelectElement>) => void; //Hàm xử lý chọn sắp xếp
 }
 
 export default function ProductListHeader({

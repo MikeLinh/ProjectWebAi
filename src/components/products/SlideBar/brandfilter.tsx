@@ -5,6 +5,7 @@ import type { FilterState } from "./SlidebarFilter";
 
 interface BrandFilterProps {
   filters: FilterState;
+  // Hàm generic dùng để cập nhật một trường bất kỳ trong FilterState
   update: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
 }
 
@@ -21,10 +22,10 @@ export default function BrandFilter({ filters, update }: BrandFilterProps) {
       .catch(err => {
         console.error("Lỗi lấy brand:", err);
         // Fallback
-        setBrands(["Trek", "Giant", "Specialized", "Cannondale", "Bianchi", "Adidas"]);
+        setBrands(["Trek", "Giant", "Specialized", "Cannondale", "Bianchi"]);
       });
   }, []);
-
+  // Hàm xử lý khi người dùng nhấn chọn/bỏ chọn một thương hiệu
   const toggleBrand = (value: string) => {
     const current = filters.brands || [];
     update("brands", 

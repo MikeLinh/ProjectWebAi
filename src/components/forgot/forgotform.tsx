@@ -8,6 +8,7 @@ export default function ForgotForm() {
     const [isSuccess, setIsSuccess] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
 
+    //Hàm xử lý gửi form
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrorMessage("");
@@ -60,7 +61,7 @@ export default function ForgotForm() {
                 name="email"
                 placeholder="Nhập email đã đăng ký"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)} // Cập nhật state khi người dùng gõ
                 required
             />
 

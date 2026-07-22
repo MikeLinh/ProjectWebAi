@@ -10,6 +10,7 @@ export default function RegisterFooter(){
     onSuccess: async (access_token) => {
       try {
         const googleAuthApi= import.meta.env.VITE_GOOGLE_API as string
+        // Gửi yêu cầu fetch kèm theo token vào header để lấy thông tin chi tiết của người dùng
         const res = await fetch(googleAuthApi, {
           headers: { Authorization: `Bearer ${access_token}` },
         });

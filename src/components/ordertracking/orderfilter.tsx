@@ -1,6 +1,7 @@
 import React from "react";
 import type { OrderStatus } from "./orderitem";
 
+// Định nghĩa danh sách tùy chọn cho bộ lọc trạng thái
 const STATUS_OPTIONS: { value: OrderStatus | "ALL"; label: string }[] = [
   { value: "ALL",        label: "Tất cả" },
   { value: "PENDING",    label: "Chờ xác nhận" },

@@ -90,10 +90,10 @@ public class VNPayService {
     private String toVnpOrderInfo(String input) {
         if (input == null || input.isEmpty()) return "Thanh toan don hang";
         
-        // 1. Tách dấu ra khỏi chữ cái gốc (Ví dụ: "á" -> "a" + "`")
+        // Tách dấu ra khỏi chữ cái gốc
         String noAccent = Normalizer.normalize(input, Normalizer.Form.NFD);
         
-        // 2. Sử dụng Regex xóa sạch các dấu tách ra đó, thay chữ đ/Đ và loại bỏ ký tự lạ
+        // Sử dụng Regex xóa sạch các dấu tách ra đó
         noAccent = noAccent.replaceAll("\\p{M}", "") // Xóa tất cả các dấu thanh vừa tách
                             .replace('đ', 'd').replace('Đ', 'D')
                             .replaceAll("[^a-zA-Z0-9 ]", " ") // Chỉ giữ lại chữ, số và khoảng trắng

@@ -17,9 +17,9 @@ export default function Navbar() {
     const { getCartCount } = useCart();
     const { user, logout } = useAuth(); 
     
-    const [isCartOpen, setIsCartOpen] = useState<boolean>(false); 
-    const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
-    const [isUserMenuOpen, setIsUserMenuOpen] = useState<boolean>(false); 
+    const [isCartOpen, setIsCartOpen] = useState<boolean>(false);  //mở hoặc đóng Sidebar giỏ hàng
+    const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false); //Tìm kiếm
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState<boolean>(false); //menu khi người dùng nhấn vào icon
 
     const navigate = useNavigate();
 

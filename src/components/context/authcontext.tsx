@@ -26,7 +26,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   //Khởi tạo trạng thái người dùng
   const [user, setUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem("current_user"); // Đọc chuỗi thông tin người dùng được lưu trữ dưới trình duyệt bằng key "current_user"
+    const savedUser = localStorage.getItem("currentUser"); // Đọc chuỗi thông tin người dùng được lưu trữ dưới trình duyệt bằng key "current_user"
     try {
       return savedUser ? JSON.parse(savedUser) : null; // Nếu tìm thấy chuỗi đã lưu thì tiến hành dịch ngược JSON thành Object
     } catch (e) {
@@ -38,13 +38,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = (userData: User) => {
     setUser(userData); // Cập nhật thông tin người dùng vừa đăng nhập
     // Chuyển Object thông tin người dùng thành chuỗi và lưu vào bộ nhớ trình duyệt để duy trì đăng nhập khi F5
-    localStorage.setItem("current_user", JSON.stringify(userData));
+    localStorage.setItem("currentUser", JSON.stringify(userData));
   };
 
   // Định nghĩa hàm xử lý đăng xuất
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("current_user"); // Xóa sạch key "current_user" khỏi bộ nhớ trình duyệt
+    localStorage.removeItem("currentUser"); // Xóa sạch key "currentUser" khỏi bộ nhớ trình duyệt
+    localStorage.removeItem("token");
+    localStorage.removeItem("expiresAt");
   };
 
   return (

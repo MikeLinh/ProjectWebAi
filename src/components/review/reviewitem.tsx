@@ -5,7 +5,7 @@ interface ReviewItemProps {
   review: {
     reviewId?: number;
     rating: number;
-    reviewerName?: string;     // ← Thêm ? (optional)
+    reviewerName?: string;     
     comment: string;
     createdAt?: string;
   };

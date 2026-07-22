@@ -33,7 +33,7 @@ const ENCRYPTED_KEYWORDS = "Z2nhur90LGtpbGwsY2jhur90LHQresourcevIHPDoXQsdOG7sSBo
 const getHarmfulKeywords = (): string[] => {
   try {
     // Giải mã Base64 thành chuỗi decodeURIComponent(UTF-8), sau đó tách ra thành mảng bằng dấu phẩy, escape(xử lý ký tự đặc biệt)
-    const decoded = decodeURIComponent(escape(atob(ENCRYPTED_KEYWORDS))); //atob (viết tắt của ASCII to Binary) là một hàm có sẵn của trình duyệt, nhận chuỗi và dịch ngược, 
+    const decoded = decodeURIComponent(escape(atob(ENCRYPTED_KEYWORDS))); //atob (viết tắt của ASCII to Binary) là một hàm có sẵn của trình duyệt, nhận chuỗi và dịch ngược
     return decoded.split(","); //Chuyển thành mảng cách nhau bằng dấu ","
   } catch (error) {
     console.log(error)
@@ -115,7 +115,6 @@ interface ProductCardProps {
 function ProductCard({ product, onNavigate }: ProductCardProps) {
   return (
     <div className="mt-2 bg-white border border-blue-100 rounded-xl overflow-hidden shadow-sm max-w-[85%] w-full">
-      {/* Hiển thị ảnh sản phẩm nếu có*/}
       {product.imageUrl && (
         <img
           src={getFullImageUrl(product.imageUrl)}
@@ -124,7 +123,6 @@ function ProductCard({ product, onNavigate }: ProductCardProps) {
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
         />
       )}
-       {/* Hiển thị tên, giá, mô tả sản phẩm*/}
       <div className="px-3 pt-2 pb-1 space-y-0.5">
         <p className="text-[12px] font-bold text-gray-900 leading-snug">
           {product.productName}
@@ -140,7 +138,6 @@ function ProductCard({ product, onNavigate }: ProductCardProps) {
           </p>
         )}
       </div>
-     {/* Nút di chuyển tới trang product*/}
       <button
         onClick={() => onNavigate(product)}
         className="w-full text-[11px] font-bold text-white bg-blue-600 hover:bg-blue-700 py-1.5 transition-colors mt-1"

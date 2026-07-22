@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -22,10 +23,32 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
+    private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@gmail\\\\.com$";
+    private static final String PHONE_REGEX = "^[0-9]{10}$";
+
+    private boolean isValidEmail(String email){
+        return email != null && Pattern.matches(EMAIL_REGEX, email);
+    }
+    private boolean isValidPhone(String phone){
+        if(phone == null || phone.trim().isEmpty()){
+            return true;
+        }
+        return Pattern.matches(PHONE_REGEX, phone);
+
+    }
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
+        if(user.getEmail() == null || !isValidEmail(user.getEmail())){
+            return ResponseEntity.badRequest().body("Email không hợp lệ");
+        }
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email đã tồn tại!");
+        }
+        if(user.getPhoneNumber() == null || !isValidPhone(user.getPhoneNumber())){
+            return ResponseEntity.badRequest().body("Số điện thoại phải trên hoặc bằng 10 ký tự số!");
+        }
+        if(user.getPhoneNumber().trim().length() <= 9){
+            return ResponseEntity.badRequest().body("Số điện thoại không xác định!");
         }
 
         if (user.getFullName() == null || user.getFullName().trim().isEmpty()) {
@@ -142,10 +165,16 @@ public class AuthController {
         if (userOpt.isPresent()) {
             User existingUser = userOpt.get();
             
+            if(updatedData.getPhoneNumber() != null && !isValidPhone(updatedData.getPhoneNumber())){
+                return ResponseEntity.badRequest().body("Số điện thoại phải trên 10 chữ số !");
+            }
             existingUser.setFullName(updatedData.getFullName());
             existingUser.setPhoneNumber(updatedData.getPhoneNumber());
             existingUser.setAddress(updatedData.getAddress());
             if(updatedData.getPassword() != null && !updatedData.getPassword().trim().isEmpty()) {
+                if(updatedData.getPassword().trim().length() < 6){
+                    return ResponseEntity.badRequest().body("Mật khẩu phải trên 6 ký tự!");
+                }
                 existingUser.setPassword(updatedData.getPassword().trim());
             }
             

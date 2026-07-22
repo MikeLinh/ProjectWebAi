@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-// src/components/WarrantyDetailModal.tsx
-// Modal xem/chỉnh sửa chi tiết một thẻ bảo hành + lịch sử sửa chữa chi tiết.
+
 
 import React, { useEffect, useState, useCallback } from "react";
 

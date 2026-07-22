@@ -1,12 +1,13 @@
 import ProductCard from "../productcard";
-
+// Định nghĩa kiểu dữ liệu đầu vào
 interface ProductGridProps {
-  currentProducts: any[];
+  currentProducts: any[]; //Mảng chứa danh sách sản phẩm
   loading: boolean;
 }
 
 export default function ProductGrid({ currentProducts, loading }: ProductGridProps) {
 
+  //Trường hợp tải dữ liệu
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -24,7 +25,7 @@ export default function ProductGrid({ currentProducts, loading }: ProductGridPro
       </div>
     );
   }
-
+  //Trường hợp sản phẩm khớp với bộ lọc
   if (currentProducts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-gray-200 rounded-2xl gap-3">
@@ -45,12 +46,13 @@ export default function ProductGrid({ currentProducts, loading }: ProductGridPro
 
         // Tính toán giảm giá
         const discountPercent = product.discountPercent || 0;
-        const discountAmount = Math.round(product.price * (discountPercent / 100));
+        const discountAmount = Math.round(product.price * (discountPercent / 100)); 
         const salePrice = product.price - discountAmount;
 
         return (
+          // Gọi component ProductCard và truyền dữ liệu đã được xử lý vào các props
           <ProductCard
-            key={product.productId}
+            key={product.productId} //Định nghĩa khoá chính
             product={{
               id: product.productId,
               name: product.productName,

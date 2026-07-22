@@ -13,7 +13,7 @@ interface Promotion {
   discountValue: number;   
   startDate: string;
   endDate: string;
-  targetProductId: number | null; // 🌟 Thêm trường thông tin sản phẩm mục tiêu
+  targetProductId: number | null; // Thêm trường thông tin sản phẩm mục tiêu
 }
 
 interface Product {
@@ -195,7 +195,7 @@ export default function ManagePromotions() {
                 <option value="">Áp dụng cho tất cả sản phẩm</option>
                 {products.map((prod) => (
                   <option key={prod.productId} value={prod.productId}>
-                    [ID #{prod.productId}] - {prod.productName}
+                    [ID: {prod.productId}] - {prod.productName}
                   </option>
                 ))}
               </select>

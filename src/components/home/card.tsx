@@ -2,6 +2,7 @@ import React from "react";
 import Star from '@mui/icons-material/Star';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
+// Định nghĩa kiểu dữ liệu cho props truyền vào
 interface ProductProps {
     name: string;
     category: string;
@@ -18,9 +19,9 @@ export default function ProductCard({
     price, 
     rating, 
     image 
-}: ProductProps) {
+}: ProductProps) { 
     const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
+    const hasHalfStar = rating % 1 !== 0; // Kiểm tra có sao nửa hay không
 
     return (
         <div className="bg-white rounded-3xl p-4 shadow-xl border border-gray-100 flex flex-col h-full transition-all duration-300 hover:scale-110">
@@ -47,7 +48,7 @@ export default function ProductCard({
 
                 {/* Rating Stars */}
                 <div className="flex items-center mb-3">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(5)].map((_, i) => ( //Sử dụng toán tử Spread Operator vào các phần tử 
                         <Star 
                             key={i} 
                             style={{ fontSize: 18 }}

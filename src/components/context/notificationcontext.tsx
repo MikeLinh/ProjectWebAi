@@ -48,7 +48,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     </NotificationContext.Provider>
   );
 };
-
+//Định nghĩa 1 hook các component khác có thể sử dụng
 export const useNotification = () => {
   const context = useContext(NotificationContext);
   if (!context) {

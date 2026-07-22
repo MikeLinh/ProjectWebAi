@@ -10,6 +10,7 @@ interface CartModelProps {
 }
 
 export default function CardModel({ isOpen, onClose }: CartModelProps) {
+  //Lấy các hàm và dữ liệu từ CartContext
   const { cart, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
   const navigate = useNavigate();
 

@@ -5,24 +5,26 @@ import CloseIcon from '@mui/icons-material/Close';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+//Định tạo 1 props
 interface SearchPopupProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export default function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const navigate = useNavigate();
+  const inputRef = useRef<HTMLInputElement>(null); //Sử dụng useRef của React để ghi nhớ giá trị
+  const navigate = useNavigate(); 
   
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<any[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
+  //Gọi API về backend lấy dữ liệu của Products 
   useEffect(() => {
     if (isOpen) {
       inputRef.current?.focus();
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = "hidden"; // Khóa cuộn trang chính
       
       setLoading(true);
       axios.get("http://localhost:8080/api/products")
@@ -35,7 +37,7 @@ export default function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
           setLoading(false);
         });
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = "unset"; // Mở khóa cuộn trang 
       setSearchTerm("");
       setSuggestions([]);
     }
@@ -48,7 +50,7 @@ export default function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
       setSuggestions([]);
       return;
     }
-
+    
     const keyword = searchTerm.toLowerCase();
     const filtered = products.filter(item => {
       const brandName = item.manufacturer?.manufacturerName || item.brand || "";

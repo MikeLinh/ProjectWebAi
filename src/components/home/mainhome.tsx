@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 interface DBProduct {
   productId: number;
   productName: string;
-  brand: string;
+  manufacturer?: string;
   price: number;
   description: string;
   imageUrl: string;
@@ -161,7 +161,9 @@ export default function MainHome() {
                       category: product.category?.categoryName || "Bicycles",
                       inStock: product.stockQuantity,
                       description: product.description,
-                      brand: product.brand,
+                      manufacturer: typeof product.manufacturer === 'object' && product.manufacturer !== null
+                      ? (product.manufacturer as any).manufacturerName 
+                      : product.manufacturer,
                       isNew: product.isNew || product.new,
                     }}
                   />

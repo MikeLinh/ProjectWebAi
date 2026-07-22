@@ -38,16 +38,16 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   }, [productId]);
    
   // Định nghĩa hàm bất đồng bộ handleAddReview xử lý khi người dùng gửi một đánh giá mới, kiểu dữ liệu Promise
-  const handleAddReview = async (newReview: DBReview): Promise<boolean> => {
-    try {
-      // Gửi một yêu cầu HTTP POST kèm theo Object dữ liệu nhận xét mới 'newReview' lên Server để lưu vào Cơ sở dữ liệu
-      const res = await axios.post(`http://localhost:8080/api/products/${productId}/reviews`, newReview);
-      setReviews([res.data, ...reviews]);  //Lưu dữ liệu review và giữ lại các review cữ
-      return true;
-    } catch (err) {
-      console.error("Lỗi gửi API review:", err);
-      return false;
-    }
+  const handleAddReview = async (newReview: DBReview): Promise<{ success: boolean; message: string }> => {
+      try {
+        const res = await axios.post(`http://localhost:8080/api/products/${productId}/reviews`, newReview);
+        setReviews([res.data, ...reviews]);
+        return { success: true, message: "Đánh giá thành công!" };
+      } catch (err: any) {
+        console.error("Lỗi gửi API review:", err);
+        const errorMessage = err.response?.data?.message || err.response?.data || "Lỗi hệ thống, vui lòng thử lại sau.";
+        return { success: false, message: typeof errorMessage === 'string' ? errorMessage : "Gửi đánh giá không thành công." };
+      }
   };
 
   if (loading) {

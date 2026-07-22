@@ -1,4 +1,4 @@
-// components/products/ProductPagination.tsx
+
 interface ProductPaginationProps {
   currentPage: number;
   totalPages: number;

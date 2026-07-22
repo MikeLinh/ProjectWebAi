@@ -29,18 +29,20 @@ interface DBProduct {
   };
   reviewCount?: number;
 }
-
+//Kiểu dữ liệu cho các lựa chọn sắp xếp
 export type SortOption = "newest" | "price-asc" | "price-desc";
 
+//Cấu hình phân trang
 const PRODUCTS_PER_PAGE = 6;
 
+//Giá trị mặc định cho bộ lọc
 const INITIAL_FILTERS: FilterState = {
   categories: [],
   brands: [],
   priceMin: 0,
   priceMax: 5000,
   sizes: [],
-  rating: null,
+  rating: null, 
 };
 
 export default function MainProduct() {
@@ -50,6 +52,7 @@ export default function MainProduct() {
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [currentPage, setCurrentPage] = useState<number>(1);
 
+  //Hàm cập nhật bộ lọc và reset về trang 1
   function handleFilterChange(newFilters: FilterState) {
     console.log("Filter thay đổi:", newFilters);
     setFilters(newFilters);
@@ -77,7 +80,7 @@ export default function MainProduct() {
     const url = `http://localhost:8080/api/products${params.toString() ? `?${params.toString()}` : ""}`;
 
     console.log("Fetching URL:", url);
-
+    // Gọi API
     fetch(url)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -93,7 +96,7 @@ export default function MainProduct() {
       })
       .finally(() => setLoading(false));
   }, [filters]);
-
+  //Logic sắp xếp
   const sortedProducts = [...dbProducts].sort((a: any, b: any) => {
     if(sortBy === "newest"){
       const isNewA= a.isNew || a.new ? 1 : 0;
@@ -104,20 +107,20 @@ export default function MainProduct() {
       }
       return isNewB - isNewA;
     }
-    if(sortBy === "price-asc") return a.price - b.price;
-    if(sortBy === "price-desc") return b.price - a.price;
+    if(sortBy === "price-asc") return a.price - b.price; // Giá tăng dần
+    if(sortBy === "price-desc") return b.price - a.price; // Giá giảm dần
     return b.productId - a.productId;
   });
 
-  const totalPages = Math.ceil(sortedProducts.length / PRODUCTS_PER_PAGE);
-  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-  const currentProducts = sortedProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
-
+  const totalPages = Math.ceil(sortedProducts.length / PRODUCTS_PER_PAGE); // Tổng số trang
+  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE; // Vị trí bắt đầu
+  const currentProducts = sortedProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE); // Cắt lấy đúng 6 SP
+  //Hàm xử lý chuyển trang
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
+  //Hàm xử lý khi chọn loại sắp xếp
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSortBy(e.target.value as SortOption);
     setCurrentPage(1);

@@ -9,9 +9,9 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
 
   if (!user || user.role !== "ADMIN") {
     showNotification("Bạn không có quyền truy cập vào khu vực Admin!","warning");
-    return <Navigate to="/" replace />;
+    return <Navigate to="/home" replace />;
   }
-
+  // Nếu điều kiện thỏa mãn, render nội dung bên trong 
   return <>{children}</>;
 }
 

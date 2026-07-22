@@ -9,11 +9,11 @@ interface Promotion {
   minSpend: number;
   startDate: string | null;
   endDate: string | null;
-  targetProductId: number | null; // 🌟 Thêm trường: null = tất cả, number = ID sản phẩm cụ thể
+  targetProductId: number | null; 
 }
 
 interface PromoSectionProps {
-  cart: any[]; // 🌟 Thêm nhận mảng giỏ hàng để duyệt tìm sản phẩm mục tiêu
+  cart: any[]; // Thêm nhận mảng giỏ hàng để duyệt tìm sản phẩm mục tiêu
   cartTotal: number;
   onApplyDiscount: (discountAmount: number, code: string, promoId: number | null) => void;
 }
@@ -38,7 +38,7 @@ export default function PromoSection({ cart, cartTotal, onApplyDiscount }: Promo
       const targetItem = cart.find(item => item.id === promo.targetProductId);
       if (!targetItem) return 0;
 
-      // Tính tổng giá trị của riêng sản phẩm đó (giá * số lượng)
+      // Tính tổng giá trị của riêng sản phẩm đó 
       const itemTotalSub = targetItem.price * targetItem.quantity;
       if (promo.discountType === "PERCENTAGE") {
         return (itemTotalSub * promo.discountValue) / 100;
@@ -47,7 +47,7 @@ export default function PromoSection({ cart, cartTotal, onApplyDiscount }: Promo
       return Math.min(promo.discountValue, itemTotalSub);
     }
 
-    // Nếu áp dụng cho TẤT CẢ sản phẩm (toàn bộ giỏ hàng)
+    // Nếu áp dụng cho tất cả sản phẩm (toàn bộ giỏ hàng)
     if (promo.discountType === "PERCENTAGE") {
       return (cartTotal * promo.discountValue) / 100;
     }

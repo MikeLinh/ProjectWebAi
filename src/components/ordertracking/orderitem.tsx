@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { useNotification } from "../context/notificationcontext";
+// Định nghĩa kiểu dữ liệu cho trạng thái đơn hàng
 export type OrderStatus =
   | "PENDING"
   | "CONFIRMED"
@@ -9,6 +10,7 @@ export type OrderStatus =
   | "DELIVERED"
   | "CANCELLED";
 
+// Định nghĩa cấu trúc đối tượng Order
 export interface Order {
   orderId: number;
   orderDate: string;
@@ -20,7 +22,7 @@ export interface Order {
   items: { orderDetailId: number; productId?: number; productName: string; quantity: number; price: number }[];
 }
 
-
+//Mapping nhãn hiển thị cho từng trạng thái
 const STATUS_LABEL: Record<OrderStatus, string> = {
   PENDING:   "Chờ xác nhận",
   CONFIRMED: "Đã xác nhận",
@@ -29,7 +31,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   DELIVERED: "Đã nhận hàng",
   CANCELLED: "Đã hủy",
 };
-
+//Mapping màu sắc cho Badge dựa trên trạng thái
 const STATUS_BADGE: Record<OrderStatus, string> = {
   PENDING:   "bg-amber-50  text-amber-600  border-amber-200",
   CONFIRMED: "bg-blue-50   text-blue-600   border-blue-200",
@@ -38,7 +40,7 @@ const STATUS_BADGE: Record<OrderStatus, string> = {
   DELIVERED: "bg-green-50  text-green-600  border-green-200",
   CANCELLED: "bg-red-50    text-red-600    border-red-200",
 };
-
+//Định nghĩa 1 props
 interface OrderItemProps {
   order: Order;
   onCancelOrder?: (orderId: number) => void;   
@@ -49,6 +51,7 @@ interface OrderItemProps {
 export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToProduct }: OrderItemProps) {
   const {showNotification} = useNotification();
   const [rePaying, setRePaying] = useState(false);
+  //Hàm xử lý tách ngày và giờ từ chuỗi ISO Date trả về từ API
   const formatOrderDate = (dateString: string) => {
     const d = new Date(dateString);
     const giờ  = d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
@@ -60,7 +63,9 @@ export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToP
   const { giờ, ngày } = formatOrderDate(order.orderDate);
   const canCancel = ["PENDING", "CONFIRMED"].includes(order.status);
   const canReview = order.status === "DELIVERED";
-  const isVnPayPending = order.status === "PENDING" && order.paymentMethod === "VNPAY";
+  const isVnPayPending = order.status === "PENDING" && order.paymentMethod === "VNPAY"; // Hiện nút thanh toán lại nếu dùng VNPay mà chưa thanh toán
+
+  //Hàm thanh toán lại qua VNPAY
   const handleRepay = async () => {
     setRePaying(true);
     try {
@@ -76,6 +81,7 @@ export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToP
 
       if (!vnpayRes.ok) throw new Error("Không thể tạo lại liên kết VNPay");
 
+      // Chuyển đổi phản hồi từ API thành đối tượng JSON
       const vnpayData = await vnpayRes.json();
       if (vnpayData.payUrl) {
         showNotification("Đang chuyển hướng đến cổng thanh toán VNPay...","success");

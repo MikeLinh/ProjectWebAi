@@ -27,7 +27,7 @@ export default function ProductInfoRight({ id, image, name, price, originalPrice
 
   const { addToCart } = useCart();
   const hasDiscount = originalPrice && originalPrice > price;
-
+  
   const handleAddToCart = () => {
     if (inStock <= 0) {
       showNotification(`Xin lỗi, sản phẩm "${name}" hiện tại đã hết hàng!`,"warning");

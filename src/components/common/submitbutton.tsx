@@ -5,7 +5,7 @@ interface SubmitButtonProps{
     children: React.ReactNode; //React.ReactNode cho phép truyền bất kỳ thứ gì vào giữa cặp thẻ đóng/mở
     isLoading?: boolean;
 }
-export default function SubmitButton({children, isLoading}: SubmitButtonProps){
+export default function SubmitButton({children, isLoading}: SubmitButtonProps){ //Trích xuất dữ liệu từ props
     return(
         <button
             type="submit"
