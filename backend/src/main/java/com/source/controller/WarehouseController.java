@@ -5,6 +5,9 @@ import com.source.model.Category;
 import com.source.model.WarehouseReceipt;
 import com.source.repository.ProductRepository;
 import com.source.repository.WarehouseReceiptRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +43,7 @@ public class WarehouseController {
                 )
         );
     }
-
+    @Transactional
     @PostMapping
     public ResponseEntity<?> importStock(@RequestBody WarehouseReceipt receipt) {
         Optional<Product> opt = productRepository.findById(receipt.getProductId());
@@ -68,7 +71,7 @@ public class WarehouseController {
 
         return ResponseEntity.ok(saved);
     }
-
+    @Transactional
     @PutMapping("/{id}")
     public ResponseEntity<?> updateReceipt(@PathVariable Long id, @RequestBody WarehouseReceipt updatedReceipt) {
         Optional<WarehouseReceipt> receiptOpt = warehouseReceiptRepository.findById(id);

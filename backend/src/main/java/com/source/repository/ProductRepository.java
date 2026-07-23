@@ -19,4 +19,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
     @Query("UPDATE Product p SET p.stockQuantity = p.stockQuantity - :qty " +
            "WHERE p.productId = :id AND p.stockQuantity >= :qty")
     int decreaseStock(@Param("id") Long id, @Param("qty") int qty);
+
+    boolean existsByCategory_CategoryId(Integer categoryId);
+    boolean existsByManufacturer_ManufacturerId(Integer manufacturerId);
+    boolean existsBySupplier_SupplierId(Integer supplierId);
 }

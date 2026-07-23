@@ -1,8 +1,10 @@
 package com.source.controller;
 
 import com.source.model.Supplier;
+import com.source.repository.ProductRepository;
 import com.source.repository.SupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,9 @@ public class SupplierController {
 
     @Autowired 
     private SupplierRepository supplierRepository;
+
+    @Autowired 
+    private ProductRepository productRepository;
 
     @GetMapping
     public ResponseEntity<List<Supplier>> getAll() {
@@ -52,9 +57,13 @@ public class SupplierController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
         if (!supplierRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
+        }
+        if(productRepository.existsBySupplier_SupplierId(id)){
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Không thể xóa nhà cung cấp này vì đang có sản phẩm tồn tại!");
         }
         supplierRepository.deleteById(id);
         return ResponseEntity.noContent().build();
