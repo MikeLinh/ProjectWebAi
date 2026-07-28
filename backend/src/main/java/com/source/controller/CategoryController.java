@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -28,7 +29,21 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@RequestBody Category category) {
+    public ResponseEntity<Object> createCategory(@PathVariable Integer id,@RequestBody Category category) {
+        //KT ID
+        Optional<Category> categoryOpt = categoryRepository.findById(id);
+        if(categoryOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy danh mục");
+        }
+        //KT Tên DM
+        if(category.getCategoryName() == null || category.getCategoryName().trim().isEmpty()){
+            return ResponseEntity.badRequest().body("Tên danh mục không được để trống !");
+        }
+        String newName = category.getCategoryName().trim();
+        Category existingCategory = categoryOpt.get();
+
+     
+       
         Category saved = categoryRepository.save(category);
         return ResponseEntity.ok(saved);
     }
@@ -52,4 +67,12 @@ public class CategoryController {
         categoryRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> categoryFindId(@PathVariable Integer id){
+        Optional<Category> opt = categoryRepository.findById(id);
+        if(opt.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(opt.get());
+    } 
 }

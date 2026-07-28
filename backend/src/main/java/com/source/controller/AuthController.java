@@ -23,8 +23,8 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
-    private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@gmail\\\\.com$";
-    private static final String PHONE_REGEX = "^[0-9]{10}$";
+    private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@gmail\\.com$";
+    private static final String PHONE_REGEX = "^[0-9]{10,11}$";
 
     private boolean isValidEmail(String email){
         return email != null && Pattern.matches(EMAIL_REGEX, email);

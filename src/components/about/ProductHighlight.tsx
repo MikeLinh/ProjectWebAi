@@ -1,24 +1,24 @@
 import React from "react";
-
-import bike1 from "../../assets/images/bike1.png";
-import bike2 from "../../assets/images/bike2.png";
-import bike3 from "../../assets/images/bike3.png";
+import bike1 from "../../assets/images/bk1.png";
+import bike2 from "../../assets/images/bk2.png";
+import bike3 from "../../assets/images/bk3.png";
 
 export default function ProductHighlight() {
+  
   const products = [
     { 
-      name: "Xe đạp điện Xiaomi Himo", 
-      price: "1000", 
+      name: "Xe Đạp Giant Touring", 
+      price: "1200", 
       img: bike1 
     },
     { 
-      name: "Xe đạp thể thao Specialized", 
-      price: "2000", 
+      name: "Xe đạp Giant LIV", 
+      price: "2300", 
       img: bike2 
     },
     { 
-      name: "Xe đạp trẻ em Liv", 
-      price: "2500", 
+      name: "Xe đạp Giant Escape", 
+      price: "3000", 
       img: bike3 
     },
   ];
@@ -46,7 +46,7 @@ export default function ProductHighlight() {
                 <p className="text-3xl font-bold text-green-600">
                   {parseInt(p.price).toLocaleString('vi-VN')} $
                 </p>
-                <button className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-medium transition-colors">
+                <button className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-medium transition-colors" >
                   Xem chi tiết
                 </button>
               </div>

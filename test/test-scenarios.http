@@ -9,10 +9,10 @@ Content-Type: application/json
 
 {
   "fullName": "Nguyen Van Test",
-  "email": "test01@example.com",
-  "password": "123456",
-  "phoneNumber": "0901234567",
-  "address": "123 Nguyen Trai, Q5, TP.HCM"
+  "email": "test01@gmail.com",
+  "phoneNumber": "09012345671",
+  "address": "123 Nguyen Trai, Q5, TP.HCM",
+  "password": "1234567"
 }
 
 ### TC-02: Đăng ký với email đã tồn tại 
@@ -22,9 +22,9 @@ Content-Type: application/json
 
 {
   "fullName": "Nguyen Van Test",
-  "email": "test01@example.com",
-  "password": "123456",
-  "phoneNumber": "0901234567",
+  "email": "test01@gmail.com",
+  "password": "1234567",
+  "phoneNumber": "09012345671",
   "address": "123 Nguyen Trai, Q5, TP.HCM"
 }
 

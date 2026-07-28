@@ -7,6 +7,7 @@ import OrderFilter from "../components/ordertracking/orderfilter";
 import OrderList from "../components/ordertracking/orderlist";
 import { type Order, type OrderStatus } from "../components/ordertracking/orderitem";
 import { useNotification } from "../components/context/notificationcontext";
+import OrderDetailModal from "../admin/components/orderdetailmodel";
 
 // Định nghĩa hàm để lấy ID người dùng hiện tại từ bộ nhớ cục bộ
 function getCurrentUserId(): number | null {
@@ -27,6 +28,8 @@ export default function OrderTrackingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [updateId, setUpdateId] = useState<number | null>(null);
 
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "ALL">("ALL");
   const [timeSort, setTimeSort] = useState<"NEWEST" | "OLDEST" | "BY_HOUR">("NEWEST");
@@ -34,6 +37,29 @@ export default function OrderTrackingPage() {
   const [selectedYear, setSelectedYear] = useState<string>("Tất cả");
   const navigate = useNavigate();
   
+  const handleUpdateStatus = async (id: number, newStatus: OrderStatus) =>{
+    setUpdateId(id);
+    try{
+      const res = await fetch(`http://localhost:8080/api/orders/${id}/status`,{
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      if (!res.ok) throw new Error("Cập nhật thất bại");
+
+      setOrders((prev) => 
+        prev.map((o)=> (o.orderId === id ? {...o, status: newStatus} : o))
+      );
+      if(selectedOrder?.orderId === id){
+      setSelectedOrder((prev) => (prev ? {...prev, status: newStatus} : prev));
+    }
+    }catch(err){
+      showNotification("Không thể cập nhâp trạng thái vui lòng thử lại","error");
+      console.log(err);
+    }finally{
+      setUpdateId(null);
+    }
+  }
   // Định nghĩa hàm xử lý việc chuyển hướng người dùng đến trang chi tiết của một sản phẩm cụ thể trong đơn hàng
   const handleGoToProductDetail = (productItem: any) => {
     const productId = productItem.productId;
@@ -192,10 +218,19 @@ export default function OrderTrackingPage() {
               onCancelOrder={handleCancelOrder}
               onReviewOrder={handleReviewOrder}
               onGoToProduct={handleGoToProductDetail}
+              onViewDetail={(orders) => setSelectedOrder(orders)}
             />
           </>
         )}
       </div>
+      {selectedOrder &&(
+        <OrderDetailModal
+          order={selectedOrder}
+          onClose={()=> setSelectedOrder(null)}
+          onUpdateStatus={handleUpdateStatus}
+          updatingId={updateId} 
+        />
+      )}
 
       <Footer />
     </div>

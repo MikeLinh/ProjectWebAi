@@ -36,18 +36,29 @@ public class ManufacturerController {
     }
 
     @PostMapping
-    public ResponseEntity<Manufacturer> create(@RequestBody Manufacturer manufacturer) {
+    public ResponseEntity<?> create(@RequestBody Manufacturer manufacturer) {
+        if(manufacturer.getManufacturerName() == null || manufacturer.getManufacturerName().trim().isEmpty()){
+            return ResponseEntity.badRequest().body("Tên nsx không được để trống");
+        }
+        String cleanName= manufacturer.getManufacturerName().trim();
+
+        
         Manufacturer saved = manufacturerRepository.save(manufacturer);
         return ResponseEntity.ok(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Manufacturer> update(@PathVariable Integer id, @RequestBody Manufacturer updated) {
+    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Manufacturer updated) {
         Optional<Manufacturer> opt = manufacturerRepository.findById(id);
         if (opt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+        if(updated.getManufacturerName() == null || updated.getManufacturerName().trim().isEmpty()){
+                return ResponseEntity.badRequest().body("Tên nsx không được để trống");
+        }
+
         Manufacturer existing = opt.get();
+    
         existing.setManufacturerName(updated.getManufacturerName());
         existing.setCountry(updated.getCountry());
         existing.setActive(updated.getActive());
@@ -57,6 +68,12 @@ public class ManufacturerController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
+        if(id == null || id <= 0 ){
+            return ResponseEntity.badRequest().body("ID không hợp lệ");
+        }
+        if(!manufacturerRepository.existsById(id)){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhà sản xuất không hợp lệ");
+        }
         if (!manufacturerRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }

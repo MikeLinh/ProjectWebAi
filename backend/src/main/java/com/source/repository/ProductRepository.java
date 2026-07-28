@@ -22,5 +22,5 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
 
     boolean existsByCategory_CategoryId(Integer categoryId);
     boolean existsByManufacturer_ManufacturerId(Integer manufacturerId);
-    boolean existsBySupplier_SupplierId(Integer supplierId);
+  
 }

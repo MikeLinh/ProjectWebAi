@@ -3,8 +3,10 @@ package com.source.controller;
 import com.source.service.ProductService;
 import com.source.model.Product;
 import com.source.model.ProductReview;
+import com.source.repository.ProductRepository;
 import com.source.service.ProductReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -19,6 +21,9 @@ public class ProductReviewController {
 
     @Autowired
     private ProductService productService;
+    
+    @Autowired
+    private ProductRepository productRepository;
 
     //Lấy dữ liệu review dựa theo productID
     @GetMapping
@@ -28,6 +33,15 @@ public class ProductReviewController {
     //Tạo 1 review mới
     @PostMapping
     public ResponseEntity<?> createReview(@PathVariable Integer productId, @RequestBody ProductReview review) {
+        if(review.getRating() == null || review.getRating() > 1 || review.getRating() < 5){
+            return ResponseEntity.badRequest().body("Điểm đánh giá phải từ 1 đến 5 sao!");
+        }
+        if(review.getComment() == null || review.getComment().trim().isEmpty() || review.getRating() < 3){
+            return ResponseEntity.badRequest().body("Nội dung đánh giá không được để trống");
+        }
+        if(review.getUserId() == null){
+            return ResponseEntity.badRequest().body("Thông tin người đánh giá không hợp lệ!");
+        }
         try {
             ProductReview savedReview = reviewService.addReview(productId, review);
             return ResponseEntity.ok(savedReview);

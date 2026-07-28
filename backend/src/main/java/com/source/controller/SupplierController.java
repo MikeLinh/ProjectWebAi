@@ -19,8 +19,7 @@ public class SupplierController {
     @Autowired 
     private SupplierRepository supplierRepository;
 
-    @Autowired 
-    private ProductRepository productRepository;
+
 
     @GetMapping
     public ResponseEntity<List<Supplier>> getAll() {
@@ -61,10 +60,7 @@ public class SupplierController {
         if (!supplierRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        if(productRepository.existsBySupplier_SupplierId(id)){
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Không thể xóa nhà cung cấp này vì đang có sản phẩm tồn tại!");
-        }
+       
         supplierRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }

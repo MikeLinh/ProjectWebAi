@@ -46,9 +46,10 @@ interface OrderItemProps {
   onCancelOrder?: (orderId: number) => void;   
   onReviewOrder?: (orderId: number) => void;
   onGoToProduct?: (productItem: any) => void;
+  onViewDetail?: (order : Order) => void;
 }
 
-export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToProduct }: OrderItemProps) {
+export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToProduct, onViewDetail }: OrderItemProps) {
   const {showNotification} = useNotification();
   const [rePaying, setRePaying] = useState(false);
   //Hàm xử lý tách ngày và giờ từ chuỗi ISO Date trả về từ API
@@ -99,33 +100,48 @@ export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToP
   return (
     <div className="border border-gray-200 rounded-xl p-5 hover:shadow-sm transition-shadow space-y-4 bg-white">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-3">
-        <div>
+        <div className="flex items-center gap-1.5 text-xs text-gray-400">
           <span className="font-mono font-bold text-sm text-gray-900 mr-2">#{order.orderId}</span>
           <span className="text-xs text-gray-400">
             Đặt lúc: <strong className="text-gray-700 font-normal">{giờ}</strong> - {ngày}
           </span>
+          <p className="mb-0.5">|</p>
+          {onViewDetail && (
+            <button
+              onClick={() => onViewDetail(order)}
+              className="text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-colors"
+            >
+              Xem chi tiết
+            </button>
+          )}
         </div>
+        
         <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${STATUS_BADGE[order.status]}`}>
           {STATUS_LABEL[order.status]}
         </span>
+      
       </div>
 
       <div className="space-y-2">
         {order.items.map((item) => (
           <div key={item.orderDetailId} className="flex justify-between items-center text-xs">
-            <button
-              onClick={() => onGoToProduct && onGoToProduct(item)}
-              className="text-gray-800 hover:text-red-500 font-medium transition-colors text-left"
-            >
-              {item.productName} <span className="text-gray-400 font-mono">x{item.quantity}</span>
-            </button>
-            {order.status === "DELIVERED" && (
-              <a href={`/warranty?orderDetailId=${item.orderDetailId}`}
-                className="text-[10px] text-green-600 font-semibold hover:underline mt-1 block"
-                >
-                  Xem thẻ bảo hành sản phẩm
-              </a>
-            )}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onGoToProduct && onGoToProduct(item)}
+                className="text-gray-800 hover:text-red-500 font-medium transition-colors text-left"
+              >
+                {item.productName} <span className="text-gray-400 font-mono">x{item.quantity}</span>
+              </button>
+              <p>|</p>
+              {order.status === "DELIVERED" && (
+                <a href={`/warranty?orderDetailId=${item.orderDetailId}`}
+                  className="text-[10px] text-green-600 font-semibold hover:underline mt-1 block"
+                  >
+                   Xem thẻ bảo hành sản phẩm
+                </a>
+              )}
+            </div>
+            
             <div className="font-medium text-gray-900">
               ${(item.price * item.quantity).toLocaleString()}
             </div>

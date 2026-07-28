@@ -64,7 +64,7 @@ public class ProductController {
         }
         return ResponseEntity.ok(opt.get());
     }
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) //Nhận cả định dạng các dạng như file và file ảnh
     public ResponseEntity<Product> createProduct(
             @RequestParam("productName") String productName,
             @RequestParam("manufacturerName") String manufacturerName,
