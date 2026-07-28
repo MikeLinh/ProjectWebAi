@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { useNotification } from "../context/notificationcontext";
+import { handleExportInvoice } from "../utils/exportInvoice";
 // Định nghĩa kiểu dữ liệu cho trạng thái đơn hàng
 export type OrderStatus =
   | "PENDING"
@@ -158,8 +159,16 @@ export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToP
           {rePaying ? "Đang xử lý..." : "Thanh toán lại qua VNPAY"}
         </button>
       )}
-
-      {canCancel && onCancelOrder && (
+      <div className="flex items-center gap-2">
+       {order.status === "DELIVERED" && (
+        <button
+          onClick={() => handleExportInvoice(order, ngày, giờ)}
+          className="w-full py-2 bg-green-600 hover:bg-green-900 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
+        >
+          Xuất hóa đơn
+        </button>
+       )}
+        {canCancel && onCancelOrder && (
         <button 
           onClick={() => onCancelOrder(order.orderId)}
           className="mt-3 w-full py-2.5 text-red-600 border border-red-300 hover:bg-red-50 rounded-xl text-xs font-medium transition-colors"
@@ -175,6 +184,9 @@ export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToP
           Đánh giá đơn hàng
         </button>
       )}
+      </div>
+
+      
     </div>
   );
 }
