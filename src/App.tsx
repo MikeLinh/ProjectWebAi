@@ -20,6 +20,7 @@ import About from './pages/About'
 import Sale from './pages/Sale'
 import Warranty from './pages/Warranty'
 import { NotificationProvider } from "./components/context/notificationcontext";
+import Chatbox from './components/chatbox/chatbox'
 
 import VNPayReturn from './pages/VnpayReturn'
 
@@ -54,6 +55,7 @@ function App() {
                 
           } />
               </Routes>
+              <Chatbox />
             </Router>
           </NotificationProvider>
         </CartProvider>

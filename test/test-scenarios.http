@@ -179,14 +179,23 @@ Content-Type: application/json
 PATCH {{baseUrl}}/orders/1/payment-result?vnp_ResponseCode=24
 
 
+POST {{baseUrl}}/vnpay/create
+Content-Type: application/json
+
+{
+  "orderId": 46,
+  "amount": 5000000,
+  "orderInfo": "Thanh toan don hang test"
+}
+
+### TC-21: Test hoàn tiền
 POST {{baseUrl}}/vnpay/refund
 Content-Type: application/json
 
 {
-  "orderId": 23,
+  "orderId": 46,
   "createBy": "Linh Nguyễn"
 }
-
 
 ### TC-21: Theo dõi trạng thái đơn hàng real-time (SSE)
 #Xem trực tiếp trên UI

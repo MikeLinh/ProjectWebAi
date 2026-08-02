@@ -9,8 +9,8 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ReplayIcon from '@mui/icons-material/Replay';
-//Bảng tra cứu nhãn hiển thị
-//Ánh xạ (map) một giá trị mã hóa kỹ thuật sang một chuỗi ký tự thân thiện với người dùng
+
+// Bảng tra cứu nhãn hiển thị
 const STATUS_LABEL: Record<OrderStatus, string> = {
   PENDING:   "Chờ xử lý",
   CONFIRMED: "Đã xác nhận",
@@ -20,8 +20,8 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   CANCELLED: "Đã hủy",
   REFUNDED:  "Đã hoàn tiền",
 };
-//Bản đồ chuyển trạng thái
-//Chỉ một số trạng thái trung gian mới có bước đi tiếp theo. Mỗi bước đi tiếp theo gồm 1 nhãn nút bấm (label) và 1 điểm đến tiếp theo (next).
+
+// Bản đồ chuyển trạng thái
 const NEXT_ACTION: Partial<Record<OrderStatus, { label: string; next: OrderStatus }>> = {
   PENDING:   { label: "Xác nhận đơn", next: "CONFIRMED" },
   CONFIRMED: { label: "Bắt đầu đóng gói", next: "PACKING" },
@@ -40,33 +40,32 @@ const STEP_ICONS: Record<string, React.ElementType> = {
   SHIPPING: LocalShippingIcon,
   DELIVERED: CheckCircleOutlineIcon,
 };
-//Định nghĩa dữ liệu đầu vào
+
+// Định nghĩa dữ liệu đầu vào
 interface OrderDetailModalProps {
   order: any | null;
   onClose: () => void;
-  onUpdateStatus: (orderId: number, newStatus: OrderStatus) => void;
-  onRefund?: (orderId: number) => void; // Thêm prop onRefund để xử lý hoàn tiền
-  updatingId: number | null;
+  onUpdateStatus?: (orderId: number, newStatus: OrderStatus) => void;
+  onRefund?: (orderId: number) => void;
+  updatingId?: number | null;
+  isAdmin?: boolean; // Thêm prop này để phân biệt giao diện Admin và User
 }
 
 export default function OrderDetailModal({
-  order, onClose, onUpdateStatus, onRefund, updatingId,
+  order, onClose, onUpdateStatus, onRefund, updatingId, isAdmin = true,
 }: OrderDetailModalProps) {
   if (!order) return null;
 
   const action = NEXT_ACTION[order.status as OrderStatus]; 
   const isUpdating = updatingId === order.orderId; 
-  const canCancel = ["PENDING", "CONFIRMED"].includes(order.status); // Chỉ cho phép hủy đơn hàng khi đơn hàng đang ở trạng thái "Chờ xử lý" hoặc "Đã xác nhận"
-  const canRefund =
-   order.status === "CANCELLED" &&
-    order.paymentMethod?.toUpperCase() === "VNPAY";
+  const canCancel = ["PENDING", "CONFIRMED"].includes(order.status); 
+  const canRefund = order.status === "CANCELLED" && order.paymentMethod?.toUpperCase() === "VNPAY";
 
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      {/* Tăng độ rộng từ max-w-md lên max-w-lg để nhìn thoáng hơn */}
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl p-7 space-y-5 text-black text-sm">
         
         {/* Header */}
@@ -77,7 +76,6 @@ export default function OrderDetailModal({
 
         {/* --- KHU VỰC STEPPER TRẠNG THÁI CÓ ICON MUI --- */}
         <div className="w-full relative mt-6 mb-8 px-2">
-          {/* Thanh ngang nền */}
           <div className="absolute top-[1.25rem] left-8 right-8 h-[2px] bg-gray-200 z-0"></div>
           
           <div className="flex justify-between items-start relative z-10">
@@ -114,9 +112,8 @@ export default function OrderDetailModal({
             })}
           </div>
         </div>
-        {/* --- KẾT THÚC KHU VỰC STEPPER --- */}
 
-        {/* Thông tin khách hàng - Viền đen bo góc như ảnh reference */}
+        {/* Thông tin khách hàng */}
         <div className="space-y-2 border border-gray-800 p-4 rounded-xl">
           <p><b>Khách hàng:</b> {order.receiverName}</p>
           <p><b>Số điện thoại:</b> {order.receiverPhone}</p>
@@ -126,7 +123,7 @@ export default function OrderDetailModal({
           {order.note && <p><b>Ghi chú:</b> {order.note}</p>}
         </div>
 
-        {/* Danh sách sản phẩm - Viền đen bo góc */}
+        {/* Danh sách sản phẩm */}
         <div>
           <h3 className="font-extrabold mb-2 uppercase text-gray-400 text-xs">Sản phẩm</h3>
           <div className="divide-y divide-gray-800 border border-gray-800 rounded-xl overflow-hidden bg-white">
@@ -156,34 +153,40 @@ export default function OrderDetailModal({
             Đóng
           </button>
 
-          {action && (
-            <button
-              onClick={() => onUpdateStatus(order.orderId, action.next)}
-              disabled={isUpdating}
-              className="flex-1 bg-[#00a651] hover:bg-green-700 disabled:opacity-50 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors"
-            >
-              {isUpdating ? "Đang xử lý..." : action.label}
-            </button>
-          )}
+          {/* CHỈ HIỂN THỊ CÁC NÚT CHỨC NĂNG KHI LÀ ADMIN (isAdmin = true) */}
+          {isAdmin && (
+            <>
+              {action && onUpdateStatus && (
+                <button
+                  onClick={() => onUpdateStatus(order.orderId, action.next)}
+                  disabled={isUpdating}
+                  className="flex-1 bg-[#00a651] hover:bg-green-700 disabled:opacity-50 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors"
+                >
+                  {isUpdating ? "Đang xử lý..." : action.label}
+                </button>
+              )}
 
-          {canCancel && (
-            <button
-              onClick={() => onUpdateStatus(order.orderId, "CANCELLED")}
-              disabled={isUpdating}
-              className="flex-1 bg-[#e30019] hover:bg-red-700 disabled:opacity-50 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors"
-            >
-              {isUpdating ? "Đang xử lý..." : "Hủy đơn hàng"}
-            </button>
-          )}
-          {canRefund && (
-            <button
-              onClick={() => onRefund?.(order.orderId)}
-              disabled={isUpdating}
-              className="flex-1 min-w-[100px] bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1"
-            >
-              <ReplayIcon fontSize="small" />
-              {isUpdating ? "Đang hoàn tiền..." : "Hoàn tiền VNPAY"}
-            </button>
+              {canCancel && onUpdateStatus && (
+                <button
+                  onClick={() => onUpdateStatus(order.orderId, "CANCELLED")}
+                  disabled={isUpdating}
+                  className="flex-1 bg-[#e30019] hover:bg-red-700 disabled:opacity-50 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors"
+                >
+                  {isUpdating ? "Đang xử lý..." : "Hủy đơn hàng"}
+                </button>
+              )}
+
+              {canRefund && (
+                <button
+                  onClick={() => onRefund?.(order.orderId)}
+                  disabled={isUpdating}
+                  className="flex-1 min-w-[100px] bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1"
+                >
+                  <ReplayIcon fontSize="small" />
+                  {isUpdating ? "Đang hoàn tiền..." : "Hoàn tiền VNPAY"}
+                </button>
+              )}
+            </>
           )}
         </div>
 

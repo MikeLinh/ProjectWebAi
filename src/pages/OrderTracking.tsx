@@ -229,6 +229,7 @@ export default function OrderTrackingPage() {
           onClose={()=> setSelectedOrder(null)}
           onUpdateStatus={handleUpdateStatus}
           updatingId={updateId} 
+          isAdmin={false}
         />
       )}
 

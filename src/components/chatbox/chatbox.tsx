@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import CloseIcon from "@mui/icons-material/Close";
 import SendIcon from "@mui/icons-material/Send";
@@ -150,13 +151,18 @@ function ProductCard({ product, onNavigate }: ProductCardProps) {
 //Component AI
 export default function AIChatbot() {
   const navigate = useNavigate();
-
+  const location = useLocation();
+  if (location.pathname.startsWith("/admin")) {
+    return null;
+  }
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState(""); // Dữ liệu khi người dùng gõ vào ô chat
   const [isTyping, setIsTyping] = useState(false); //Phần AI xử lý thông tin/ gõ chữ
   const [aiContext, setAiContext] = useState<string | null>(null); // Ngữ cảnh (System Prompt) huấn luyện AI
   const [contextError, setContextError] = useState(false); // Trạng thái kết nối API lỗi(offline)
   const [products, setProducts] = useState<Product[]>([]); // Danh sách sản phẩm load từ Backend
+
+  
 
   // Khởi tạo mảng hội thoại ban đầu kèm tin chào mừng của Bot
   const [messages, setMessages] = useState<Message[]>([

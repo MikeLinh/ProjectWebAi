@@ -14,47 +14,45 @@ export default function CheckoutSuccess() {
   const orderId = location.state?.orderId || searchParams.get("vnp_TxnRef")?.split("_")[0];
   // Lấy mã phản hồi kết quả giao dịch từ VNPay trên URL
   const responseCode = searchParams.get("vnp_ResponseCode");
-  const {showNotification}= useNotification();
+  const { showNotification } = useNotification();
   
 
   const isSuccess = responseCode === "00" || !responseCode; 
   const isUpdated = useRef(false);
   const [rePaying, setRePaying] = useState(false);
+  const txnRef = searchParams.get("vnp_TxnRef");
 
   useEffect(() => {
     if (isSuccess) {
       clearCart();
     }
-    // Nếu là thanh toán VNPay thành công mã "00" có mã đơn hàng hợp lệ và đơn hàng này chưa từng được cập nhật thành công
-    if (responseCode === "00" && orderId && !isUpdated.current) {
-      //Sử dụng async để fetch dữ liệu từ FE gọi API lên BE để cập nhập trạng thái
+    // Nếu có mã phản hồi từ VNPay và có mã đơn hàng hợp lệ thì tiến hành cập nhật
+    if (responseCode && orderId && !isUpdated.current) {
       const confirmOrder = async () => {
         try {
           isUpdated.current = true;
-          await fetch(`http://localhost:8080/api/orders/${orderId}/status`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ status: "CONFIRMED" }), // Gửi payload cập nhật trạng thái
-          });
+          // Gọi endpoint /payment-result để backend tự động đồng bộ trạng thái đơn hàng và thanh toán
+          await fetch(
+            `http://localhost:8080/api/orders/${orderId}/payment-result?vnp_ResponseCode=${responseCode}&vnp_TxnRef=${txnRef}`,
+            { method: "PATCH" }
+          );
         } catch (error) {
           console.log("Lỗi khi cập nhập trạng thái đơn hàng", error); 
         }
       };
       confirmOrder();
     }
-  }, [isSuccess, clearCart, orderId, responseCode]); //tự động chạy lại khi một trong các tham số này thay đổi
+  }, [isSuccess, clearCart, orderId, responseCode]); // tự động chạy lại khi một trong các tham số này thay đổi
   
   // Định nghĩa hàm xử lý thanh toán lại
   const handleRepay = async () => {
     if (!orderId) {
-      showNotification("Không tìm thấy mã đơn hàng để thực hiện thanh toán lại!","error");
+      showNotification("Không tìm thấy mã đơn hàng để thực hiện thanh toán lại!", "error");
       return;
     }
     setRePaying(true);
     try {
-      //Xác định số tiền chuẩn của đơn hàng
+      // Xác định số tiền chuẩn của đơn hàng
       let finalAmount = location.state?.order?.total || location.state?.order?.totalAmount;
 
       if (!finalAmount) {
@@ -70,7 +68,7 @@ export default function CheckoutSuccess() {
         throw new Error("Không thể xác định số tiền thanh toán của đơn hàng này.");
       }
 
-      //Gửi request chuẩn lên Backend để tạo URL thanh toán mới
+      // Gửi request chuẩn lên Backend để tạo URL thanh toán mới
       const vnpayRes = await fetch("http://localhost:8080/api/vnpay/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -88,11 +86,11 @@ export default function CheckoutSuccess() {
       
       const vnpayData = await vnpayRes.json();
       if (vnpayData.payUrl) {
-        showNotification("Đang chuyển hướng lại đến VNPay...","info");
+        showNotification("Đang chuyển hướng lại đến VNPay...", "info");
         window.location.href = vnpayData.payUrl;
       }
     } catch (error: any) {
-      showNotification(error.message || "Tạo liên kết thanh toán lại thất bại.","error");
+      showNotification(error.message || "Tạo liên kết thanh toán lại thất bại.", "error");
     } finally {
       setRePaying(false);
     }

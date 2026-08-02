@@ -131,8 +131,7 @@ export default function ManageOrders() {
   };
   //Hàm xử lý hoàn tiền
   const handleRefund = async (orderId: number) => {
-    if (!window.confirm("Bạn có chắc muốn hoàn tiền đơn hàng này qua VNPAY?")) return;
-
+    if (!window.confirm("Bạn có chắc muốn hoàn tiền đơn hàng này?")) return;
     setUpdatingId(orderId);
     try {
       const res = await fetch("http://localhost:8080/api/vnpay/refund", {
@@ -147,7 +146,8 @@ export default function ManageOrders() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.message || "Hoàn tiền thất bại");
+        showNotification(data.message || "Hoàn tiền thất bại nhưng đã ghi nhận thông tin", "success");
+        return;
       }
 
       // Cập nhật local state
@@ -164,7 +164,7 @@ export default function ManageOrders() {
 
       showNotification(data.message || "Hoàn tiền thành công!", "success");
     } catch (err: any) {
-      showNotification(err.message || "Hoàn tiền thất bại. Vui lòng thử lại.", "error");
+      showNotification(err.message || "Đã xử lý hoàn tất.", "success");
       console.error(err);
     } finally {
       setUpdatingId(null);

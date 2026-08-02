@@ -94,4 +94,9 @@ public class Order {
 
     public BigDecimal getDiscount()             { return discount; }
     public void setDiscount(BigDecimal d)       { this.discount = d; }
+    @Column(name = "vnp_txn_ref")
+    private String vnpTxnRef;
+
+    public String getVnpTxnRef() { return vnpTxnRef; }
+    public void setVnpTxnRef(String vnpTxnRef) { this.vnpTxnRef = vnpTxnRef; }
 }

@@ -88,7 +88,7 @@ export default function CheckoutPage() {
           discount,
           total: finalTotal,
           payment: paymentMethod,
-          status: "PENDING",
+          status: "PAID",
         },
       };
       // Nếu phương thức thanh toán là COD

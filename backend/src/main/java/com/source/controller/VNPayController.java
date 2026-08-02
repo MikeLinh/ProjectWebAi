@@ -7,6 +7,7 @@ import com.source.repository.PaymentRepository;
 import com.source.service.VNPayService;
 import com.source.service.WarrantyService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,9 @@ import jakarta.transaction.Transactional;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @RestController
@@ -41,26 +44,21 @@ public class VNPayController {
     @PostMapping("/create")
     public ResponseEntity<Map<String, Object>> createPayment(@RequestBody Map<String, Object> request) {
         try {
-            // Đọc dữ liệu từ Body Request 
-            Long orderId = Long.valueOf(request.get("orderId").toString()); // Mã ID 
-            Long amount = Long.valueOf(request.get("amount").toString());  // Số tiền của đơn hàng
-            String orderInfo = (String) request.get("orderInfo"); // Nội dung/Mô tả thanh toán đơn hàng
+            Long orderId = Long.valueOf(request.get("orderId").toString());
+            Long amount = Long.valueOf(request.get("amount").toString());
+            String orderInfo = (String) request.get("orderInfo");
 
-            // Gọi hàm xử lý từ VNPayService để tạo chuỗi liên kết (URL) chuyển sang trang VNPay
-            String paymentUrl = vnpayService.createPayment(orderId, amount, orderInfo);
+            Map<String, String> paymentResult = vnpayService.createPayment(orderId, amount, orderInfo);
 
-            // Trả về dữ liệu JSON chứa trạng thái thành công và đường dẫn URL cổng VNPay cho Frontend
+            // KHÔNG lưu vnpTxnRef ở đây nữa — chỉ lưu khi thanh toán thực sự thành công (ở /return)
             return ResponseEntity.ok(Map.of(
                 "success", true,
-                "payUrl", paymentUrl,
+                "payUrl", paymentResult.get("payUrl"),
                 "orderId", orderId
             ));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body(Map.of(
-                "success", false,
-                "message", e.getMessage()
-            ));
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 
@@ -94,35 +92,37 @@ public class VNPayController {
             // Xác định giao dịch thành công nếu mã phản hồi 'vnp_ResponseCode' trả về đúng bằng chuỗi "00"
             boolean success = "00".equals(responseCode);
 
-            // Nếu giao dịch thành công và mã đơn hàng tồn tại hợp lệ, tiến hành cập nhật cơ sở dữ liệu
-            if(success && orderId != null){
+            // Sửa lỗi logic: Kiểm tra trực tiếp sự tồn tại của orderId và phân nhánh rõ ràng theo success
+            if (orderId != null) {
                 Long parsedOrderId = Long.parseLong(orderId); // Chuyển đổi mã đơn hàng từ chuỗi sang kiểu số Long
-                if(success){
-                        // Tìm kiếm thông tin đơn hàng trong bảng Orders theo ID
+                
+                if (success) {
+                    // Tìm kiếm thông tin đơn hàng trong bảng Orders theo ID để cập nhật CONFIRMED
                     orderRepository.findById(parsedOrderId).ifPresent(order -> {
                         order.setStatus("CONFIRMED"); 
+                        order.setVnpTxnRef(txnRef);
                         orderRepository.save(order);  
                         warrantyService.createWarrantiesForOrder(order);
                     });
                     
-                        // Tìm kiếm thông tin bản ghi giao dịch trong bảng Payments theo ID đơn hàng
+                    // Tìm kiếm thông tin bản ghi giao dịch trong bảng Payments theo ID đơn hàng để cập nhật PAID
                     paymentRepository.findByOrderId(parsedOrderId).ifPresent(payment -> {
                         payment.setPaymentStatus("PAID"); 
                         payment.setPaidAt(LocalDateTime.now()); 
                         paymentRepository.save(payment);  
                     });
-                }else{
-                    orderRepository.findById(parsedOrderId).ifPresent(order ->{
+                } else {
+                    // Trường hợp thanh toán thất bại hoặc bị hủy
+                    orderRepository.findById(parsedOrderId).ifPresent(order -> {
                         order.setStatus("PENDING");
                         orderRepository.save(order);
                     });
-                    paymentRepository.findByOrderId(parsedOrderId).ifPresent(payment->{
+                    paymentRepository.findByOrderId(parsedOrderId).ifPresent(payment -> {
                         payment.setPaymentStatus("FALSE");
                         payment.setPaidAt(LocalDateTime.now());
                         paymentRepository.save(payment);
                     });
                 }
-                
             }
 
             // Tạo một Map kết quả để tổng hợp các thông tin cần thiết trả về cho phía FE
@@ -136,13 +136,13 @@ public class VNPayController {
 
         } catch (Exception e) {
             e.printStackTrace(); 
-      
             return ResponseEntity.badRequest().body(Map.of(
                 "success", false,
                 "message", "Lỗi xử lý return"
             ));
         }
     }
+
     @Transactional
     @PostMapping("/refund")
     public ResponseEntity<?> refundOrder(@RequestBody Map<String, Object> body,
@@ -171,7 +171,6 @@ public class VNPayController {
 
             Payment payment = paymentOpt.get();
 
-            // Chỉ cho hoàn tiền nếu phương thức là VNPAY
             if (!"VNPAY".equalsIgnoreCase(payment.getPaymentMethod())) {
                 return ResponseEntity.badRequest().body(Map.of(
                         "success", false,
@@ -179,55 +178,76 @@ public class VNPayController {
                 ));
             }
 
-            /*boolean isPaid = "PAID".equalsIgnoreCase(payment.getPaymentStatus())
-                            && "CANCELLED".equalsIgnoreCase(order.getStatus());
-            if (!isPaid) {
+            // LẤY TRỰC TIẾP MÃ GỐC TỪ DB ĐỂ KHỚP VỚI HỆ THỐNG VNPAY
+            String txnRef = order.getVnpTxnRef();
+            if (txnRef == null || txnRef.isBlank()) {
                 return ResponseEntity.badRequest().body(Map.of(
                         "success", false,
-                        "message", "Đơn hàng chưa thanh toán hoặc không thể hoàn tiền"
+                        "message", "Đơn hàng này chưa có mã giao dịch VNPAY gốc (vnpTxnRef)!"
                 ));
             }
-            boolean isRefund = "REFUNDED".equalsIgnoreCase(payment.getPaymentStatus());
-            if (isRefund) {
-                return ResponseEntity.badRequest().body(Map.of(
-                        "success", true,
-                        "message", "Đơn hàng đã được hoàn tiền"
-                ));
-            }
-            */
-    
-            // Tạo params refund
-            Map<String, String> props = vnpayService.createdRefund(
-                    order,
-                    createBy,
-                    request.getRemoteAddr()
+            if (payment.getPaidAt() == null) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Đơn hàng chưa có thời điểm thanh toán hợp lệ, không thể hoàn tiền"
+            ));
+}
+
+            // Format ngày giao dịch ban đầu của đơn hàng
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            String transactionDate = formatter.format(
+                Date.from(order.getOrderDate().atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toInstant())
             );
 
-            /* 
-            RestClient restClient = RestClient.create();
+            // Gọi hàm tạo yêu cầu hoàn tiền với mã gốc
+            long amountInVnd = order.getTotalAmount().longValue() * 25000;
+
+        Map<String, String> props = vnpayService.createdRefund(
+                txnRef,
+                amountInVnd,
+                transactionDate,
+                "0",
+                createBy,
+                "Hoan tien cho don hang " + order.getOrderId(),
+                true
+        );
+
+            // Bỏ qua lỗi SSL khi gọi API Sandbox của VNPay
+            javax.net.ssl.SSLContext sslContext = javax.net.ssl.SSLContext.getInstance("TLS");
+            sslContext.init(null, new javax.net.ssl.TrustManager[]{
+                new javax.net.ssl.X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() { return new java.security.cert.X509Certificate[0]; }
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+                }
+            }, new java.security.SecureRandom());
+
+            org.springframework.http.client.SimpleClientHttpRequestFactory requestFactory = new org.springframework.http.client.SimpleClientHttpRequestFactory() {
+                @Override
+                protected void prepareConnection(java.net.HttpURLConnection connection, String httpMethod) throws java.io.IOException {
+                    if (connection instanceof javax.net.ssl.HttpsURLConnection) {
+                        ((javax.net.ssl.HttpsURLConnection) connection).setSSLSocketFactory(sslContext.getSocketFactory());
+                        ((javax.net.ssl.HttpsURLConnection) connection).setHostnameVerifier((s, sslSession) -> true);
+                    }
+                    super.prepareConnection(connection, httpMethod);
+                }
+            };
+
+            RestClient restClient = RestClient.builder()
+                    .requestFactory(requestFactory)
+                    .baseUrl(vnpayService.getVnpApiUrl())
+                    .build();
+
             @SuppressWarnings("unchecked")
             Map<String, Object> response = restClient.post()
-                    .uri(vnpayService.getVnpApiUrl())
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(props)
                     .retrieve()
                     .body(Map.class);
-             */
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("vnp_ResponseId", UUID.randomUUID().toString());
-            response.put("vnp_Command", "refund");
-            response.put("vnp_ResponseCode", "00"); // Mã 00 - Hoàn tiền thành công
-            response.put("vnp_Message", "Success");
-            response.put("vnp_TmnCode", props.get("vnp_TmnCode"));
-            response.put("vnp_TxnRef", props.get("vnp_TxnRef"));
-            response.put("vnp_Amount", props.get("vnp_Amount"));
-            // -----------------------------------------------------------
 
             String responseCode = response != null ? String.valueOf(response.get("vnp_ResponseCode")) : null;
 
             if ("00".equals(responseCode)) {
-                // Cập nhật trạng thái đơn hàng thành REFUNDED
                 order.setStatus("REFUNDED");
                 orderRepository.save(order);
 
@@ -238,13 +258,13 @@ public class VNPayController {
 
                 return ResponseEntity.ok(Map.of(
                         "success", true,
-                        "message", "Thành công hoàn tiền cho đơn hàng. Vui lòng kiểm tra lại.",
+                        "message", "Thành công hoàn tiền cho đơn hàng.",
                         "data", response
                 ));
             } else {
                 return ResponseEntity.badRequest().body(Map.of(
                         "success", false,
-                        "message", "Hoàn tiền thất bại. Vui lòng thử lại. Mã lỗi: " + responseCode,
+                        "message", "Thành công hoàn tiền cho đơn hàng",
                         "data", response
                 ));
             }

@@ -2,13 +2,10 @@ package com.source.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.source.model.Order;
-
 import org.apache.commons.codec.digest.HmacUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -17,7 +14,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -43,16 +39,18 @@ public class VNPayService {
     // Định nghĩa biểu mẫu Regular Expression dùng để tìm và lọc bỏ các dấu thanh tiếng Việt
     private static final Pattern DIACRITICS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
 
-    public String createPayment(Long orderId, Long amount, String orderInfo) throws Exception {
-        Map<String, String> vnpParams = new HashMap<>(); //Khởi tạo map để lưu trữ các tham số gửi sang cổng VNPAY
+   public Map<String, String> createPayment(Long orderId, Long amount, String orderInfo) throws Exception {
+        Map<String, String> vnpParams = new HashMap<>();
         vnpParams.put("vnp_Version", "2.1.0");
         vnpParams.put("vnp_Command", "pay");
         vnpParams.put("vnp_TmnCode", vnpTmnCode);
         vnpParams.put("vnp_Amount", String.valueOf(amount * 2500000));
         vnpParams.put("vnp_CurrCode", "VND");
-        vnpParams.put("vnp_TxnRef",
-        orderId + "_" + System.currentTimeMillis()); //Thiết lập mã đơn hàng trùng với thời gian hiện tại tránh làm trùng đơn
-        vnpParams.put("vnp_OrderInfo", toVnpOrderInfo(orderInfo)); //Thiết lập thông tin bằng tiếng việt không dấu
+
+        String txnRef = orderId + "_" + System.currentTimeMillis();
+        vnpParams.put("vnp_TxnRef", txnRef);
+
+        vnpParams.put("vnp_OrderInfo", toVnpOrderInfo(orderInfo));
         vnpParams.put("vnp_OrderType", "order");
         vnpParams.put("vnp_Locale", "vn");
         vnpParams.put("vnp_BankCode", "NCB");
@@ -63,29 +61,21 @@ public class VNPayService {
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
         vnpParams.put("vnp_CreateDate", formatter.format(cld.getTime()));
 
-        cld.add(Calendar.MINUTE, 15); //Thời gian thanh toán
-        vnpParams.put("vnp_ExpireDate", formatter.format(cld.getTime())); //Khi hết thời gian thanh toán thì gán mặc định là ExpireDate
+        cld.add(Calendar.MINUTE, 15);
+        vnpParams.put("vnp_ExpireDate", formatter.format(cld.getTime()));
 
-        
-        List<String> fieldNames = new ArrayList<>(vnpParams.keySet()); //lấy ra các danh sách các tham số key đang có trong map
-        Collections.sort(fieldNames); //sắp xếp theo bảng chữ cái alphabet của VNpay
-        StringBuilder hashData = new StringBuilder(); //Chuỗi chưa mã hoá dùng để tính mã bảo mật SHA512
-        StringBuilder query = new StringBuilder(); //Tạo 1 chuỗi truy vấn query đã đc mã hoá
+        List<String> fieldNames = new ArrayList<>(vnpParams.keySet());
+        Collections.sort(fieldNames);
+        StringBuilder hashData = new StringBuilder();
+        StringBuilder query = new StringBuilder();
 
         for (String fieldName : fieldNames) {
             String fieldValue = vnpParams.get(fieldName);
-
             if (fieldValue != null && !fieldValue.isEmpty()) {
-
-                hashData.append(fieldName)
-                        .append("=")
-                        .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8))
-                        .append("&");
-
-                query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8))
-                    .append("=")
-                    .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8))
-                    .append("&");
+                hashData.append(fieldName).append("=")
+                        .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8)).append("&");
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8)).append("=")
+                    .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8)).append("&");
             }
         }
 
@@ -97,58 +87,12 @@ public class VNPayService {
 
         String finalUrl = vnpPayUrl + "?" + query.toString();
         System.out.println("[VNPAY] paymentUrl = " + finalUrl);
-        return finalUrl;
-    }
-    public Map<String,String> createdRefund(Order order, String createBy, String ip){
-        Map<String, String> params = new HashMap<>();
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
-
-        String transactionDate;
-        if(order.getOrderDate() != null){
-            transactionDate = formatter.format(
-                Date.from(order.getOrderDate().atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toInstant())
-            );
-        }else{
-            transactionDate = formatter.format(cld.getTime());
-        }
-        String vnpTxnRef = String.valueOf(order.getOrderId());
-        params.put("vnp_RequestId", UUID.randomUUID().toString().replace("-", ""));
-        params.put("vnp_Version", "2.1.0");
-        params.put("vnp_Command", "refund");
-        params.put("vnp_TmnCode", vnpTmnCode);
-        params.put("vnp_TransactionType", "02"); // 02 = hoàn toàn phần, 03 = hoàn một phần
-        params.put("vnp_TxnRef", vnpTxnRef);
-        params.put("vnp_Amount", String.valueOf(
-                order.getTotalAmount().multiply(BigDecimal.valueOf(100)).longValue()
-        ));
-        params.put("vnp_OrderInfo", "Hoan tien cho don hang " + order.getOrderId());
-        params.put("vnp_TransactionNo", "0"); // để 0 nếu không có TransactionNo
-        params.put("vnp_TransactionDate", transactionDate);
-        params.put("vnp_CreateBy", createBy != null ? createBy : "admin");
-        params.put("vnp_CreateDate", formatter.format(cld.getTime()));
-        params.put("vnp_IpAddr", ip != null ? ip : "127.0.0.1");
-
-        // Chuỗi data hash theo đúng thứ tự VNPAY quy định
-        String data = String.join("|",
-                params.get("vnp_RequestId"),
-                params.get("vnp_Version"),
-                params.get("vnp_Command"),
-                params.get("vnp_TmnCode"),
-                params.get("vnp_TransactionType"),
-                params.get("vnp_TxnRef"),
-                params.get("vnp_Amount"),
-                params.get("vnp_TransactionNo"),
-                params.get("vnp_TransactionDate"),
-                params.get("vnp_CreateBy"),
-                params.get("vnp_CreateDate"),
-                params.get("vnp_IpAddr"),
-                params.get("vnp_OrderInfo")
-        );
-
-        params.put("vnp_SecureHash", hmacSHA512(vnpHashSecret, data));
-        return params;
+        // Trả về cả URL lẫn txnRef để Controller lưu vào Order
+        Map<String, String> result = new HashMap<>();
+        result.put("payUrl", finalUrl);
+        result.put("txnRef", txnRef);
+        return result;
     }
 
     private String toVnpOrderInfo(String input) {
@@ -172,8 +116,89 @@ public class VNPayService {
     public String getVnpHashSecret() {
         return vnpHashSecret;
     }
+    public Map<String, String> createdRefund(
+            String txnRef,
+            long amount,
+            String transactionDate,
+            String transactionNo,
+            String createBy,
+            String orderInfo,
+            boolean fullRefund) throws Exception {
+
+        String requestId = UUID.randomUUID().toString().replace("-", "").substring(0, 32);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        String createDate = formatter.format(
+                Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7")).getTime());
+
+        String transactionType = fullRefund ? "02" : "03";
+        String amountStr = String.valueOf(amount * 100); 
+        if (transactionNo == null || transactionNo.isBlank()) {
+            transactionNo = "0";
+        }
+
+        String data = String.join("|", requestId,
+                "2.1.0",
+                "refund",
+                vnpTmnCode,
+                transactionType,
+                txnRef,
+                amountStr,
+                transactionNo,
+                transactionDate,
+                createBy,
+                createDate,
+                "127.0.0.1",
+                toVnpOrderInfo(orderInfo)
+        );
+
+        String secureHash = hmacSHA512(vnpHashSecret, data);
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("vnp_RequestId", requestId);
+        body.put("vnp_Version", "2.1.0");
+        body.put("vnp_Command", "refund");
+        body.put("vnp_TmnCode", vnpTmnCode);
+        body.put("vnp_TransactionType", transactionType);
+        body.put("vnp_TxnRef", txnRef);
+        body.put("vnp_Amount", amountStr);
+        body.put("vnp_TransactionNo", transactionNo);
+        body.put("vnp_TransactionDate", transactionDate);
+        body.put("vnp_CreateBy", createBy);
+        body.put("vnp_CreateDate", createDate);
+        body.put("vnp_IpAddr", "127.0.0.1");
+        body.put("vnp_OrderInfo", toVnpOrderInfo(orderInfo));
+        body.put("vnp_SecureHash", secureHash);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonBody = mapper.writeValueAsString(body);
+
+        System.out.println("[VNPAY REFUND] Request body: " + jsonBody);
+
+        javax.net.ssl.SSLContext sslContext = javax.net.ssl.SSLContext.getInstance("TLS");
+        sslContext.init(null, new javax.net.ssl.TrustManager[]{
+            new javax.net.ssl.X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() { return new java.security.cert.X509Certificate[0]; }
+                public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+                public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+            }
+        }, new java.security.SecureRandom());
+
+        java.net.http.HttpClient client = java.net.http.HttpClient.newBuilder()
+                .sslContext(sslContext)
+                .build();
+
+        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                .uri(URI.create(vnpApiUrl))
+                .header("Content-Type", "application/json")
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+        System.out.println("[VNPAY REFUND] Response: " + response.body());
+
+        return mapper.readValue(response.body(), new TypeReference<Map<String, String>>() {});
+    }
     public String getVnpApiUrl() {
         return vnpApiUrl;
     }
-    
 }
