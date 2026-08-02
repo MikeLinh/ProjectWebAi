@@ -39,11 +39,6 @@ public class CategoryController {
         if(category.getCategoryName() == null || category.getCategoryName().trim().isEmpty()){
             return ResponseEntity.badRequest().body("Tên danh mục không được để trống !");
         }
-        String newName = category.getCategoryName().trim();
-        Category existingCategory = categoryOpt.get();
-
-     
-       
         Category saved = categoryRepository.save(category);
         return ResponseEntity.ok(saved);
     }

@@ -127,7 +127,7 @@ public class AuthController {
                 User foundUser = existingUser.get();
                 if(foundUser.getPassword() != null && !foundUser.getPassword().isEmpty()){
                     return ResponseEntity.status(HttpStatus.CONFLICT)
-                            .body(Map.of("message","Email này đã được đăng ký bằng mật khẩu. Vui lòng đăng nhập bằng email và mật khẩu."));
+                            .body(Map.of("message"," Email này đã được đăng ký bằng mật khẩu. Vui lòng đăng nhập bằng email và mật khẩu."));
                 }
                 user = foundUser;
             } else {

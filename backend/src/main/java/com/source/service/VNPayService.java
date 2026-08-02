@@ -1,13 +1,23 @@
 package com.source.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.source.model.Order;
+
 import org.apache.commons.codec.digest.HmacUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.net.URI;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -26,6 +36,9 @@ public class VNPayService {
     // Lấy đường dẫn URL mà VNPay sẽ redirect người dùng quay trở lại sau khi thanh toán xong
     @Value("${vnpay.return-url}")
     private String vnpReturnUrl;
+
+    @Value("${vnpay.api-url:https://sandbox.vnpayment.vn/merchant_webapi/api/transaction}")
+    private String vnpApiUrl;
 
     // Định nghĩa biểu mẫu Regular Expression dùng để tìm và lọc bỏ các dấu thanh tiếng Việt
     private static final Pattern DIACRITICS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
@@ -86,6 +99,57 @@ public class VNPayService {
         System.out.println("[VNPAY] paymentUrl = " + finalUrl);
         return finalUrl;
     }
+    public Map<String,String> createdRefund(Order order, String createBy, String ip){
+        Map<String, String> params = new HashMap<>();
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+
+        String transactionDate;
+        if(order.getOrderDate() != null){
+            transactionDate = formatter.format(
+                Date.from(order.getOrderDate().atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toInstant())
+            );
+        }else{
+            transactionDate = formatter.format(cld.getTime());
+        }
+        String vnpTxnRef = String.valueOf(order.getOrderId());
+        params.put("vnp_RequestId", UUID.randomUUID().toString().replace("-", ""));
+        params.put("vnp_Version", "2.1.0");
+        params.put("vnp_Command", "refund");
+        params.put("vnp_TmnCode", vnpTmnCode);
+        params.put("vnp_TransactionType", "02"); // 02 = hoàn toàn phần, 03 = hoàn một phần
+        params.put("vnp_TxnRef", vnpTxnRef);
+        params.put("vnp_Amount", String.valueOf(
+                order.getTotalAmount().multiply(BigDecimal.valueOf(100)).longValue()
+        ));
+        params.put("vnp_OrderInfo", "Hoan tien cho don hang " + order.getOrderId());
+        params.put("vnp_TransactionNo", "0"); // để 0 nếu không có TransactionNo
+        params.put("vnp_TransactionDate", transactionDate);
+        params.put("vnp_CreateBy", createBy != null ? createBy : "admin");
+        params.put("vnp_CreateDate", formatter.format(cld.getTime()));
+        params.put("vnp_IpAddr", ip != null ? ip : "127.0.0.1");
+
+        // Chuỗi data hash theo đúng thứ tự VNPAY quy định
+        String data = String.join("|",
+                params.get("vnp_RequestId"),
+                params.get("vnp_Version"),
+                params.get("vnp_Command"),
+                params.get("vnp_TmnCode"),
+                params.get("vnp_TransactionType"),
+                params.get("vnp_TxnRef"),
+                params.get("vnp_Amount"),
+                params.get("vnp_TransactionNo"),
+                params.get("vnp_TransactionDate"),
+                params.get("vnp_CreateBy"),
+                params.get("vnp_CreateDate"),
+                params.get("vnp_IpAddr"),
+                params.get("vnp_OrderInfo")
+        );
+
+        params.put("vnp_SecureHash", hmacSHA512(vnpHashSecret, data));
+        return params;
+    }
 
     private String toVnpOrderInfo(String input) {
         if (input == null || input.isEmpty()) return "Thanh toan don hang";
@@ -108,4 +172,8 @@ public class VNPayService {
     public String getVnpHashSecret() {
         return vnpHashSecret;
     }
+    public String getVnpApiUrl() {
+        return vnpApiUrl;
+    }
+    
 }

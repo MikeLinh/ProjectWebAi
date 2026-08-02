@@ -40,9 +40,6 @@ public class ManufacturerController {
         if(manufacturer.getManufacturerName() == null || manufacturer.getManufacturerName().trim().isEmpty()){
             return ResponseEntity.badRequest().body("Tên nsx không được để trống");
         }
-        String cleanName= manufacturer.getManufacturerName().trim();
-
-        
         Manufacturer saved = manufacturerRepository.save(manufacturer);
         return ResponseEntity.ok(saved);
     }

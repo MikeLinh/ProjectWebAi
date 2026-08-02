@@ -11,6 +11,7 @@ export type OrderStatus =
   | "SHIPPING"
   | "DELIVERED"
   | "CANCELLED"
+  | "REFUNDED"
   ;
 // Khai báo cấu trúc dữ liệu cho một sản phẩm nằm trong đơn hàng
 interface OrderItem {
@@ -43,6 +44,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   SHIPPING:  "Đang vận chuyển",
   DELIVERED: "Đã nhận hàng",
   CANCELLED: "Đã hủy",
+  REFUNDED:  "Đã hoàn tiền",
 };
 // Ánh xạ các class Tailwind CSS màu sắc giao diện tương ứng với từng trạng thái
 const STATUS_COLOR: Record<OrderStatus, string> = {
@@ -52,6 +54,7 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
   SHIPPING:  "bg-orange-50 text-orange-600 border-orange-200",
   DELIVERED: "bg-green-50  text-green-600  border-green-200",
   CANCELLED: "bg-red-50    text-red-600    border-red-200",
+  REFUNDED:  "bg-gray-50   text-gray-600   border-gray-200",
 };
 // Định nghĩa nút hành động tiếp theo và trạng thái chuyển tiếp tương ứng trong quy trình vận hành đơn hàng
 const NEXT_ACTION: Partial<Record<OrderStatus, { label: string; next: OrderStatus }>> = {
@@ -126,6 +129,47 @@ export default function ManageOrders() {
       setUpdatingId(null);
     }
   };
+  //Hàm xử lý hoàn tiền
+  const handleRefund = async (orderId: number) => {
+    if (!window.confirm("Bạn có chắc muốn hoàn tiền đơn hàng này qua VNPAY?")) return;
+
+    setUpdatingId(orderId);
+    try {
+      const res = await fetch("http://localhost:8080/api/vnpay/refund", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: orderId,
+          createBy: "admin", // có thể lấy từ user đang login
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Hoàn tiền thất bại");
+      }
+
+      // Cập nhật local state
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.orderId === orderId ? { ...o, status: "REFUNDED" as OrderStatus } : o
+        )
+      );
+      if (selectedOrder?.orderId === orderId) {
+        setSelectedOrder((prev) =>
+          prev ? { ...prev, status: "REFUNDED" as OrderStatus } : prev
+        );
+      }
+
+      showNotification(data.message || "Hoàn tiền thành công!", "success");
+    } catch (err: any) {
+      showNotification(err.message || "Hoàn tiền thất bại. Vui lòng thử lại.", "error");
+      console.error(err);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -153,6 +197,7 @@ export default function ManageOrders() {
               <option value="SHIPPING">Đang vận chuyển</option>
               <option value="DELIVERED">Đã nhận hàng</option>
               <option value="CANCELLED">Đã hủy</option>
+              <option value="REFUNDED">Đã hoàn tiền</option>
             </select>
             {/* Nút refresh tải lại danh sách thủ công */}
             <button
@@ -221,6 +266,7 @@ export default function ManageOrders() {
                           {isUpdating ? "..." : action.label}
                         </button>
                       )}
+                      
                     </td>
                   </tr>
                 );
@@ -234,7 +280,8 @@ export default function ManageOrders() {
         order={selectedOrder} // Truyền dữ liệu chi tiết của đơn hàng đang chọn
         onClose={() => setSelectedOrder(null)} // Đóng modal bằng cách reset về null
         onUpdateStatus={handleUpdateStatus} // Cho phép cập nhật trạng thái đơn trực tiếp từ giao diện Modal chi tiết
-        updatingId={updatingId}  // Truyền trạng thái loading để vô hiệu hóa nút bấm trong modal khi đang xử lý API
+        onRefund={handleRefund}  // Cho phép hoàn tiền trực tiếp từ giao diện Modal chi tiết
+        updatingId={updatingId} 
       />
     </div>
   );

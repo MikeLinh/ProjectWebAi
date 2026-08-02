@@ -9,7 +9,8 @@ export type OrderStatus =
   | "PACKING"
   | "SHIPPING"
   | "DELIVERED"
-  | "CANCELLED";
+  | "CANCELLED"
+  | "REFUNDED";
 
 // Định nghĩa cấu trúc đối tượng Order
 export interface Order {
@@ -31,6 +32,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   SHIPPING:  "Đang vận chuyển",
   DELIVERED: "Đã nhận hàng",
   CANCELLED: "Đã hủy",
+  REFUNDED: "Đã hoàn tiền",
 };
 //Mapping màu sắc cho Badge dựa trên trạng thái
 const STATUS_BADGE: Record<OrderStatus, string> = {
@@ -40,6 +42,7 @@ const STATUS_BADGE: Record<OrderStatus, string> = {
   SHIPPING:  "bg-orange-50 text-orange-600 border-orange-200",
   DELIVERED: "bg-green-50  text-green-600  border-green-200",
   CANCELLED: "bg-red-50    text-red-600    border-red-200",
+  REFUNDED:  "bg-gray-50   text-gray-600   border-gray-200",
 };
 //Định nghĩa 1 props
 interface OrderItemProps {
@@ -165,7 +168,7 @@ export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToP
           onClick={() => handleExportInvoice(order, ngày, giờ)}
           className="w-full py-2 bg-green-600 hover:bg-green-900 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
         >
-          Xuất hóa đơn
+          Xem hóa đơn
         </button>
        )}
         {canCancel && onCancelOrder && (

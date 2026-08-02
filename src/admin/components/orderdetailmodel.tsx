@@ -8,7 +8,7 @@ import Inventory2Icon from '@mui/icons-material/Inventory2';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-
+import ReplayIcon from '@mui/icons-material/Replay';
 //Bảng tra cứu nhãn hiển thị
 //Ánh xạ (map) một giá trị mã hóa kỹ thuật sang một chuỗi ký tự thân thiện với người dùng
 const STATUS_LABEL: Record<OrderStatus, string> = {
@@ -18,6 +18,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   SHIPPING:  "Đang vận chuyển",
   DELIVERED: "Đã nhận hàng",
   CANCELLED: "Đã hủy",
+  REFUNDED:  "Đã hoàn tiền",
 };
 //Bản đồ chuyển trạng thái
 //Chỉ một số trạng thái trung gian mới có bước đi tiếp theo. Mỗi bước đi tiếp theo gồm 1 nhãn nút bấm (label) và 1 điểm đến tiếp theo (next).
@@ -44,17 +45,21 @@ interface OrderDetailModalProps {
   order: any | null;
   onClose: () => void;
   onUpdateStatus: (orderId: number, newStatus: OrderStatus) => void;
+  onRefund?: (orderId: number) => void; // Thêm prop onRefund để xử lý hoàn tiền
   updatingId: number | null;
 }
 
 export default function OrderDetailModal({
-  order, onClose, onUpdateStatus, updatingId,
+  order, onClose, onUpdateStatus, onRefund, updatingId,
 }: OrderDetailModalProps) {
   if (!order) return null;
 
-  const action = NEXT_ACTION[order.status as OrderStatus]; // Lấy ra hành động tiếp theo dựa trên trạng thái hiện tại của đơn hàng
-  const isUpdating = updatingId === order.orderId; // Kiểm tra xem đơn hàng này có đang trong quá trình cập nhật trạng thái hay không
+  const action = NEXT_ACTION[order.status as OrderStatus]; 
+  const isUpdating = updatingId === order.orderId; 
   const canCancel = ["PENDING", "CONFIRMED"].includes(order.status); // Chỉ cho phép hủy đơn hàng khi đơn hàng đang ở trạng thái "Chờ xử lý" hoặc "Đã xác nhận"
+  const canRefund =
+   order.status === "CANCELLED" &&
+    order.paymentMethod?.toUpperCase() === "VNPAY";
 
   return (
     <div
@@ -168,6 +173,16 @@ export default function OrderDetailModal({
               className="flex-1 bg-[#e30019] hover:bg-red-700 disabled:opacity-50 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors"
             >
               {isUpdating ? "Đang xử lý..." : "Hủy đơn hàng"}
+            </button>
+          )}
+          {canRefund && (
+            <button
+              onClick={() => onRefund?.(order.orderId)}
+              disabled={isUpdating}
+              className="flex-1 min-w-[100px] bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1"
+            >
+              <ReplayIcon fontSize="small" />
+              {isUpdating ? "Đang hoàn tiền..." : "Hoàn tiền VNPAY"}
             </button>
           )}
         </div>

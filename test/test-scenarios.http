@@ -179,6 +179,13 @@ Content-Type: application/json
 PATCH {{baseUrl}}/orders/1/payment-result?vnp_ResponseCode=24
 
 
+POST {{baseUrl}}/vnpay/refund
+Content-Type: application/json
+
+{
+  "orderId": 23,
+  "createBy": "Linh Nguyễn"
+}
 
 
 ### TC-21: Theo dõi trạng thái đơn hàng real-time (SSE)
@@ -356,3 +363,5 @@ GET {{baseUrl}}/warranties/user/2
 
 ### TC-35: Xem thống kê tổng quan (Dashboard)
 GET {{baseUrl}}/overview/stats
+
+
