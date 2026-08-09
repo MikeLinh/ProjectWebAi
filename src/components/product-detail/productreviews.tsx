@@ -27,7 +27,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/api/products/${productId}/reviews`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products/${productId}/reviews`);
         setReviews(res.data);
       } catch (err: any) {
         console.error("Lỗi fetch reviews:", err);
@@ -49,7 +49,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
         reviewerEmail: newReview.reviewerEmail || user?.email,
       };
 
-      const res = await axios.post(`http://localhost:8080/api/products/${productId}/reviews`, reviewData);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/products/${productId}/reviews`, reviewData);
       setReviews([res.data, ...reviews]);
       return { success: true, message: "Đánh giá thành công!" };
     } catch (err: any) {

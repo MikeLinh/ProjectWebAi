@@ -16,7 +16,7 @@ export default function CategoryFilter({ filters, update }: CategoryFilterProps)
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/categories")
+    fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
       .then((res) => res.json())
       .then((data) => setCategories(data))
       .catch((err) => console.error("Lỗi khi tải danh mục:", err));

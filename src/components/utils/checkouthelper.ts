@@ -48,7 +48,7 @@ export async function fetchAutofillData(): Promise<CheckoutFormData | null> {
       }
 
       if (user.userId) {
-        const res = await fetch(`http://localhost:8080/api/users/${user.userId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user.userId}`);
         if (res.ok) return mapUserToFormData(await res.json());
       }
     } catch (e) {
@@ -103,7 +103,7 @@ export function buildOrderPayload({
 export async function submitOrder(
   payload: ReturnType<typeof buildOrderPayload>
 ): Promise<{ orderId: number; payUrl?: string }> {
-  const res = await fetch("http://localhost:8080/api/orders", {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -124,7 +124,7 @@ export async function submitOrder(
   const orderId = result.orderId ?? result.order_id;
 
     if (payload.paymentMethod === "VNPAY") {  
-    const vnpayRes = await fetch("http://localhost:8080/api/vnpay/create", {
+    const vnpayRes = await fetch(`${import.meta.env.VITE_API_URL}/api/vnpay/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

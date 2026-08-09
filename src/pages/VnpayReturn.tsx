@@ -26,7 +26,7 @@
         const extractedId = txnRef.split("_")[0];
         setOrderId(extractedId);
         if(responseCode){
-          axios.patch(`http://localhost:8080/api/orders/${extractedId}/payment-result`, null,{
+          axios.patch(`${import.meta.env.VITE_API_URL}/api/orders/${extractedId}/payment-result`, null,{
             params: {vnp_ResponseCode: responseCode}
           })
             .then(()=> console.log("Đã cập nhập thanh toán"))

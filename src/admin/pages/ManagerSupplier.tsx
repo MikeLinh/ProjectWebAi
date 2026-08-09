@@ -16,7 +16,7 @@ export default function ManagerSupplier() {
   });
 
   const fetchData = () => {
-    fetch("http://localhost:8080/api/suppliers")
+    fetch(`${import.meta.env.VITE_API_URL}/api/suppliers`)
       .then((res) => res.json())
       .then((data) => setList(data))
       .catch((err) => console.error(err));
@@ -43,8 +43,8 @@ export default function ManagerSupplier() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const url = editingItem
-      ? `http://localhost:8080/api/suppliers/${editingItem.supplierId}`
-      : "http://localhost:8080/api/suppliers";
+      ? `${import.meta.env.VITE_API_URL}/api/suppliers/${editingItem.supplierId}`
+      : `${import.meta.env.VITE_API_URL}/api/suppliers`;
     const method = editingItem ? "PUT" : "POST";
 
     try {
@@ -69,7 +69,7 @@ export default function ManagerSupplier() {
   const handleDelete = async (id: number) => {
     if (!window.confirm("Xóa nhà cung cấp này? Hành động không thể hoàn tác!")) return;
     try {
-      const res = await fetch(`http://localhost:8080/api/suppliers/${id}`, { method: "DELETE" });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/suppliers/${id}`, { method: "DELETE" });
       if (res.ok) {
         showNotification("Xóa nhà cung cấp thành công!", "success");
         fetchData();

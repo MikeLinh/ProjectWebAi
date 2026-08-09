@@ -61,7 +61,7 @@ export default function DashboardOverview() {
       const params = new URLSearchParams(); // tạo 1 đối tượng chứa query string
       if (month !== "ALL") params.set("month", month);
       if (year  !== "ALL") params.set("year",  year);
-      const res = await fetch(`http://localhost:8080/api/overview/stats?${params}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/overview/stats?${params}`);
       const data = await res.json();
       setStats(data); // Đổ dữ liệu nhận được vào state
     } catch (err) {

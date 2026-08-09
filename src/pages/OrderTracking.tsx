@@ -40,7 +40,7 @@ export default function OrderTrackingPage() {
   const handleUpdateStatus = async (id: number, newStatus: OrderStatus) =>{
     setUpdateId(id);
     try{
-      const res = await fetch(`http://localhost:8080/api/orders/${id}/status`,{
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${id}/status`,{
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -99,7 +99,7 @@ export default function OrderTrackingPage() {
     }
 
     try {
-      const res = await fetch(`http://localhost:8080/api/orders/user/${userId}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/user/${userId}`);
       if (!res.ok) throw new Error("Không thể tải đơn hàng");
       
       const data: Order[] = await res.json(); // Chuyển đổi dữ liệu phản hồi thành mảng dữ liệu định dạng JSON kiểu Order[]
@@ -118,7 +118,7 @@ export default function OrderTrackingPage() {
   if (!window.confirm("Bạn có chắc muốn hủy đơn hàng này không?")) return;
 
   try {
-    const res = await fetch(`http://localhost:8080/api/orders/${orderId}/cancel`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}/cancel`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
     });

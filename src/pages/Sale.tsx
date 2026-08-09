@@ -24,7 +24,7 @@ export default function Sale() {
 
   useEffect(() => {
     // Thực hiện gửi yêu cầu lấy dữ liệu (GET request) tới API lấy danh sách các sản phẩm đang có chương trình sale
-    fetch("http://localhost:8080/api/products?sale=true")
+    fetch(`${import.meta.env.VITE_API_URL}/api/products?sale=true`)
       .then((res) => {
         if (!res.ok) throw new Error("Lỗi khi lấy dữ liệu");
         return res.json();

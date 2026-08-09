@@ -26,7 +26,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
     const fetchReviews = async () => {
       try {
         // Sử dụng thư viện axios để gửi một yêu cầu HTTP GET tới endpoint chứa danh sách đánh giá của sản phẩm này
-        const res = await axios.get<DBReview[]>(`http://localhost:8080/api/products/${productId}/reviews`);
+        const res = await axios.get<DBReview[]>(`${import.meta.env.VITE_API_URL}/api/products/${productId}/reviews`);
         setReviews(res.data);
       } catch (err) {
         console.error("Lỗi lấy danh sách đánh giá:", err);
@@ -40,7 +40,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   // Định nghĩa hàm bất đồng bộ handleAddReview xử lý khi người dùng gửi một đánh giá mới, kiểu dữ liệu Promise
   const handleAddReview = async (newReview: DBReview): Promise<{ success: boolean; message: string }> => {
       try {
-        const res = await axios.post(`http://localhost:8080/api/products/${productId}/reviews`, newReview);
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/products/${productId}/reviews`, newReview);
         setReviews([res.data, ...reviews]);
         return { success: true, message: "Đánh giá thành công!" };
       } catch (err: any) {

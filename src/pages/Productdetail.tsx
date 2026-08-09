@@ -52,7 +52,7 @@ export default function ProductDetail() {
 
     setLoadingProduct(true);
     // Sử dụng Axios gửi yêu cầu GET tới API lấy chi tiết một sản phẩm theo ID từ server
-    axios.get(`http://localhost:8080/api/products/${id}`)
+    axios.get(`${import.meta.env.VITE_API_URL}/api/products/${id}`)
       .then((res) => {
         const p = res.data;
         const imageName = p.imageUrl ? p.imageUrl.trim() : "bike1.png";
@@ -89,13 +89,13 @@ export default function ProductDetail() {
      // Kiểm tra điều kiện tiên quyết nếu đã có đối tượng sản phẩm và mã id sản phẩm tồn tại hợp lệ
     if (product?.id) {
       //Gọi API lấy dữ liệu đánh giá
-      axios.get(`http://localhost:8080/api/products/${product.id}/reviews`)
+      axios.get(`${import.meta.env.VITE_API_URL}/api/products/${product.id}/reviews`)
         .then(res => setReviewCount(res.data.length))
         .catch(() => setReviewCount(0));
       //kiểm tra xem sản phẩm có brand liên quan không
       if (product.manufacturerId) {
         // Gửi yêu cầu lấy sản phẩm liên quan cùng hãng
-        axios.get(`http://localhost:8080/api/products/related-by-brand`,{
+        axios.get(`${import.meta.env.VITE_API_URL}/api/products/related-by-brand`,{
           params:{
             brand: product.manufacturerId,
             excludeId: product.id

@@ -33,7 +33,7 @@ export default function CheckoutSuccess() {
           isUpdated.current = true;
           // Gọi endpoint /payment-result để backend tự động đồng bộ trạng thái đơn hàng và thanh toán
           await fetch(
-            `http://localhost:8080/api/orders/${orderId}/payment-result?vnp_ResponseCode=${responseCode}&vnp_TxnRef=${txnRef}`,
+            `${import.meta.env.VITE_API_URL}/api/orders/${orderId}/payment-result?vnp_ResponseCode=${responseCode}&vnp_TxnRef=${txnRef}`,
             { method: "PATCH" }
           );
         } catch (error) {
@@ -57,7 +57,7 @@ export default function CheckoutSuccess() {
 
       if (!finalAmount) {
         // Nếu không có sẵn trong state, fetch từ API chi tiết đơn hàng dựa trên orderId
-        const orderRes = await fetch(`http://localhost:8080/api/orders/${orderId}`); 
+        const orderRes = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}`); 
         if (orderRes.ok) {
           const orderData = await orderRes.json();
           finalAmount = orderData.totalAmount; // Lấy trường totalAmount từ Model Order
@@ -69,7 +69,7 @@ export default function CheckoutSuccess() {
       }
 
       // Gửi request chuẩn lên Backend để tạo URL thanh toán mới
-      const vnpayRes = await fetch("http://localhost:8080/api/vnpay/create", {
+      const vnpayRes = await fetch(`${import.meta.env.VITE_API_URL}/api/vnpay/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

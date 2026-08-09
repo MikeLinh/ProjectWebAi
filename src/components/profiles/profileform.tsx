@@ -38,7 +38,7 @@ export default function ProfileForm() {
     if (!user?.userId) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/api/auth/update-profile/${user.userId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/update-profile/${user.userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

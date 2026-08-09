@@ -23,8 +23,8 @@ interface Message {
   matchedProducts?: Product[];
 }
 // Đường dẫn API lấy ngữ cảnh AI và lấy danh sách sản phẩm từ Backend
-const CONTEXT_API = "http://localhost:8080/api/chat/context";
-const PRODUCTS_API = "http://localhost:8080/api/products";
+const CONTEXT_API = `${import.meta.env.VITE_API_URL}/api/chat/context`;
+const PRODUCTS_API = `${import.meta.env.VITE_API_URL}/api/products`;
 
 //tạo những từ khoá nhạy cảm thành mã Base64
 const ENCRYPTED_KEYWORDS = "Z2nhur90LGtpbGwsY2jhur90LHQresourcevIHPDoXQsdOG7sSBo4bqhaSxib21iLG7hu58sZMOBbmgsxJHDom0saGnhur9wLHJhcGUscG9ybixzZXgsbnVkZSxjaOG7rWksxJHhu4t0LG3hurUgbcOgeSxmdWNrLSRtLHZjbCx2bCxjbCvxkW1tLGPhurdjLGzhu5NuLGLFAyxzbWw=";

@@ -93,7 +93,7 @@ export default function ManageOrders() {
     if (!window.confirm("Bạn có chắc muốn hủy đơn hàng này? Nếu đã thanh toán VNPAY, hệ thống sẽ tự động hoàn tiền.")) return;
     setUpdatingId(orderId);
     try {
-      const res = await fetch(`http://localhost:8080/api/orders/${orderId}/cancel`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}/cancel`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
       });
@@ -123,7 +123,7 @@ export default function ManageOrders() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8080/api/orders");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`);
       if (!res.ok) throw new Error("Lỗi tải đơn hàng");
       const data = await res.json();
       setOrders(data); // Cập nhật danh sách đơn hàng vào state
@@ -137,7 +137,7 @@ export default function ManageOrders() {
   const handleUpdateStatus = async (id: number, newStatus: OrderStatus) => {
     setUpdatingId(id); // Đặt ID đang cập nhật để tạm khóa nút, ngăn việc click trùng lặp (spam click)
     try {
-      const res = await fetch(`http://localhost:8080/api/orders/${id}/status`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${id}/status`, {
         method: "PATCH", // sử dụng để cập nhập riêng cho một đối tượng 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -164,7 +164,7 @@ export default function ManageOrders() {
     if (!window.confirm("Bạn có chắc muốn hoàn tiền đơn hàng này?")) return;
     setUpdatingId(orderId);
     try {
-      const res = await fetch("http://localhost:8080/api/vnpay/refund", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vnpay/refund`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

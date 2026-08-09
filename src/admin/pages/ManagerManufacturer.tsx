@@ -10,7 +10,7 @@ export default function ManagerManufacturer() {
   const [country, setCountry] = useState("");
 
   const fetchData = () => {
-    fetch("http://localhost:8080/api/manufacturers")
+    fetch(`${import.meta.env.VITE_API_URL}/api/manufacturers`)
       .then((res) => res.json())
       .then((data) => setList(data))
       .catch((err) => console.error(err));
@@ -28,8 +28,8 @@ export default function ManagerManufacturer() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const url = editingItem
-      ? `http://localhost:8080/api/manufacturers/${editingItem.manufacturerId || editingItem.id}`
-      : "http://localhost:8080/api/manufacturers";
+      ? `${import.meta.env.VITE_API_URL}/api/manufacturers/${editingItem.manufacturerId || editingItem.id}`
+      : `${import.meta.env.VITE_API_URL}/api/manufacturers`;
     const method = editingItem ? "PUT" : "POST";
 
     try {
@@ -54,7 +54,7 @@ export default function ManagerManufacturer() {
   const handleDelete = async (id: number) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa NSX này?")) return;
     try {
-      const res = await fetch(`http://localhost:8080/api/manufacturers/${id}`, { method: "DELETE" });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/manufacturers/${id}`, { method: "DELETE" });
       if (res.ok) {
         showNotification("Xóa thành công!", "success");
         fetchData();

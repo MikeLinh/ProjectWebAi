@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNotification } from "../../components/context/notificationcontext";
 
 // Đường dẫn API Backend dùng để thao tác dữ liệu CRUD danh mục
-const API = "http://localhost:8080/api/categories";
+const API = `${import.meta.env.VITE_API_URL}/api/categories`;
 
 // Định nghĩa kiểu dữ liệu (TypeScript Interface) cho đối tượng Danh mục
 interface Category { 

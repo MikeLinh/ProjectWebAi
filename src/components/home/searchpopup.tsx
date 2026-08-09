@@ -27,7 +27,7 @@ export default function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
       document.body.style.overflow = "hidden"; // Khóa cuộn trang chính
       
       setLoading(true);
-      axios.get("http://localhost:8080/api/products")
+      axios.get(`${import.meta.env.VITE_API_URL}/api/products`)
         .then(res => {
           setProducts(res.data);
           setLoading(false);

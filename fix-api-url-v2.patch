@@ -1,0 +1,625 @@
+diff --git a/src/admin/components/productmodal.tsx b/src/admin/components/productmodal.tsx
+index d4135c5..6d35e7e 100644
+--- a/src/admin/components/productmodal.tsx
++++ b/src/admin/components/productmodal.tsx
+@@ -30,7 +30,7 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
+     // State lưu trữ file ảnh được người dùng chọn từ máy tính để upload
+     const updateStock = async (productId: number, newStock: number) => {
+     try {
+-      await fetch(`http://localhost:8080/api/products/${productId}/stock`, {
++      await fetch(`${import.meta.env.VITE_API_URL}/api/products/${productId}/stock`, {
+         method: "PATCH",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ stockQuantity: newStock })
+@@ -45,7 +45,7 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
+   // Gọi API lấy danh sách danh mục khi Modal được mở
+   useEffect(() => {
+     if (isOpen) {
+-      fetch("http://localhost:8080/api/categories")
++      fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
+         .then((res) => res.json())
+         .then((data) => {
+           setCategories(data);
+@@ -59,13 +59,13 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
+   }, [isOpen, editingProduct]);
+   //Gọi API lấy danh sách sản phẩm khả dụng trong kho
+   useEffect(()=>{
+-    fetch("http://localhost:8080/api/warehouse/available")
++    fetch(`${import.meta.env.VITE_API_URL}/api/warehouse/available`)
+       .then((res) => res.json())
+       .then((data) => setwarehouseProducts(data))
+       .catch((err) => console.log("Lỗi lấy sản phẩm từ kho: ",err));
+   },[isOpen,editingProduct])
+   useEffect(()=>{
+-    fetch("http://localhost:8080/api/manufacturers")
++    fetch(`${import.meta.env.VITE_API_URL}/api/manufacturers`)
+       .then((res) => res.json())
+       .then((data) =>{
+         setManufacturers(data);
+@@ -136,8 +136,8 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
+     }
+ 
+     const url = editingProduct 
+-      ? `http://localhost:8080/api/products/${editingProduct.productId}` 
+-      : "http://localhost:8080/api/products"; 
++      ? `${import.meta.env.VITE_API_URL}/api/products/${editingProduct.productId}` 
++      : `${import.meta.env.VITE_API_URL}/api/products`; 
+     const method = editingProduct ? "PUT" : "POST";
+ 
+     try {
+diff --git a/src/admin/pages/ManageUser.tsx b/src/admin/pages/ManageUser.tsx
+index f2984b3..10590ce 100644
+--- a/src/admin/pages/ManageUser.tsx
++++ b/src/admin/pages/ManageUser.tsx
+@@ -1,7 +1,7 @@
+ /* eslint-disable react-hooks/set-state-in-effect */
+ import React, { useState, useEffect, useCallback } from "react";
+ import { useNotification } from "../../components/context/notificationcontext";
+-const API = "http://localhost:8080/api/users";
++const API = `${import.meta.env.VITE_API_URL}/api/users`;
+ 
+ // Định nghĩa kiểu dữ liệu Interface cho đối tượng User
+ interface User {
+diff --git a/src/admin/pages/ManagerCategory.tsx b/src/admin/pages/ManagerCategory.tsx
+index 74ea4bb..4c61807 100644
+--- a/src/admin/pages/ManagerCategory.tsx
++++ b/src/admin/pages/ManagerCategory.tsx
+@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
+ import { useNotification } from "../../components/context/notificationcontext";
+ 
+ // Đường dẫn API Backend dùng để thao tác dữ liệu CRUD danh mục
+-const API = "http://localhost:8080/api/categories";
++const API = `${import.meta.env.VITE_API_URL}/api/categories`;
+ 
+ // Định nghĩa kiểu dữ liệu (TypeScript Interface) cho đối tượng Danh mục
+ interface Category { 
+diff --git a/src/admin/pages/ManagerManufacturer.tsx b/src/admin/pages/ManagerManufacturer.tsx
+index 214d984..c431099 100644
+--- a/src/admin/pages/ManagerManufacturer.tsx
++++ b/src/admin/pages/ManagerManufacturer.tsx
+@@ -10,7 +10,7 @@ export default function ManagerManufacturer() {
+   const [country, setCountry] = useState("");
+ 
+   const fetchData = () => {
+-    fetch("http://localhost:8080/api/manufacturers")
++    fetch(`${import.meta.env.VITE_API_URL}/api/manufacturers`)
+       .then((res) => res.json())
+       .then((data) => setList(data))
+       .catch((err) => console.error(err));
+@@ -28,8 +28,8 @@ export default function ManagerManufacturer() {
+   const handleSave = async (e: React.FormEvent) => {
+     e.preventDefault();
+     const url = editingItem
+-      ? `http://localhost:8080/api/manufacturers/${editingItem.manufacturerId || editingItem.id}`
+-      : "http://localhost:8080/api/manufacturers";
++      ? `${import.meta.env.VITE_API_URL}/api/manufacturers/${editingItem.manufacturerId || editingItem.id}`
++      : `${import.meta.env.VITE_API_URL}/api/manufacturers`;
+     const method = editingItem ? "PUT" : "POST";
+ 
+     try {
+@@ -54,7 +54,7 @@ export default function ManagerManufacturer() {
+   const handleDelete = async (id: number) => {
+     if (!window.confirm("Bạn có chắc chắn muốn xóa NSX này?")) return;
+     try {
+-      const res = await fetch(`http://localhost:8080/api/manufacturers/${id}`, { method: "DELETE" });
++      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/manufacturers/${id}`, { method: "DELETE" });
+       if (res.ok) {
+         showNotification("Xóa thành công!", "success");
+         fetchData();
+diff --git a/src/admin/pages/ManagerOrder.tsx b/src/admin/pages/ManagerOrder.tsx
+index 59caa6d..194ccc5 100644
+--- a/src/admin/pages/ManagerOrder.tsx
++++ b/src/admin/pages/ManagerOrder.tsx
+@@ -93,7 +93,7 @@ export default function ManageOrders() {
+     if (!window.confirm("Bạn có chắc muốn hủy đơn hàng này? Nếu đã thanh toán VNPAY, hệ thống sẽ tự động hoàn tiền.")) return;
+     setUpdatingId(orderId);
+     try {
+-      const res = await fetch(`http://localhost:8080/api/orders/${orderId}/cancel`, {
++      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}/cancel`, {
+         method: "PATCH",
+         headers: { "Content-Type": "application/json" },
+       });
+@@ -123,7 +123,7 @@ export default function ManageOrders() {
+   const fetchOrders = async () => {
+     setLoading(true);
+     try {
+-      const res = await fetch("http://localhost:8080/api/orders");
++      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`);
+       if (!res.ok) throw new Error("Lỗi tải đơn hàng");
+       const data = await res.json();
+       setOrders(data); // Cập nhật danh sách đơn hàng vào state
+@@ -137,7 +137,7 @@ export default function ManageOrders() {
+   const handleUpdateStatus = async (id: number, newStatus: OrderStatus) => {
+     setUpdatingId(id); // Đặt ID đang cập nhật để tạm khóa nút, ngăn việc click trùng lặp (spam click)
+     try {
+-      const res = await fetch(`http://localhost:8080/api/orders/${id}/status`, {
++      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${id}/status`, {
+         method: "PATCH", // sử dụng để cập nhập riêng cho một đối tượng 
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ status: newStatus }),
+@@ -164,7 +164,7 @@ export default function ManageOrders() {
+     if (!window.confirm("Bạn có chắc muốn hoàn tiền đơn hàng này?")) return;
+     setUpdatingId(orderId);
+     try {
+-      const res = await fetch("http://localhost:8080/api/vnpay/refund", {
++      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vnpay/refund`, {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({
+diff --git a/src/admin/pages/ManagerProduct.tsx b/src/admin/pages/ManagerProduct.tsx
+index f5bc362..36fa961 100644
+--- a/src/admin/pages/ManagerProduct.tsx
++++ b/src/admin/pages/ManagerProduct.tsx
+@@ -4,7 +4,7 @@ import ProductModal from "../components/productmodal";
+ import { useNotification } from "../../components/context/notificationcontext";
+ 
+ // API Backend dùng để thao tác CRUD(create, read, update, delete) sản phẩm
+-const API = "http://localhost:8080/api/products";
++const API = `${import.meta.env.VITE_API_URL}/api/products`;
+ 
+ export default function ManageProducts() {
+   const {showNotification} = useNotification(); 
+diff --git a/src/admin/pages/ManagerPromotion.tsx b/src/admin/pages/ManagerPromotion.tsx
+index 900900e..816116c 100644
+--- a/src/admin/pages/ManagerPromotion.tsx
++++ b/src/admin/pages/ManagerPromotion.tsx
+@@ -3,8 +3,8 @@ import React, { useState, useEffect, useCallback } from "react";
+ import { useNotification } from "../../components/context/notificationcontext";
+ 
+ // URL endpoint API để quản lý các chương trình khuyến mãi
+-const API = "http://localhost:8080/api/promotions";
+-const API_PRODUCTS = "http://localhost:8080/api/products"; // API lấy danh sách sản phẩm
++const API = `${import.meta.env.VITE_API_URL}/api/promotions`;
++const API_PRODUCTS = `${import.meta.env.VITE_API_URL}/api/products`; // API lấy danh sách sản phẩm
+ 
+ // Định nghĩa kiểu dữ liệu (Interface) cho đối tượng Khuyến mãi
+ interface Promotion {
+diff --git a/src/admin/pages/ManagerSupplier.tsx b/src/admin/pages/ManagerSupplier.tsx
+index 5714ce7..ef4cd32 100644
+--- a/src/admin/pages/ManagerSupplier.tsx
++++ b/src/admin/pages/ManagerSupplier.tsx
+@@ -16,7 +16,7 @@ export default function ManagerSupplier() {
+   });
+ 
+   const fetchData = () => {
+-    fetch("http://localhost:8080/api/suppliers")
++    fetch(`${import.meta.env.VITE_API_URL}/api/suppliers`)
+       .then((res) => res.json())
+       .then((data) => setList(data))
+       .catch((err) => console.error(err));
+@@ -43,8 +43,8 @@ export default function ManagerSupplier() {
+   const handleSave = async (e: React.FormEvent) => {
+     e.preventDefault();
+     const url = editingItem
+-      ? `http://localhost:8080/api/suppliers/${editingItem.supplierId}`
+-      : "http://localhost:8080/api/suppliers";
++      ? `${import.meta.env.VITE_API_URL}/api/suppliers/${editingItem.supplierId}`
++      : `${import.meta.env.VITE_API_URL}/api/suppliers`;
+     const method = editingItem ? "PUT" : "POST";
+ 
+     try {
+@@ -69,7 +69,7 @@ export default function ManagerSupplier() {
+   const handleDelete = async (id: number) => {
+     if (!window.confirm("Xóa nhà cung cấp này? Hành động không thể hoàn tác!")) return;
+     try {
+-      const res = await fetch(`http://localhost:8080/api/suppliers/${id}`, { method: "DELETE" });
++      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/suppliers/${id}`, { method: "DELETE" });
+       if (res.ok) {
+         showNotification("Xóa nhà cung cấp thành công!", "success");
+         fetchData();
+diff --git a/src/admin/pages/ManagerWarehouse.tsx b/src/admin/pages/ManagerWarehouse.tsx
+index b50412c..e493fc4 100644
+--- a/src/admin/pages/ManagerWarehouse.tsx
++++ b/src/admin/pages/ManagerWarehouse.tsx
+@@ -75,11 +75,11 @@ export default function ManagerWarehouse() {
+   const fetchAll = async () => {
+     try {
+       const [pRes, rRes, lRes, mRes, sRes] = await Promise.all([ 
+-        axios.get<Product[]>("http://localhost:8080/api/products"),
+-        axios.get<Receipt[]>("http://localhost:8080/api/warehouse"),
+-        axios.get<Product[]>("http://localhost:8080/api/warehouse/low-stock"),
+-        axios.get<Manufacturer[]>("http://localhost:8080/api/manufacturers"), 
+-        axios.get<Supplier[]>("http://localhost:8080/api/suppliers") 
++        axios.get<Product[]>(`${import.meta.env.VITE_API_URL}/api/products`),
++        axios.get<Receipt[]>(`${import.meta.env.VITE_API_URL}/api/warehouse`),
++        axios.get<Product[]>(`${import.meta.env.VITE_API_URL}/api/warehouse/low-stock`),
++        axios.get<Manufacturer[]>(`${import.meta.env.VITE_API_URL}/api/manufacturers`), 
++        axios.get<Supplier[]>(`${import.meta.env.VITE_API_URL}/api/suppliers`) 
+       ]);
+       setProducts(pRes.data);
+       setReceipts(rRes.data);
+@@ -163,7 +163,7 @@ export default function ManagerWarehouse() {
+   const handleDeleteClick = async (receiptId: number) => {
+     if (!window.confirm("Bạn có chắc chắn muốn xóa phiếu nhập kho này? Số lượng tồn kho sản phẩm sẽ không tự hoàn tác.")) return; 
+     try {
+-      await axios.delete(`http://localhost:8080/api/warehouse/${receiptId}`);
++      await axios.delete(`${import.meta.env.VITE_API_URL}/api/warehouse/${receiptId}`);
+       setSuccessMsg("Xóa phiếu nhập kho thành công!");
+       fetchAll(); 
+     } catch (err: any) {
+@@ -198,11 +198,11 @@ export default function ManagerWarehouse() {
+       };
+ 
+       if (isEditing) {  
+-        await axios.put(`http://localhost:8080/api/warehouse/${form.receiptId}`, payload);
++        await axios.put(`${import.meta.env.VITE_API_URL}/api/warehouse/${form.receiptId}`, payload);
+         setSuccessMsg("Cập nhật thông tin phiếu kho thành công!");
+         setIsEditing(false); 
+       } else {
+-        await axios.post("http://localhost:8080/api/warehouse", payload);
++        await axios.post(`${import.meta.env.VITE_API_URL}/api/warehouse`, payload);
+         setSuccessMsg("Tạo phiếu nhập kho và tăng tồn kho thành công!");
+       }
+ 
+diff --git a/src/admin/pages/Overview.tsx b/src/admin/pages/Overview.tsx
+index 236afff..6562fba 100644
+--- a/src/admin/pages/Overview.tsx
++++ b/src/admin/pages/Overview.tsx
+@@ -61,7 +61,7 @@ export default function DashboardOverview() {
+       const params = new URLSearchParams(); // tạo 1 đối tượng chứa query string
+       if (month !== "ALL") params.set("month", month);
+       if (year  !== "ALL") params.set("year",  year);
+-      const res = await fetch(`http://localhost:8080/api/overview/stats?${params}`);
++      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/overview/stats?${params}`);
+       const data = await res.json();
+       setStats(data); // Đổ dữ liệu nhận được vào state
+     } catch (err) {
+diff --git a/src/components/chatbox/chatbox.tsx b/src/components/chatbox/chatbox.tsx
+index 5246751..812852f 100644
+--- a/src/components/chatbox/chatbox.tsx
++++ b/src/components/chatbox/chatbox.tsx
+@@ -23,8 +23,8 @@ interface Message {
+   matchedProducts?: Product[];
+ }
+ // Đường dẫn API lấy ngữ cảnh AI và lấy danh sách sản phẩm từ Backend
+-const CONTEXT_API = "http://localhost:8080/api/chat/context";
+-const PRODUCTS_API = "http://localhost:8080/api/products";
++const CONTEXT_API = `${import.meta.env.VITE_API_URL}/api/chat/context`;
++const PRODUCTS_API = `${import.meta.env.VITE_API_URL}/api/products`;
+ 
+ //tạo những từ khoá nhạy cảm thành mã Base64
+ const ENCRYPTED_KEYWORDS = "Z2nhur90LGtpbGwsY2jhur90LHQresourcevIHPDoXQsdOG7sSBo4bqhaSxib21iLG7hu58sZMOBbmgsxJHDom0saGnhur9wLHJhcGUscG9ybixzZXgsbnVkZSxjaOG7rWksxJHhu4t0LG3hurUgbcOgeSxmdWNrLSRtLHZjbCx2bCxjbCvxkW1tLGPhurdjLGzhu5NuLGLFAyxzbWw=";
+diff --git a/src/components/forgot/forgotform.tsx b/src/components/forgot/forgotform.tsx
+index d13249d..166544b 100644
+--- a/src/components/forgot/forgotform.tsx
++++ b/src/components/forgot/forgotform.tsx
+@@ -16,7 +16,7 @@ export default function ForgotForm() {
+ 
+         try {
+             // Thực hiện gọi API bất đồng bộ bằng fetch tới server local chạy ở cổng 8080
+-            const res = await fetch("http://localhost:8080/api/auth/forgot-password", {
++            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/forgot-password`, {
+                 method: "POST",
+                 headers: { "Content-Type": "application/json" },
+                 body: JSON.stringify({ email: email.trim() }),
+diff --git a/src/components/home/mainhome.tsx b/src/components/home/mainhome.tsx
+index c6f7326..e125f24 100644
+--- a/src/components/home/mainhome.tsx
++++ b/src/components/home/mainhome.tsx
+@@ -32,7 +32,7 @@ export default function MainHome() {
+   const [loading, setLoading] = useState(true);
+ 
+   useEffect(() => {
+-    fetch("http://localhost:8080/api/products")
++    fetch(`${import.meta.env.VITE_API_URL}/api/products`)
+       .then((res) => {
+         if (!res.ok) throw new Error("Failed to fetch");
+         return res.json();
+diff --git a/src/components/home/searchpopup.tsx b/src/components/home/searchpopup.tsx
+index e4cf753..e24ad46 100644
+--- a/src/components/home/searchpopup.tsx
++++ b/src/components/home/searchpopup.tsx
+@@ -27,7 +27,7 @@ export default function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
+       document.body.style.overflow = "hidden"; // Khóa cuộn trang chính
+       
+       setLoading(true);
+-      axios.get("http://localhost:8080/api/products")
++      axios.get(`${import.meta.env.VITE_API_URL}/api/products`)
+         .then(res => {
+           setProducts(res.data);
+           setLoading(false);
+diff --git a/src/components/ordertracking/orderitem.tsx b/src/components/ordertracking/orderitem.tsx
+index 0ad32d1..5f8f10b 100644
+--- a/src/components/ordertracking/orderitem.tsx
++++ b/src/components/ordertracking/orderitem.tsx
+@@ -74,7 +74,7 @@ export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToP
+   const handleRepay = async () => {
+     setRePaying(true);
+     try {
+-      const vnpayRes = await fetch("http://localhost:8080/api/vnpay/create", {
++      const vnpayRes = await fetch(`${import.meta.env.VITE_API_URL}/api/vnpay/create`, {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({
+diff --git a/src/components/product-detail/productreviews.tsx b/src/components/product-detail/productreviews.tsx
+index 2429a97..0e8e2a3 100644
+--- a/src/components/product-detail/productreviews.tsx
++++ b/src/components/product-detail/productreviews.tsx
+@@ -27,7 +27,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
+   useEffect(() => {
+     const fetchReviews = async () => {
+       try {
+-        const res = await axios.get(`http://localhost:8080/api/products/${productId}/reviews`);
++        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products/${productId}/reviews`);
+         setReviews(res.data);
+       } catch (err: any) {
+         console.error("Lỗi fetch reviews:", err);
+@@ -49,7 +49,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
+         reviewerEmail: newReview.reviewerEmail || user?.email,
+       };
+ 
+-      const res = await axios.post(`http://localhost:8080/api/products/${productId}/reviews`, reviewData);
++      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/products/${productId}/reviews`, reviewData);
+       setReviews([res.data, ...reviews]);
+       return { success: true, message: "Đánh giá thành công!" };
+     } catch (err: any) {
+diff --git a/src/components/products/MainProduct/mainproduct.tsx b/src/components/products/MainProduct/mainproduct.tsx
+index a4838d1..f13fdd6 100644
+--- a/src/components/products/MainProduct/mainproduct.tsx
++++ b/src/components/products/MainProduct/mainproduct.tsx
+@@ -77,7 +77,7 @@ export default function MainProduct() {
+       params.append("maxPrice", filters.priceMax.toString());
+     }
+ 
+-    const url = `http://localhost:8080/api/products${params.toString() ? `?${params.toString()}` : ""}`;
++    const url = `${import.meta.env.VITE_API_URL}/api/products${params.toString() ? `?${params.toString()}` : ""}`;
+ 
+     console.log("Fetching URL:", url);
+     // Gọi API
+diff --git a/src/components/products/SlideBar/brandfilter.tsx b/src/components/products/SlideBar/brandfilter.tsx
+index 0d24db9..79f93ea 100644
+--- a/src/components/products/SlideBar/brandfilter.tsx
++++ b/src/components/products/SlideBar/brandfilter.tsx
+@@ -13,7 +13,7 @@ export default function BrandFilter({ filters, update }: BrandFilterProps) {
+   const [brands, setBrands] = useState<string[]>([]);
+ 
+   useEffect(() => {
+-    fetch("http://localhost:8080/api/products")
++    fetch(`${import.meta.env.VITE_API_URL}/api/products`)
+       .then(res => res.json())
+       .then((products: any[]) => {
+         const uniqueBrands = [...new Set(products.map((p: any) => p.manufacturer?.manufacturerName).filter(Boolean))];
+diff --git a/src/components/products/SlideBar/catagoryfilter.tsx b/src/components/products/SlideBar/catagoryfilter.tsx
+index 1f009e1..9cadad9 100644
+--- a/src/components/products/SlideBar/catagoryfilter.tsx
++++ b/src/components/products/SlideBar/catagoryfilter.tsx
+@@ -16,7 +16,7 @@ export default function CategoryFilter({ filters, update }: CategoryFilterProps)
+   const [categories, setCategories] = useState<Category[]>([]);
+ 
+   useEffect(() => {
+-    fetch("http://localhost:8080/api/categories")
++    fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
+       .then((res) => res.json())
+       .then((data) => setCategories(data))
+       .catch((err) => console.error("Lỗi khi tải danh mục:", err));
+diff --git a/src/components/profiles/profileform.tsx b/src/components/profiles/profileform.tsx
+index 406b283..f5739e3 100644
+--- a/src/components/profiles/profileform.tsx
++++ b/src/components/profiles/profileform.tsx
+@@ -38,7 +38,7 @@ export default function ProfileForm() {
+     if (!user?.userId) return;
+ 
+     try {
+-      const res = await fetch(`http://localhost:8080/api/auth/update-profile/${user.userId}`, {
++      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/update-profile/${user.userId}`, {
+         method: "PUT",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({
+diff --git a/src/components/promotion/promosection.tsx b/src/components/promotion/promosection.tsx
+index a0280cd..be7c063 100644
+--- a/src/components/promotion/promosection.tsx
++++ b/src/components/promotion/promosection.tsx
+@@ -25,7 +25,7 @@ export default function PromoSection({ cart, cartTotal, onApplyDiscount }: Promo
+ 
+   // Tải danh sách mã hiển thị lên select box
+   useEffect(() => {
+-    fetch("http://localhost:8080/api/promotions") 
++    fetch(`${import.meta.env.VITE_API_URL}/api/promotions`) 
+       .then((res) => res.json())
+       .then((data: Promotion[]) => setPromotions(data))
+       .catch((err) => console.error("Lỗi khi tải mã giảm giá:", err));
+@@ -118,7 +118,7 @@ export default function PromoSection({ cart, cartTotal, onApplyDiscount }: Promo
+ 
+     try {
+       // Gọi API validate ở Backend để Double Check thời gian thực tế từ Server
+-      const response = await fetch(`http://localhost:8080/api/promotions/validate?code=${code}`);
++      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/promotions/validate?code=${code}`);
+       const data = await response.json();
+ 
+       if (response.ok && data.success) {
+diff --git a/src/components/utils/checkouthelper.ts b/src/components/utils/checkouthelper.ts
+index fdc7876..7396e19 100644
+--- a/src/components/utils/checkouthelper.ts
++++ b/src/components/utils/checkouthelper.ts
+@@ -48,7 +48,7 @@ export async function fetchAutofillData(): Promise<CheckoutFormData | null> {
+       }
+ 
+       if (user.userId) {
+-        const res = await fetch(`http://localhost:8080/api/users/${user.userId}`);
++        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user.userId}`);
+         if (res.ok) return mapUserToFormData(await res.json());
+       }
+     } catch (e) {
+@@ -103,7 +103,7 @@ export function buildOrderPayload({
+ export async function submitOrder(
+   payload: ReturnType<typeof buildOrderPayload>
+ ): Promise<{ orderId: number; payUrl?: string }> {
+-  const res = await fetch("http://localhost:8080/api/orders", {
++  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
+     method: "POST",
+     headers: { "Content-Type": "application/json" },
+     body: JSON.stringify(payload),
+@@ -124,7 +124,7 @@ export async function submitOrder(
+   const orderId = result.orderId ?? result.order_id;
+ 
+     if (payload.paymentMethod === "VNPAY") {  
+-    const vnpayRes = await fetch("http://localhost:8080/api/vnpay/create", {
++    const vnpayRes = await fetch(`${import.meta.env.VITE_API_URL}/api/vnpay/create`, {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({
+diff --git a/src/pages/CheckoutSuccessPage.tsx b/src/pages/CheckoutSuccessPage.tsx
+index 2bc258d..a6cd05f 100644
+--- a/src/pages/CheckoutSuccessPage.tsx
++++ b/src/pages/CheckoutSuccessPage.tsx
+@@ -33,7 +33,7 @@ export default function CheckoutSuccess() {
+           isUpdated.current = true;
+           // Gọi endpoint /payment-result để backend tự động đồng bộ trạng thái đơn hàng và thanh toán
+           await fetch(
+-            `http://localhost:8080/api/orders/${orderId}/payment-result?vnp_ResponseCode=${responseCode}&vnp_TxnRef=${txnRef}`,
++            `${import.meta.env.VITE_API_URL}/api/orders/${orderId}/payment-result?vnp_ResponseCode=${responseCode}&vnp_TxnRef=${txnRef}`,
+             { method: "PATCH" }
+           );
+         } catch (error) {
+@@ -57,7 +57,7 @@ export default function CheckoutSuccess() {
+ 
+       if (!finalAmount) {
+         // Nếu không có sẵn trong state, fetch từ API chi tiết đơn hàng dựa trên orderId
+-        const orderRes = await fetch(`http://localhost:8080/api/orders/${orderId}`); 
++        const orderRes = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}`); 
+         if (orderRes.ok) {
+           const orderData = await orderRes.json();
+           finalAmount = orderData.totalAmount; // Lấy trường totalAmount từ Model Order
+@@ -69,7 +69,7 @@ export default function CheckoutSuccess() {
+       }
+ 
+       // Gửi request chuẩn lên Backend để tạo URL thanh toán mới
+-      const vnpayRes = await fetch("http://localhost:8080/api/vnpay/create", {
++      const vnpayRes = await fetch(`${import.meta.env.VITE_API_URL}/api/vnpay/create`, {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({
+diff --git a/src/pages/Login.tsx b/src/pages/Login.tsx
+index 2b4f640..c060805 100644
+--- a/src/pages/Login.tsx
++++ b/src/pages/Login.tsx
+@@ -25,7 +25,7 @@ export default function Login() {
+ 
+   try {
+     // Gọi API đăng nhập ở Back-end bằng phương thức POST
+-    const res = await fetch("http://localhost:8080/api/auth/login", {
++    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({ email: email.trim(), password }),
+diff --git a/src/pages/OrderTracking.tsx b/src/pages/OrderTracking.tsx
+index 80a2ad5..11c35a5 100644
+--- a/src/pages/OrderTracking.tsx
++++ b/src/pages/OrderTracking.tsx
+@@ -40,7 +40,7 @@ export default function OrderTrackingPage() {
+   const handleUpdateStatus = async (id: number, newStatus: OrderStatus) =>{
+     setUpdateId(id);
+     try{
+-      const res = await fetch(`http://localhost:8080/api/orders/${id}/status`,{
++      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${id}/status`,{
+         method: "PATCH",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ status: newStatus }),
+@@ -99,7 +99,7 @@ export default function OrderTrackingPage() {
+     }
+ 
+     try {
+-      const res = await fetch(`http://localhost:8080/api/orders/user/${userId}`);
++      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/user/${userId}`);
+       if (!res.ok) throw new Error("Không thể tải đơn hàng");
+       
+       const data: Order[] = await res.json(); // Chuyển đổi dữ liệu phản hồi thành mảng dữ liệu định dạng JSON kiểu Order[]
+@@ -118,7 +118,7 @@ export default function OrderTrackingPage() {
+   if (!window.confirm("Bạn có chắc muốn hủy đơn hàng này không?")) return;
+ 
+   try {
+-    const res = await fetch(`http://localhost:8080/api/orders/${orderId}/cancel`, {
++    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}/cancel`, {
+       method: "PATCH",
+       headers: { "Content-Type": "application/json" },
+     });
+diff --git a/src/pages/Productdetail.tsx b/src/pages/Productdetail.tsx
+index c2f64bf..7123d2c 100644
+--- a/src/pages/Productdetail.tsx
++++ b/src/pages/Productdetail.tsx
+@@ -52,7 +52,7 @@ export default function ProductDetail() {
+ 
+     setLoadingProduct(true);
+     // Sử dụng Axios gửi yêu cầu GET tới API lấy chi tiết một sản phẩm theo ID từ server
+-    axios.get(`http://localhost:8080/api/products/${id}`)
++    axios.get(`${import.meta.env.VITE_API_URL}/api/products/${id}`)
+       .then((res) => {
+         const p = res.data;
+         const imageName = p.imageUrl ? p.imageUrl.trim() : "bike1.png";
+@@ -89,13 +89,13 @@ export default function ProductDetail() {
+      // Kiểm tra điều kiện tiên quyết nếu đã có đối tượng sản phẩm và mã id sản phẩm tồn tại hợp lệ
+     if (product?.id) {
+       //Gọi API lấy dữ liệu đánh giá
+-      axios.get(`http://localhost:8080/api/products/${product.id}/reviews`)
++      axios.get(`${import.meta.env.VITE_API_URL}/api/products/${product.id}/reviews`)
+         .then(res => setReviewCount(res.data.length))
+         .catch(() => setReviewCount(0));
+       //kiểm tra xem sản phẩm có brand liên quan không
+       if (product.manufacturerId) {
+         // Gửi yêu cầu lấy sản phẩm liên quan cùng hãng
+-        axios.get(`http://localhost:8080/api/products/related-by-brand`,{
++        axios.get(`${import.meta.env.VITE_API_URL}/api/products/related-by-brand`,{
+           params:{
+             brand: product.manufacturerId,
+             excludeId: product.id
+diff --git a/src/pages/Register.tsx b/src/pages/Register.tsx
+index 8e7ec81..ff6367e 100644
+--- a/src/pages/Register.tsx
++++ b/src/pages/Register.tsx
+@@ -47,7 +47,7 @@ export default function RegisterForm() {
+ 
+         try {
+             // Sử dụng hàm fetch để gửi một yêu cầu HTTP dạng POST tới endpoint xử lý đăng ký tài khoản của Backend
+-            const res = await fetch("http://localhost:8080/api/auth/register", {
++            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
+                 method: "POST",
+                 headers: { "Content-Type": "application/json" },
+                 body: JSON.stringify({
+diff --git a/src/pages/ReviewPage.tsx b/src/pages/ReviewPage.tsx
+index c166ff2..ede70d8 100644
+--- a/src/pages/ReviewPage.tsx
++++ b/src/pages/ReviewPage.tsx
+@@ -26,7 +26,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
+     const fetchReviews = async () => {
+       try {
+         // Sử dụng thư viện axios để gửi một yêu cầu HTTP GET tới endpoint chứa danh sách đánh giá của sản phẩm này
+-        const res = await axios.get<DBReview[]>(`http://localhost:8080/api/products/${productId}/reviews`);
++        const res = await axios.get<DBReview[]>(`${import.meta.env.VITE_API_URL}/api/products/${productId}/reviews`);
+         setReviews(res.data);
+       } catch (err) {
+         console.error("Lỗi lấy danh sách đánh giá:", err);
+@@ -40,7 +40,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
+   // Định nghĩa hàm bất đồng bộ handleAddReview xử lý khi người dùng gửi một đánh giá mới, kiểu dữ liệu Promise
+   const handleAddReview = async (newReview: DBReview): Promise<{ success: boolean; message: string }> => {
+       try {
+-        const res = await axios.post(`http://localhost:8080/api/products/${productId}/reviews`, newReview);
++        const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/products/${productId}/reviews`, newReview);
+         setReviews([res.data, ...reviews]);
+         return { success: true, message: "Đánh giá thành công!" };
+       } catch (err: any) {
+diff --git a/src/pages/Sale.tsx b/src/pages/Sale.tsx
+index caa585d..57276d1 100644
+--- a/src/pages/Sale.tsx
++++ b/src/pages/Sale.tsx
+@@ -24,7 +24,7 @@ export default function Sale() {
+ 
+   useEffect(() => {
+     // Thực hiện gửi yêu cầu lấy dữ liệu (GET request) tới API lấy danh sách các sản phẩm đang có chương trình sale
+-    fetch("http://localhost:8080/api/products?sale=true")
++    fetch(`${import.meta.env.VITE_API_URL}/api/products?sale=true`)
+       .then((res) => {
+         if (!res.ok) throw new Error("Lỗi khi lấy dữ liệu");
+         return res.json();
+diff --git a/src/pages/VnpayReturn.tsx b/src/pages/VnpayReturn.tsx
+index 9dacd42..5a70068 100644
+--- a/src/pages/VnpayReturn.tsx
++++ b/src/pages/VnpayReturn.tsx
+@@ -26,7 +26,7 @@
+         const extractedId = txnRef.split("_")[0];
+         setOrderId(extractedId);
+         if(responseCode){
+-          axios.patch(`http://localhost:8080/api/orders/${extractedId}/payment-result`, null,{
++          axios.patch(`${import.meta.env.VITE_API_URL}/api/orders/${extractedId}/payment-result`, null,{
+             params: {vnp_ResponseCode: responseCode}
+           })
+             .then(()=> console.log("Đã cập nhập thanh toán"))

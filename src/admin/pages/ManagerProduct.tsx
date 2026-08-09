@@ -4,7 +4,7 @@ import ProductModal from "../components/productmodal";
 import { useNotification } from "../../components/context/notificationcontext";
 
 // API Backend dùng để thao tác CRUD(create, read, update, delete) sản phẩm
-const API = "http://localhost:8080/api/products";
+const API = `${import.meta.env.VITE_API_URL}/api/products`;
 
 export default function ManageProducts() {
   const {showNotification} = useNotification(); 

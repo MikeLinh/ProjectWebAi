@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useCallback } from "react";
 import { useNotification } from "../../components/context/notificationcontext";
-const API = "http://localhost:8080/api/users";
+const API = `${import.meta.env.VITE_API_URL}/api/users`;
 
 // Định nghĩa kiểu dữ liệu Interface cho đối tượng User
 interface User {

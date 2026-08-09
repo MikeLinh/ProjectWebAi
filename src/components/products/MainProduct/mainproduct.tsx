@@ -77,7 +77,7 @@ export default function MainProduct() {
       params.append("maxPrice", filters.priceMax.toString());
     }
 
-    const url = `http://localhost:8080/api/products${params.toString() ? `?${params.toString()}` : ""}`;
+    const url = `${import.meta.env.VITE_API_URL}/api/products${params.toString() ? `?${params.toString()}` : ""}`;
 
     console.log("Fetching URL:", url);
     // Gọi API

@@ -32,7 +32,7 @@ export default function MainHome() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/products")
+    fetch(`${import.meta.env.VITE_API_URL}/api/products`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch");
         return res.json();

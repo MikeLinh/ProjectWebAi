@@ -30,7 +30,7 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     // State lưu trữ file ảnh được người dùng chọn từ máy tính để upload
     const updateStock = async (productId: number, newStock: number) => {
     try {
-      await fetch(`http://localhost:8080/api/products/${productId}/stock`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/products/${productId}/stock`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stockQuantity: newStock })
@@ -45,7 +45,7 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
   // Gọi API lấy danh sách danh mục khi Modal được mở
   useEffect(() => {
     if (isOpen) {
-      fetch("http://localhost:8080/api/categories")
+      fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
         .then((res) => res.json())
         .then((data) => {
           setCategories(data);
@@ -59,13 +59,13 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
   }, [isOpen, editingProduct]);
   //Gọi API lấy danh sách sản phẩm khả dụng trong kho
   useEffect(()=>{
-    fetch("http://localhost:8080/api/warehouse/available")
+    fetch(`${import.meta.env.VITE_API_URL}/api/warehouse/available`)
       .then((res) => res.json())
       .then((data) => setwarehouseProducts(data))
       .catch((err) => console.log("Lỗi lấy sản phẩm từ kho: ",err));
   },[isOpen,editingProduct])
   useEffect(()=>{
-    fetch("http://localhost:8080/api/manufacturers")
+    fetch(`${import.meta.env.VITE_API_URL}/api/manufacturers`)
       .then((res) => res.json())
       .then((data) =>{
         setManufacturers(data);
@@ -136,8 +136,8 @@ export default function ProductModal({ isOpen, onClose, onSave, editingProduct }
     }
 
     const url = editingProduct 
-      ? `http://localhost:8080/api/products/${editingProduct.productId}` 
-      : "http://localhost:8080/api/products"; 
+      ? `${import.meta.env.VITE_API_URL}/api/products/${editingProduct.productId}` 
+      : `${import.meta.env.VITE_API_URL}/api/products`; 
     const method = editingProduct ? "PUT" : "POST";
 
     try {

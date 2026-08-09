@@ -25,7 +25,7 @@ export default function PromoSection({ cart, cartTotal, onApplyDiscount }: Promo
 
   // Tải danh sách mã hiển thị lên select box
   useEffect(() => {
-    fetch("http://localhost:8080/api/promotions") 
+    fetch(`${import.meta.env.VITE_API_URL}/api/promotions`) 
       .then((res) => res.json())
       .then((data: Promotion[]) => setPromotions(data))
       .catch((err) => console.error("Lỗi khi tải mã giảm giá:", err));
@@ -118,7 +118,7 @@ export default function PromoSection({ cart, cartTotal, onApplyDiscount }: Promo
 
     try {
       // Gọi API validate ở Backend để Double Check thời gian thực tế từ Server
-      const response = await fetch(`http://localhost:8080/api/promotions/validate?code=${code}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/promotions/validate?code=${code}`);
       const data = await response.json();
 
       if (response.ok && data.success) {

@@ -13,7 +13,7 @@ export default function BrandFilter({ filters, update }: BrandFilterProps) {
   const [brands, setBrands] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/products")
+    fetch(`${import.meta.env.VITE_API_URL}/api/products`)
       .then(res => res.json())
       .then((products: any[]) => {
         const uniqueBrands = [...new Set(products.map((p: any) => p.manufacturer?.manufacturerName).filter(Boolean))];

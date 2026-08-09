@@ -75,11 +75,11 @@ export default function ManagerWarehouse() {
   const fetchAll = async () => {
     try {
       const [pRes, rRes, lRes, mRes, sRes] = await Promise.all([ 
-        axios.get<Product[]>("http://localhost:8080/api/products"),
-        axios.get<Receipt[]>("http://localhost:8080/api/warehouse"),
-        axios.get<Product[]>("http://localhost:8080/api/warehouse/low-stock"),
-        axios.get<Manufacturer[]>("http://localhost:8080/api/manufacturers"), 
-        axios.get<Supplier[]>("http://localhost:8080/api/suppliers") 
+        axios.get<Product[]>(`${import.meta.env.VITE_API_URL}/api/products`),
+        axios.get<Receipt[]>(`${import.meta.env.VITE_API_URL}/api/warehouse`),
+        axios.get<Product[]>(`${import.meta.env.VITE_API_URL}/api/warehouse/low-stock`),
+        axios.get<Manufacturer[]>(`${import.meta.env.VITE_API_URL}/api/manufacturers`), 
+        axios.get<Supplier[]>(`${import.meta.env.VITE_API_URL}/api/suppliers`) 
       ]);
       setProducts(pRes.data);
       setReceipts(rRes.data);
@@ -163,7 +163,7 @@ export default function ManagerWarehouse() {
   const handleDeleteClick = async (receiptId: number) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa phiếu nhập kho này? Số lượng tồn kho sản phẩm sẽ không tự hoàn tác.")) return; 
     try {
-      await axios.delete(`http://localhost:8080/api/warehouse/${receiptId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/warehouse/${receiptId}`);
       setSuccessMsg("Xóa phiếu nhập kho thành công!");
       fetchAll(); 
     } catch (err: any) {
@@ -198,11 +198,11 @@ export default function ManagerWarehouse() {
       };
 
       if (isEditing) {  
-        await axios.put(`http://localhost:8080/api/warehouse/${form.receiptId}`, payload);
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/warehouse/${form.receiptId}`, payload);
         setSuccessMsg("Cập nhật thông tin phiếu kho thành công!");
         setIsEditing(false); 
       } else {
-        await axios.post("http://localhost:8080/api/warehouse", payload);
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/warehouse`, payload);
         setSuccessMsg("Tạo phiếu nhập kho và tăng tồn kho thành công!");
       }
 

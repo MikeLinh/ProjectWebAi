@@ -3,8 +3,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNotification } from "../../components/context/notificationcontext";
 
 // URL endpoint API để quản lý các chương trình khuyến mãi
-const API = "http://localhost:8080/api/promotions";
-const API_PRODUCTS = "http://localhost:8080/api/products"; // API lấy danh sách sản phẩm
+const API = `${import.meta.env.VITE_API_URL}/api/promotions`;
+const API_PRODUCTS = `${import.meta.env.VITE_API_URL}/api/products`; // API lấy danh sách sản phẩm
 
 // Định nghĩa kiểu dữ liệu (Interface) cho đối tượng Khuyến mãi
 interface Promotion {

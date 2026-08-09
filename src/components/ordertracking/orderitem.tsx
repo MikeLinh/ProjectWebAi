@@ -74,7 +74,7 @@ export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToP
   const handleRepay = async () => {
     setRePaying(true);
     try {
-      const vnpayRes = await fetch("http://localhost:8080/api/vnpay/create", {
+      const vnpayRes = await fetch(`${import.meta.env.VITE_API_URL}/api/vnpay/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
