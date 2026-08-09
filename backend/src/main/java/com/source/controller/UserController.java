@@ -70,5 +70,15 @@ public class UserController {
         userRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-   
+    @GetMapping("/search")
+    public ResponseEntity<List<User>> searchName(@RequestParam String name){
+        if(name == null || name.trim().isEmpty()){
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(userRepository.findByFullNameContainingIgnoreCase(name));
+    }
+    @GetMapping("/count")
+    public ResponseEntity<Long> countUsers(){
+        return ResponseEntity.ok(userRepository.count());
+    }
 }

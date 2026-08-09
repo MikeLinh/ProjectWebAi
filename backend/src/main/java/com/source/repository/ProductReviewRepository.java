@@ -9,5 +9,6 @@ import java.util.List;
 public interface ProductReviewRepository extends JpaRepository<ProductReview, Long> {
     
     List<ProductReview> findByProductId(Integer productId);
-    long countByProductId(Integer productId);
+    long countByProductId(Integer productId);   
+    boolean existsByProductIdAndUserId(Integer productId, Long userId);
 }

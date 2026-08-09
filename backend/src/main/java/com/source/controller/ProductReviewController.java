@@ -4,6 +4,7 @@ import com.source.service.ProductService;
 import com.source.model.Product;
 import com.source.model.ProductReview;
 import com.source.repository.ProductRepository;
+import com.source.repository.ProductReviewRepository;
 import com.source.service.ProductReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,9 @@ public class ProductReviewController {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private ProductReviewRepository productReviewRepository;
+
     //Lấy dữ liệu review dựa theo productID
     @GetMapping
     public ResponseEntity<List<ProductReview>> getReviews(@PathVariable Integer productId) {
@@ -33,14 +37,17 @@ public class ProductReviewController {
     //Tạo 1 review mới
     @PostMapping
     public ResponseEntity<?> createReview(@PathVariable Integer productId, @RequestBody ProductReview review) {
-        if(review.getRating() == null || review.getRating() > 1 || review.getRating() < 5){
+        if(review.getRating() == null || review.getRating() < 1 || review.getRating() > 5){
             return ResponseEntity.badRequest().body("Điểm đánh giá phải từ 1 đến 5 sao!");
         }
-        if(review.getComment() == null || review.getComment().trim().isEmpty() || review.getRating() < 3){
+        if(review.getComment() == null || review.getComment().trim().isEmpty()){
             return ResponseEntity.badRequest().body("Nội dung đánh giá không được để trống");
         }
         if(review.getUserId() == null){
             return ResponseEntity.badRequest().body("Thông tin người đánh giá không hợp lệ!");
+        }
+        if(productReviewRepository.existsByProductIdAndUserId(productId, review.getUserId())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Người dùng đã đánh giá sản phẩm này!");
         }
         try {
             ProductReview savedReview = reviewService.addReview(productId, review);

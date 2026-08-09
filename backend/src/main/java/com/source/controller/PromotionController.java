@@ -25,7 +25,7 @@ public class PromotionController {
         Optional<Promotion> promoOpt = promotionRepository.findByCouponCode(code.toUpperCase());
 
         if (promoOpt.isEmpty()) {
-            // Sử dụng HashMap thay vì Map.of để an toàn với giá trị null
+            // Sử dụng HashMap  để an toàn với giá trị null
             Map<String, Object> errorBody = new HashMap<>();
             errorBody.put("success", false);
             errorBody.put("message", "Mã giảm giá không tồn tại!");
@@ -87,6 +87,15 @@ public class PromotionController {
         }
         promotionRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/count-active")
+    public ResponseEntity<Long> countActivePromotions(){
+        LocalDateTime now = LocalDateTime.now();
+        Long count = promotionRepository.findAll().stream()
+                    .filter(p -> p.getEndDate() != null && p.getEndDate().isAfter(now))
+                    .filter(p -> p.getStartDate() == null || p.getStartDate().isBefore(now))
+                    .count();
+        return ResponseEntity.ok(count);
     }
    
 }

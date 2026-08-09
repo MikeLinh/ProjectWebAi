@@ -40,21 +40,25 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
     if (productId) fetchReviews();
   }, [productId]);
 
-  const handleAddReview = async (newReview: any): Promise<boolean> => {
+    const handleAddReview = async (newReview: any): Promise<{ success: boolean; message: string }> => {
     try {
       const reviewData = {
         ...newReview,
-        userId: user?.userId,        
+        userId: user?.userId,
         reviewerName: newReview.reviewerName || user?.fullName,
         reviewerEmail: newReview.reviewerEmail || user?.email,
       };
 
       const res = await axios.post(`http://localhost:8080/api/products/${productId}/reviews`, reviewData);
       setReviews([res.data, ...reviews]);
-      return true;
-    } catch (err) {
+      return { success: true, message: "Đánh giá thành công!" };
+    } catch (err: any) {
       console.error("Lỗi gửi review:", err);
-      return false;
+      const errorMessage = err.response?.data?.message || err.response?.data || "Gửi đánh giá không thành công.";
+      return {
+        success: false,
+        message: typeof errorMessage === "string" ? errorMessage : "Gửi đánh giá không thành công.",
+      };
     }
   };
 

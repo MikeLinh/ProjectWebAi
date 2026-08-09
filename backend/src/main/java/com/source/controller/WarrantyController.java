@@ -82,4 +82,12 @@ public class WarrantyController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
+    @GetMapping("/count")
+    public ResponseEntity<Long> countWarranties(@RequestParam(required = false) String status){
+        if(status == null || status.isBlank()){
+            return ResponseEntity.ok(warrantyRepository.count());
+        } 
+        return ResponseEntity.ok(warrantyRepository.countByStatus(status));
+    }
+    
 }

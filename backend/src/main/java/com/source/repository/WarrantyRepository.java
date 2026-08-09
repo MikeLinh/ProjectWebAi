@@ -19,4 +19,5 @@ public interface WarrantyRepository extends JpaRepository<Warranty, Integer> {
            "ORDER BY w.createdAt DESC")
     List<Warranty> findByUserIdOrderByCreatedAtDesc(@Param("userId") Integer userId);
     Optional<Warranty> findByOrderDetail_OrderDetailId(Long orderDetailId);
+    Long countByStatus(String status);
 }

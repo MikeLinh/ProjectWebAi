@@ -89,7 +89,7 @@ public class ProductService {
             List<Predicate> predicates = new ArrayList<>();
 
             if (categoryIds != null && !categoryIds.isEmpty()) {
-                predicates.add(root.get("category").get("categoryId").in(categories));
+                predicates.add(root.get("category").get("categoryId").in(categoryIds));
             }
             if (brands != null && !brands.isEmpty()) {
                 predicates.add(root.get("manufacturer").get("manufacturerName").in(brands));

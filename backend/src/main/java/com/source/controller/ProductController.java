@@ -101,7 +101,7 @@ public class ProductController {
             return ResponseEntity.internalServerError().build();
         }
     }
-
+    
    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Product> updateProduct(
             @PathVariable Integer id,
@@ -150,6 +150,7 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
         productService.deleteProduct(id);
+        
         return ResponseEntity.noContent().build();
     }
 
@@ -179,7 +180,18 @@ public class ProductController {
         Product saved = productRepository.save(product); //Lưu sp vào db
         return ResponseEntity.ok(saved);
     }
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> searchByName(@RequestParam  String name) {
+        if(name == null || name.trim().isEmpty()){
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(productRepository.findByProductNameContainingIgnoreCase(name));
+    }
 
+    @GetMapping("/count")
+    public ResponseEntity<Long> countProducts(){
+        return ResponseEntity.ok(productRepository.count());
+    }
     
-    
+
 }

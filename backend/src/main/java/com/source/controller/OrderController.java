@@ -150,7 +150,7 @@ public class OrderController {
 
         Order order = opt.get();
 
-        List<String> cancellableStatuses = List.of("PENDING", "CONFIRMED");
+        List<String> cancellableStatuses = List.of("PENDING", "CONFIRMED","PAID");
         if (!cancellableStatuses.contains(order.getStatus())) {
             return ResponseEntity.badRequest().body(Map.of(
                 "message", "Không thể huỷ đơn hàng ở trạng thái hiện tại: " + order.getStatus()
@@ -162,6 +162,7 @@ public class OrderController {
                 productService.restoreStock(item.getProductId(), item.getQuantity());;
             }
         }
+     
 
         order.setStatus("CANCELLED");
         orderRepository.save(order);

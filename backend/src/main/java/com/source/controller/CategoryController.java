@@ -70,4 +70,12 @@ public class CategoryController {
         }
         return ResponseEntity.ok(opt.get());
     } 
+    @GetMapping("/count")
+    public ResponseEntity<Long> countCategories(){
+        return ResponseEntity.ok(categoryRepository.count());
+    }
+    @GetMapping("/{id}/product-count")
+    public ResponseEntity<Long> countProductsInCategory(@PathVariable Integer id){
+        return ResponseEntity.ok(productRepository.countByCategory_CategoryId(id));
+    }
 }

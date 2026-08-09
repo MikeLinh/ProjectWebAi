@@ -46,19 +46,20 @@ interface OrderDetailModalProps {
   order: any | null;
   onClose: () => void;
   onUpdateStatus?: (orderId: number, newStatus: OrderStatus) => void;
+  onCancelOrder?: (orderId: number) => void; // Thêm prop onCancelOrder
   onRefund?: (orderId: number) => void;
   updatingId?: number | null;
   isAdmin?: boolean; // Thêm prop này để phân biệt giao diện Admin và User
 }
 
 export default function OrderDetailModal({
-  order, onClose, onUpdateStatus, onRefund, updatingId, isAdmin = true,
+  order, onClose, onUpdateStatus, onRefund, updatingId, isAdmin = true, onCancelOrder
 }: OrderDetailModalProps) {
   if (!order) return null;
 
   const action = NEXT_ACTION[order.status as OrderStatus]; 
   const isUpdating = updatingId === order.orderId; 
-  const canCancel = ["PENDING", "CONFIRMED"].includes(order.status); 
+  const canCancel = ["PENDING", "CONFIRMED","PAID"].includes(order.status); 
   const canRefund = order.status === "CANCELLED" && order.paymentMethod?.toUpperCase() === "VNPAY";
 
   return (
@@ -166,9 +167,9 @@ export default function OrderDetailModal({
                 </button>
               )}
 
-              {canCancel && onUpdateStatus && (
+              {canCancel && onCancelOrder && (
                 <button
-                  onClick={() => onUpdateStatus(order.orderId, "CANCELLED")}
+                  onClick={() => onCancelOrder(order.orderId)}
                   disabled={isUpdating}
                   className="flex-1 bg-[#e30019] hover:bg-red-700 disabled:opacity-50 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors"
                 >

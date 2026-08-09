@@ -82,7 +82,7 @@ export default function ReviewForm({ onSubmitReview }: ReviewFormProps) {
       setComment("");
       setRatingInput(5);
     } else {
-      const errorMess= "Sản phẩm này phải được mua và đã được giao trong giỏ hàng của bạn thì mới được đánh giá!"
+      const errorMess= isSuccess.message || "Gửi đánh giá không thành công, vui lòng thử lại."
       setErrorMsg(errorMess);
       showNotification(errorMess, "error");
       return;

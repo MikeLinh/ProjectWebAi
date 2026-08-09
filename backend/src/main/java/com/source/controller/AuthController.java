@@ -47,7 +47,7 @@ public class AuthController {
         if(user.getPhoneNumber() == null || !isValidPhone(user.getPhoneNumber())){
             return ResponseEntity.badRequest().body("Số điện thoại phải trên hoặc bằng 10 ký tự số!");
         }
-        if(user.getPhoneNumber().trim().length() <= 9){
+        if(user.getPhoneNumber().trim().length() < 10){
             return ResponseEntity.badRequest().body("Số điện thoại không xác định!");
         }
 

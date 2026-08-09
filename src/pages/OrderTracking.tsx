@@ -115,28 +115,29 @@ export default function OrderTrackingPage() {
   };
    // Định nghĩa hàm bất đồng bộ handleCancelOrder xử lý việc yêu cầu hủy một đơn hàng từ phía khách hàng
   const handleCancelOrder = async (orderId: number) => {
-    if (!window.confirm("Bạn có chắc muốn hủy đơn hàng này không?")) return;
+  if (!window.confirm("Bạn có chắc muốn hủy đơn hàng này không?")) return;
 
-    try {
-      const res = await fetch(`http://localhost:8080/api/orders/${orderId}/cancel`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-      });
+  try {
+    const res = await fetch(`http://localhost:8080/api/orders/${orderId}/cancel`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+    });
 
-      if (res.ok) {
-        //Duyệt qua từng orderId cũ nếu trùng với ID thì sửa lại trạng thái CANCELLED
-        setOrders(prev => prev.map(order => 
-          order.orderId === orderId ? { ...order, status: "CANCELLED" as OrderStatus } : order
-        ));
-        showNotification("Đơn hàng đã được hủy thành công!","success");
-      } else {
-        showNotification("Không thể hủy đơn hàng ở trạng thái hiện tại.","error");
-      }
-    } catch (err) {
-      console.error(err);
-      showNotification("Có lỗi xảy ra khi hủy đơn hàng.","error");
+    if (res.ok) {
+      const data = await res.json(); 
+      setOrders(prev => prev.map(order => 
+        order.orderId === orderId ? { ...order, status: data.status as OrderStatus } : order
+      ));
+      showNotification("Đơn hàng đã được hủy thành công!", "success");
+    } else {
+      const errData = await res.json().catch(() => null);
+      showNotification(errData?.message || "Không thể hủy đơn hàng ở trạng thái hiện tại.", "error");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    showNotification("Có lỗi xảy ra khi hủy đơn hàng.", "error");
+  }
+};
   // Hook useEffect tự động gọi hàm tải đơn hàng
   useEffect(() => {
     fetchOrders();

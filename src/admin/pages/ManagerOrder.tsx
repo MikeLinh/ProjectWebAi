@@ -88,6 +88,36 @@ export default function ManageOrders() {
   useEffect(() => {
     fetchOrders();
   }, []);
+  // Thêm hàm mới, gọi đúng endpoint /cancel (có refund + restock) thay vì /status
+  const handleCancelOrder = async (orderId: number) => {
+    if (!window.confirm("Bạn có chắc muốn hủy đơn hàng này? Nếu đã thanh toán VNPAY, hệ thống sẽ tự động hoàn tiền.")) return;
+    setUpdatingId(orderId);
+    try {
+      const res = await fetch(`http://localhost:8080/api/orders/${orderId}/cancel`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showNotification(data.message || "Không thể hủy đơn hàng ở trạng thái hiện tại.", "error");
+        return;
+      }
+
+      setOrders((prev) =>
+        prev.map((o) => (o.orderId === orderId ? { ...o, status: data.status as OrderStatus } : o))
+      );
+      if (selectedOrder?.orderId === orderId) {
+        setSelectedOrder((prev) => (prev ? { ...prev, status: data.status as OrderStatus } : prev));
+      }
+      showNotification(data.message || "Đơn hàng đã được hủy thành công!", "success");
+    } catch (err) {
+      console.error(err);
+      showNotification("Có lỗi xảy ra khi hủy đơn hàng.", "error");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   // Hàm gọi API lấy danh sách đơn hàng
   const fetchOrders = async () => {
@@ -281,6 +311,7 @@ export default function ManageOrders() {
         onClose={() => setSelectedOrder(null)} // Đóng modal bằng cách reset về null
         onUpdateStatus={handleUpdateStatus} // Cho phép cập nhật trạng thái đơn trực tiếp từ giao diện Modal chi tiết
         onRefund={handleRefund}  // Cho phép hoàn tiền trực tiếp từ giao diện Modal chi tiết
+        onCancelOrder={handleCancelOrder} // Cho phép hủy đơn trực tiếp từ giao diện Modal chi tiết
         updatingId={updatingId} 
       />
     </div>
