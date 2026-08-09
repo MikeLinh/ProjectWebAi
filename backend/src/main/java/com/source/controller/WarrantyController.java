@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/warranties")
-@CrossOrigin(origins = "http://localhost:5173")
 public class WarrantyController {
 
     @Autowired 

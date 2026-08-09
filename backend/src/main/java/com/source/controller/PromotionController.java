@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/promotions")
-@CrossOrigin(origins = "http://localhost:5173")
 public class PromotionController {
 
     @Autowired

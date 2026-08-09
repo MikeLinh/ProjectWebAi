@@ -19,7 +19,6 @@ import java.util.Optional;
 
 @RestController 
 @RequestMapping("/api/products")
-@CrossOrigin(origins = "http://localhost:5173")
 public class ProductController {
     //Định nghĩa lưu trữ ảnh khi người dùng upload
     private final String UPLOAD_DIR = "src/assets/images/";

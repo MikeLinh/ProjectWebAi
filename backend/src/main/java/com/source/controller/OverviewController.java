@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/overview")
-@CrossOrigin(origins = "http://localhost:5173")
 public class OverviewController {
 
     @Autowired private OrderRepository orderRepository;

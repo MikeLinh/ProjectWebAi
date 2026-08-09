@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/chat")
-@CrossOrigin(origins = "http://localhost:5173")
 public class ChatController {
 
     @Autowired
