@@ -23,5 +23,3 @@ dist-ssr
 *.sln
 *.sw?
 .env
-
-backend/src/main/resources/application.properties
