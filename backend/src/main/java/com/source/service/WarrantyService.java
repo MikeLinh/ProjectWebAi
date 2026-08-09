@@ -20,31 +20,36 @@ public class WarrantyService {
 
     @Transactional
     public void createWarrantiesForOrder(Order order) {
-    if (order.getItems() != null) {
-        for (OrderDetail detail : order.getItems()) {
+        if (order.getItems() != null) {
+            for (OrderDetail detail : order.getItems()) {
+                if(warrantyRepository.existsByOrderDetail_OrderDetailId(detail.getOrderDetailId())) {
+                    continue; // Bỏ qua nếu đã tồn tại bảo hành cho OrderDetail này
+                }
+                
+                Warranty warranty = new Warranty();
+                warranty.setOrderDetail(detail);
+                
+                //Tự động sinh mã bảo hành duy nhất (Tránh trùng thuộc tính unique)
+                String randomCode = "BH-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+                warranty.setWarrantyCode(randomCode);
+                
+                //Thiết lập số tháng bảo hành (Ví dụ mặc định là 12 tháng)
+                int months = 12;
+                warranty.setWarrantyMonth(months);
+                
+                //Sử dụng đúng setStartDate và setEndDate theo Entity của bạn
+                LocalDateTime now = LocalDateTime.now();
+                warranty.setStartDate(now);
+                warranty.setEndDate(now.plusMonths(months));
+                
+                //Các thông tin bổ sung khác
+                warranty.setStatus("ACTIVE");
+                warranty.setCreatedAt(now);
+                
+                warrantyRepository.save(warranty);
+            }
             
-            Warranty warranty = new Warranty();
-            warranty.setOrderDetail(detail);
-            
-            //Tự động sinh mã bảo hành duy nhất (Tránh trùng thuộc tính unique)
-            String randomCode = "BH-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-            warranty.setWarrantyCode(randomCode);
-            
-            //Thiết lập số tháng bảo hành (Ví dụ mặc định là 12 tháng)
-            int months = 12;
-            warranty.setWarrantyMonth(months);
-            
-            //Sử dụng đúng setStartDate và setEndDate theo Entity của bạn
-            LocalDateTime now = LocalDateTime.now();
-            warranty.setStartDate(now);
-            warranty.setEndDate(now.plusMonths(months));
-            
-            //Các thông tin bổ sung khác
-            warranty.setStatus("ACTIVE");
-            warranty.setCreatedAt(now);
-            
-            warrantyRepository.save(warranty);
         }
+        
     }
-}
 }
