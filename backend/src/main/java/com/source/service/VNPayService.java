@@ -58,7 +58,7 @@ public class VNPayService {
         vnpParams.put("vnp_IpAddr", "127.0.0.1");
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT-7"));
         vnpParams.put("vnp_CreateDate", formatter.format(cld.getTime()));
 
         cld.add(Calendar.MINUTE, 15);
@@ -128,7 +128,7 @@ public class VNPayService {
         String requestId = UUID.randomUUID().toString().replace("-", "").substring(0, 32);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String createDate = formatter.format(
-                Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7")).getTime());
+                Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT-7")).getTime());
 
         String transactionType = fullRefund ? "02" : "03";
         String amountStr = String.valueOf(amount * 100); 
