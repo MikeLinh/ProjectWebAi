@@ -90,7 +90,7 @@ export default function Sale() {
                   product={{
                     id: product.productId,
                     name: product.productName,
-                    brand: product.brand,
+                    manufacturer: product.brand,
                     price: salePrice,
                     originalPrice: product.price,
                     image: getImageUrl(product.imageUrl),
