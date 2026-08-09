@@ -4,11 +4,13 @@
   import { useSearchParams, useNavigate } from "react-router-dom";
   import Navbar from "../components/home/navbar";
   import Footer from "../components/home/footer";
+  import { useCart } from "../components/context/carcontext";
   import axios from "axios";
 
   export default function VNPayReturn() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { clearCart } = useCart();  
     const [isSuccess, setIsSuccess] = useState(false);
     const [orderId, setOrderId] = useState<string | null>(null);
     const [updating, setUpdating] = useState(true);
@@ -21,13 +23,16 @@
 
       setIsSuccess(responseCode === "00");
       //Nếu có mã tham chiếu giao dịch 'txnRef' trả về trên URL
+      if(isSuccess){
+        clearCart(); // Xóa giỏ hàng nếu thanh toán thành công
+      }
       if(txnRef){
         // Tiến hành cắt chuỗi lấy phần ký tự trước dấu gạch dưới "_" để khôi phục lại mã ID đơn hàng gốc trong database
         const extractedId = txnRef.split("_")[0];
         setOrderId(extractedId);
         if(responseCode){
           axios.patch(`${import.meta.env.VITE_API_URL}/api/orders/${extractedId}/payment-result`, null,{
-            params: {vnp_ResponseCode: responseCode}
+            params: {vnp_ResponseCode: responseCode, vnp_TxnRef: txnRef}
           })
             .then(()=> console.log("Đã cập nhập thanh toán"))
             .catch((err) => console.log("Lỗi thanh toán không thành công",err))
