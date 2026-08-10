@@ -105,20 +105,23 @@ export default function VNPayReturn() {
           )}
 
           <div className="flex flex-col gap-3">
-            <button
-              onClick={handlePayAgain}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-colors text-lg"
-            >
-              Thanh toán lại
-            </button>
+         
+              {!isSuccess && (
+                <button
+                  onClick={handlePayAgain}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-colors text-lg"
+                >
+                  Thanh toán lại
+                </button>
+              )}
 
-            <button
-              onClick={() => navigate("/product")}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-xl transition-colors text-lg"
-            >
-              ← Trở về trang sản phẩm
-            </button>
-          </div>
+              <button
+                onClick={() => navigate("/product")}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-xl transition-colors text-lg"
+              >
+                ← Trở về trang sản phẩm
+              </button>
+            </div>
         </div>
       </div>
 
