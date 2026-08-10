@@ -24,7 +24,7 @@ export default function PriceFilter({ filters, update }: PriceFilterProps) {
         <div>
           <p className="text-[14px] text-gray-400 font-medium uppercase tracking-wider mb-1">Giá tối thiểu</p>
           <input
-            type="range" min="0" max="5000" step="100"
+            type="range" min="0" max="50000000" step="100"
             value={filters.priceMin}
             onChange={(e) => {
               const val = Number(e.target.value);
@@ -37,7 +37,7 @@ export default function PriceFilter({ filters, update }: PriceFilterProps) {
         <div>
           <p className="text-[14px] text-gray-400 font-medium uppercase tracking-wider mb-1">Giá tối đa</p>
           <input
-            type="range" min="0" max="5000" step="100"
+            type="range" min="0" max="50000000" step="100"
             value={filters.priceMax}
             onChange={(e) => {
               const val = Number(e.target.value);

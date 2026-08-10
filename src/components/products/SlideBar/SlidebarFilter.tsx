@@ -23,7 +23,7 @@ const DEFAULT_FILTERS: FilterState = {
   categories: [],
   brands: [],
   priceMin: 0,
-  priceMax: 5000,
+  priceMax: 50000000,
   sizes: [],
   rating: null,
 
@@ -46,7 +46,7 @@ export default function SidebarFilter({ onFilterChange }: SidebarFilterProps) {
     filters.brands.length +
     filters.sizes.length +
     (filters.rating !== null ? 1 : 0) +
-    (filters.priceMin > 0 || filters.priceMax < 5000 ? 1 : 0);
+    (filters.priceMin > 0 || filters.priceMax < 50000000 ? 1 : 0);
 
 
   const update = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {

@@ -40,7 +40,7 @@ const INITIAL_FILTERS: FilterState = {
   categories: [],
   brands: [],
   priceMin: 0,
-  priceMax: 5000,
+  priceMax: 50000000,
   sizes: [],
   rating: null, 
 };
@@ -73,7 +73,7 @@ export default function MainProduct() {
     if (filters.priceMin > 0) {
       params.append("minPrice", filters.priceMin.toString());
     }
-    if (filters.priceMax < 5000) {
+    if (filters.priceMax < 50000000) {
       params.append("maxPrice", filters.priceMax.toString());
     }
 
