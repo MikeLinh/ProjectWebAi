@@ -1,5 +1,6 @@
 import FilterSection from "./filtersection";
 import type { FilterState } from "./SlidebarFilter";
+import { formatVND } from "../../utils/formatCurrency";
 
 interface PriceFilterProps {
   filters: FilterState;
@@ -12,11 +13,11 @@ export default function PriceFilter({ filters, update }: PriceFilterProps) {
       <div className="space-y-3 pt-1">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5">
-            ${filters.priceMin.toLocaleString()}
+            {formatVND(filters.priceMin)}
           </span>
           <span className="text-gray-300 text-xs">—</span>
           <span className="text-xs font-semibold text-red-500 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5">
-            ${filters.priceMax.toLocaleString()}
+            {formatVND(filters.priceMax)}
           </span>
         </div>
 

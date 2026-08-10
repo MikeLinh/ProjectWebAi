@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import ProductModal from "../components/productmodal";
 import { useNotification } from "../../components/context/notificationcontext";
+import { formatVND } from "../../components/utils/formatCurrency";
 
 // API Backend dùng để thao tác CRUD(create, read, update, delete) sản phẩm
 const API = `${import.meta.env.VITE_API_URL}/api/products`;
@@ -112,7 +113,7 @@ export default function ManageProducts() {
                   <td className="p-4 font-semibold text-gray-900">{p.productName}</td>
                   <td className="p-4 font-semibold text-gray-900">{p.manufacturer?.manufacturerName || "-"}</td>
                   <td className="p-4 text-gray-500">{p.category?.categoryName || "—"}</td>
-                  <td className="p-4 text-red-600 font-bold">${Number(p.price).toLocaleString()}</td>
+                  <td className="p-4 text-red-600 font-bold">{formatVND(Number(p.price))}</td>
                   <td className="p-4 font-medium">{p.stockQuantity} xe</td>
 
                   {/* Cột các nút thao tác sửa / xóa */}

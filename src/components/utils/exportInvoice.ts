@@ -1,5 +1,6 @@
 import html2pdf from "html2pdf.js";
 import type { Order } from "../ordertracking/orderitem";
+import { formatVND } from "./formatCurrency";
 
 export const handleExportInvoice = (order: Order, ngày: string, giờ: string) => {
   const invoiceHTML = `
@@ -40,8 +41,8 @@ export const handleExportInvoice = (order: Order, ngày: string, giờ: string) 
               <td style="padding: 10px;">${idx + 1}</td>
               <td style="padding: 10px;"><b>${item.productName}</b></td>
               <td style="padding: 10px; text-align: center;">${item.quantity}</td>
-              <td style="padding: 10px; text-align: right;">$${item.price.toLocaleString()}</td>
-              <td style="padding: 10px; text-align: right;">$${(item.price * item.quantity).toLocaleString()}</td>
+              <td style="padding: 10px; text-align: right;">${formatVND(item.price)}</td>
+              <td style="padding: 10px; text-align: right;">${formatVND(item.price * item.quantity)}</td>
             </tr>
           `
             )

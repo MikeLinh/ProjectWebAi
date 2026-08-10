@@ -1,4 +1,5 @@
 import React from "react";
+import { formatVND } from "../../utils/formatCurrency";
 
 //Định nghĩa cấu trúc dữ liệu cho một sản phẩm nằm trong giỏ hàng
 interface CartItem {
@@ -20,7 +21,7 @@ export default function CartItemsList({ cart }: CartItemsListProps) {
           <span className="truncate max-w-[180px]">
             {item.name} <b className="text-red-500">x{item.quantity}</b>
           </span>
-          <span>${(item.price * item.quantity).toLocaleString()}</span>
+          <span>{formatVND(item.price * item.quantity)}</span>
         </div>
       ))}
     </div>

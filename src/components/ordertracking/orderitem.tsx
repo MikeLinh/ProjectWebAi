@@ -2,6 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { useNotification } from "../context/notificationcontext";
 import { handleExportInvoice } from "../utils/exportInvoice";
+import { formatVND } from "../utils/formatCurrency";
 // Định nghĩa kiểu dữ liệu cho trạng thái đơn hàng
 export type OrderStatus =
   | "PENDING"
@@ -147,7 +148,7 @@ export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToP
             </div>
             
             <div className="font-medium text-gray-900">
-              ${(item.price * item.quantity).toLocaleString()}
+              {formatVND(item.price * item.quantity)}
             </div>
           </div>
         ))}
@@ -155,7 +156,7 @@ export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToP
 
       <div className="flex justify-between items-center pt-2 border-t border-gray-100 text-xs">
         <span className="text-gray-500">Thành tiền:</span>
-        <span className="text-sm font-bold text-red-500">${order.totalAmount.toLocaleString()}</span>
+        <span className="text-sm font-bold text-red-500">{formatVND(order.totalAmount)}</span>
       </div>
       {isVnPayPending && (
         <button onClick={handleRepay} disabled = {rePaying} className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50">

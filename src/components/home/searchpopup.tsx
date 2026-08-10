@@ -4,6 +4,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { formatVND } from "../utils/formatCurrency";  
 
 //Định tạo 1 props
 interface SearchPopupProps {
@@ -168,7 +169,7 @@ export default function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
                             </div>
                           </div>
                           <span className="text-sm font-bold text-red-500">
-                            ${finalPrice.toLocaleString()}
+                            {formatVND(finalPrice)}
                           </span>
                         </li>
                       );

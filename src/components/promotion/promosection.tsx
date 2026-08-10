@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from "react";
+import { formatVND } from "../utils/formatCurrency";
 
 interface Promotion {
   promoId: number;
@@ -68,10 +69,10 @@ export default function PromoSection({ cart, cartTotal, onApplyDiscount }: Promo
 
     const detail = promo.discountType === "PERCENTAGE" 
       ? `Giảm ${safeDiscount}%` 
-      : `Giảm $${safeDiscount.toLocaleString()}`;
+      : `Giảm ${formatVND(safeDiscount)}`; // Hiển thị số tiền giảm theo định dạng VND
       
     const scope = promo.targetProductId ? `[Sản phẩm #${promo.targetProductId}]` : "[Tất cả đơn]";
-    return `Mã ${promo.couponCode || "CODE"} - ${detail} ${scope} (Đơn từ $${safeMinSpend.toLocaleString()})`;
+    return `Mã ${promo.couponCode || "CODE"} - ${detail} ${scope} (Đơn từ ${formatVND(safeMinSpend)})`;
   };
 
   // Xử lý khi người dùng chủ động chọn mã giảm giá
@@ -100,7 +101,7 @@ export default function PromoSection({ cart, cartTotal, onApplyDiscount }: Promo
     if (cartTotal < minSpend) {
       onApplyDiscount(0, "", null);
       setMessage({ 
-        text: `Giỏ hàng chưa đủ $${minSpend.toLocaleString()} để áp dụng mã này.`, 
+        text: `Giỏ hàng chưa đủ ${formatVND(minSpend)} để áp dụng mã này.`, 
         isError: true 
       });
       return;
@@ -125,7 +126,7 @@ export default function PromoSection({ cart, cartTotal, onApplyDiscount }: Promo
         const discountAmount = calculateDiscount(localPromo);
         onApplyDiscount(discountAmount, data.couponCode, data.promoId);
         setMessage({ 
-          text: `Áp dụng thành công! Đã giảm $${discountAmount.toLocaleString()}`, 
+          text: `Áp dụng thành công! Đã giảm ${formatVND(discountAmount)}`, 
           isError: false 
         });
       } else {
@@ -156,7 +157,7 @@ export default function PromoSection({ cart, cartTotal, onApplyDiscount }: Promo
         if (cartTotal < minSpend) {
           onApplyDiscount(0, "", null);
           setMessage({ 
-            text: `Mã đã bị hủy vì giỏ hàng giảm xuống dưới $${minSpend.toLocaleString()}`, 
+            text: `Mã đã bị hủy vì giỏ hàng giảm xuống dưới ${formatVND(minSpend)}`, 
             isError: true 
           });
           return;
@@ -176,7 +177,7 @@ export default function PromoSection({ cart, cartTotal, onApplyDiscount }: Promo
         const discountAmount = calculateDiscount(promo);
         onApplyDiscount(discountAmount, promo.couponCode, promo.promoId);
         setMessage({ 
-          text: `Áp dụng thành công! Đã giảm $${discountAmount.toLocaleString()}`, 
+          text: `Áp dụng thành công! Đã giảm ${formatVND(discountAmount)}`, 
           isError: false 
         });
       }
@@ -187,7 +188,7 @@ export default function PromoSection({ cart, cartTotal, onApplyDiscount }: Promo
     <div className="bg-white border border-gray-200 rounded-xl p-4 mt-4 space-y-3 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold text-gray-900">Ưu đãi của bạn</h3>
-        <span className="text-[11px] text-gray-400">Tổng đơn: ${cartTotal.toLocaleString()}</span>
+        <span className="text-[11px] text-gray-400">Tổng đơn: {formatVND(cartTotal)}</span>
       </div>
       
       <div className="space-y-2">

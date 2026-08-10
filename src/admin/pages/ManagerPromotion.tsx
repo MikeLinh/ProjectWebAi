@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useCallback } from "react";
 import { useNotification } from "../../components/context/notificationcontext";
+import { formatVND } from "../../components/utils/formatCurrency";
 
 // URL endpoint API để quản lý các chương trình khuyến mãi
 const API = `${import.meta.env.VITE_API_URL}/api/promotions`;
@@ -285,7 +286,7 @@ export default function ManagePromotions() {
                         )}
                       </td>
 
-                      <td className="p-4 font-bold text-green-600">-${Number(p.discountValue).toLocaleString()}</td>
+                      <td className="p-4 font-bold text-green-600">-{formatVND(Number(p.discountValue))}</td>
                       <td className="p-4 text-gray-500">
                         {formatDateTime(p.startDate)} ~ {formatDateTime(p.endDate)}
                       </td>

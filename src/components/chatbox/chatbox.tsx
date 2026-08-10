@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import CloseIcon from "@mui/icons-material/Close";
 import SendIcon from "@mui/icons-material/Send";
+import { formatVND } from "../../components/utils/formatCurrency";
 
 // Kiểu dữ liệu cấu trúc cho một sản phẩm trong hệ thống
 interface Product {
@@ -130,7 +131,7 @@ function ProductCard({ product, onNavigate }: ProductCardProps) {
         </p>
         {product.price != null && (
           <p className="text-[12px] font-semibold text-red-500">
-            ${Number(product.price).toLocaleString()}
+            {formatVND(Number(product.price))}
           </p>
         )}
         {product.description && (

@@ -1,5 +1,6 @@
 import React from "react";
 import type { OrderStatus } from "../pages/ManagerOrder";
+import { formatVND } from "../../components/utils/formatCurrency";
 
 // Import các Icon từ Material UI
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -133,7 +134,8 @@ export default function OrderDetailModal({
                 <span className="text-gray-800">
                   {item.productName} <b className="text-red-600 ml-1">x{item.quantity}</b>
                 </span>
-                <span className="font-extrabold">${(item.price * item.quantity).toLocaleString()}</span>
+                <span className="font-extrabold">${formatVND(item.price * item.quantity)}</span>
+  
               </div>
             ))}
           </div>
@@ -142,7 +144,7 @@ export default function OrderDetailModal({
         {/* Tổng thanh toán */}
         <div className="flex justify-between items-center font-extrabold border-t-2 border-gray-800 pt-4">
           <span className="text-base text-gray-900">Tổng thanh toán:</span>
-          <span className="text-red-600 text-xl">${order.totalAmount.toLocaleString()}</span>
+          <span className="text-red-600 text-xl">${formatVND(order.totalAmount)}</span>
         </div>
 
         {/* Các nút hành động */}

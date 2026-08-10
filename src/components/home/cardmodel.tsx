@@ -3,6 +3,7 @@ import { useCart } from "../context/carcontext";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom"; 
+import { formatVND } from "../utils/formatCurrency";
 
 interface CartModelProps {
   isOpen: boolean;
@@ -43,7 +44,7 @@ export default function CardModel({ isOpen, onClose }: CartModelProps) {
                 
                 <div className="flex-1 min-w-0">
                   <h4 className="text-xs font-semibold text-gray-900 truncate">{item.name}</h4>
-                  <p className="text-xs text-red-500 font-bold mt-0.5">${item.price.toLocaleString()}</p>
+                  <p className="text-xs text-red-500 font-bold mt-0.5">{formatVND(item.price)}</p>  
                 </div>
 
                 <div className="flex items-center border border-gray-300 rounded overflow-hidden shrink-0">
@@ -76,7 +77,7 @@ export default function CardModel({ isOpen, onClose }: CartModelProps) {
           <div className="pt-4 border-t border-gray-200 space-y-3">
             <div className="flex items-center justify-between text-xs">
               <span className="text-gray-500 font-medium">Tổng thanh toán:</span>
-              <span className="text-sm font-bold text-red-500">${getCartTotal().toLocaleString()}</span>
+              <span className="text-sm font-bold text-red-500">{formatVND(getCartTotal())}</span>
             </div>
             
             <div className="flex flex-col gap-2">

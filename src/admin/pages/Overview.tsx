@@ -6,6 +6,7 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import DirectionsBikeIcon from "@mui/icons-material/DirectionsBike";
 import LocalActivityIcon from "@mui/icons-material/LocalActivity";
 import CancelIcon from "@mui/icons-material/Cancel";
+import { formatVND } from "../../components/utils/formatCurrency";
 
 
 // Định nghĩa cấu trúc gói dữ liệu thống kê trả về từ Backend API
@@ -131,7 +132,7 @@ export default function DashboardOverview() {
             {[
               {
                 label: "Doanh thu",
-                value: `$${Number(stats.totalRevenue).toLocaleString()}`,
+                value: formatVND(Number(stats.totalRevenue)),
                 icon:  <MonetizationOnIcon fontSize="small" />,
                 bg:    "bg-green-50 text-green-600 border-green-200",
               },
@@ -194,7 +195,7 @@ export default function DashboardOverview() {
                     {/* Tooltip hiển thị số tiền chính xác khi rê chuột vào đầu cột */}
                     {val > 0 && (
                       <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                        ${val.toLocaleString()}
+                        {formatVND(val)}
                       </div>
                     )}
                     {/* Cột biểu đồ */}

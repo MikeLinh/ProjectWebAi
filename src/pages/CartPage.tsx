@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/home/navbar";
 import Footer from "../components/home/footer";
 import PromoSection from "../components/promotion/promosection"; 
+import { formatVND } from "../components/utils/formatCurrency";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, getCartTotal } = useCart();
@@ -59,7 +60,7 @@ export default function CartPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-sm truncate text-black">{item.name}</h3>
-                    <p className="text-red-500 font-semibold text-sm mt-1">${item.price.toLocaleString()}</p>
+                    <p className="text-red-500 font-semibold text-sm mt-1">{formatVND(item.price)}</p>
                   </div>
                   <div className="flex items-center border border-gray-100 rounded-lg overflow-hidden shrink-0">
                     <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="px-2.5 py-1 bg-gray-100 text-black hover:bg-gray-200">-</button>
@@ -76,12 +77,12 @@ export default function CartPage() {
                 <h2 className="text-lg font-bold border-b border-gray-200 pb-3">TỔNG GIỎ HÀNG</h2>
                 <div className="flex justify-between text-sm">
                   <span className="text-black">Tạm tính:</span>
-                  <span>${cartTotal.toLocaleString()}</span>
+                  <span>{formatVND(cartTotal)}</span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-sm text-green-600 font-medium">
                     <span>Giảm giá ({appliedCode}):</span>
-                    <span>-${discount.toLocaleString()}</span>
+                    <span>-{formatVND(discount)}</span>
                   </div>
                 )}
 
@@ -91,7 +92,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between font-bold text-base pt-1">
                   <span>Tổng cộng:</span>
-                  <span className="text-red-500">${finalTotal.toLocaleString()}</span>
+                  <span className="text-red-500">{formatVND(finalTotal)}</span>
                 </div>
                 <button 
                   onClick={() => navigate("/checkout", {

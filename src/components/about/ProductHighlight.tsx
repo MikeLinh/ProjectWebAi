@@ -2,6 +2,7 @@ import React from "react";
 import bike1 from "../../assets/images/bk1.png";
 import bike2 from "../../assets/images/bk2.png";
 import bike3 from "../../assets/images/bk3.png";
+import { formatVND } from "../../components/utils/formatCurrency";
 
 export default function ProductHighlight() {
   
@@ -44,7 +45,7 @@ export default function ProductHighlight() {
               <div className="p-6 text-center">
                 <h3 className="font-semibold text-xl mb-3 text-gray-800">{p.name}</h3>
                 <p className="text-3xl font-bold text-green-600">
-                  {parseInt(p.price).toLocaleString('vi-VN')} $
+                    {formatVND(parseInt(p.price))}
                 </p>
                 <button className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-medium transition-colors" >
                   Xem chi tiết

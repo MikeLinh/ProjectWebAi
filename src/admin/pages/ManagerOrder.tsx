@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import OrderDetailModal from "../components/orderdetailmodel";
 import { useNotification } from "../../components/context/notificationcontext";
+import { formatVND } from "../../components/utils/formatCurrency";
 
 // Định nghĩa các loại trạng thái mà một đơn hàng có thể có
 export type OrderStatus =
@@ -269,7 +270,7 @@ export default function ManageOrders() {
                     <td className="p-4 font-bold">#{o.orderId}</td>
                     <td className="p-4 font-medium text-gray-900">{o.receiverName}</td>
                     <td className="p-4 text-red-600 font-bold">
-                      ${o.totalAmount.toLocaleString()}
+                      {formatVND(o.totalAmount)}
                     </td>
                     <td className="p-4">
                       <span

@@ -2,6 +2,7 @@
 /* eslint-disable react-hooks/immutability */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { formatVND } from "../../components/utils/formatCurrency";
 
 // Định nghĩa kiểu dữ liệu cho Sản phẩm
 interface Product {
@@ -236,7 +237,7 @@ export default function ManagerWarehouse() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-2xl border shadow-sm flex flex-col justify-between">
             <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">Tổng vốn nhập kho</span>
-            <span className="text-2xl font-black text-red-600 mt-2">${totalInvestment.toLocaleString()}</span>
+            <span className="text-2xl font-black text-red-600 mt-2"> {formatVND(totalInvestment)}</span>
           </div>
           <div className="bg-white p-6 rounded-2xl border shadow-sm flex flex-col justify-between">
             <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">Tổng sản lượng nhập</span>
@@ -398,7 +399,7 @@ export default function ManagerWarehouse() {
                             {product?.productName ?? r.productName ?? `#${r.productId}`}
                           </td>
                           <td className="p-3 text-center font-bold text-blue-600">+{r.quantityAdded}</td>
-                          <td className="p-3 text-gray-700 font-semibold">${Number(r.importPrice).toLocaleString()}</td>
+                          <td className="p-3 text-gray-700 font-semibold">{formatVND(Number(r.importPrice))}</td>
                           <td className="p-3 text-gray-500">
                             <div className="font-medium text-gray-700">{r.manufacturerName || "—"}</div>
                             <div className="text-[10px] text-gray-400">{r.supplierName || "—"}</div>

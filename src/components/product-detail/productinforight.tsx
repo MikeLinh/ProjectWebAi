@@ -6,6 +6,7 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import LocalAtmIcon from "@mui/icons-material/LocalAtm";
 import { useCart } from "../../components/context/carcontext"
 import { useNotification } from "../context/notificationcontext";
+import { formatVND } from "../utils/formatCurrency";
 
 interface ProductInfoRightProps {
   id: number;
@@ -65,9 +66,9 @@ export default function ProductInfoRight({ id, image, name, price, originalPrice
 
       {/* Giá tiền */}
       <div className="flex items-baseline space-x-3 pt-2">
-        <span className="text-2xl sm:text-3xl font-extrabold text-red-500">${price.toLocaleString()}</span>
+        <span className="text-2xl sm:text-3xl font-extrabold text-red-500">{formatVND(price)}</span>
         {hasDiscount && (
-          <span className="text-gray-500 line-through text-base sm:text-lg">${originalPrice?.toLocaleString()}</span>
+          <span className="text-gray-500 line-through text-base sm:text-lg">{formatVND(originalPrice)}</span>
         )}
       </div>
 

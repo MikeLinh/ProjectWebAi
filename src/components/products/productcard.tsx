@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/carcontext"; 
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useNotification } from "../context/notificationcontext";
+import { formatVND } from "../utils/formatCurrency";
 
 interface Product {
   id: number;
@@ -118,12 +119,12 @@ export default function Card({ product }: CardProps) {
         <div className="mt-3 flex items-center justify-between"> 
           <div className="flex items-baseline gap-2">
             <span className="text-base font-bold text-red-600">
-              ${product.price.toLocaleString()}
+              {formatVND(product.price)}
             </span>
             
             {hasDiscount && product.originalPrice && (
               <span className="text-xs text-gray-400 line-through">
-                ${product.originalPrice.toLocaleString()}
+                {formatVND(product.originalPrice)}
               </span>
             )}
           </div>
