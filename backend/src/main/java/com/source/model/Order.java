@@ -56,44 +56,44 @@ public class Order {
     @Transient
     private BigDecimal discount;
 
-    public Long getOrderId()                    { return orderId; }
-    public void setOrderId(Long orderId)        { this.orderId = orderId; }
+    public Long getOrderId() { return orderId; }
+    public void setOrderId(Long orderId){ this.orderId = orderId; }
 
-    public Long getUserId()                     { return userId; }
-    public void setUserId(Long userId)          { this.userId = userId; }
+    public Long getUserId(){ return userId; }
+    public void setUserId(Long userId){ this.userId = userId; }
 
-    public Long getPromoId()                    { return promoId; }
-    public void setPromoId(Long promoId)        { this.promoId = promoId; }
+    public Long getPromoId(){ return promoId; }
+    public void setPromoId(Long promoId){ this.promoId = promoId; }
 
-    public LocalDateTime getOrderDate()         { return orderDate; }
-    public void setOrderDate(LocalDateTime d)   { this.orderDate = d; }
+    public LocalDateTime getOrderDate(){ return orderDate; }
+    public void setOrderDate(LocalDateTime d){ this.orderDate = d; }
 
-    public BigDecimal getTotalAmount()          { return totalAmount; }
-    public void setTotalAmount(BigDecimal a)    { this.totalAmount = a; }
+    public BigDecimal getTotalAmount(){ return totalAmount; }
+    public void setTotalAmount(BigDecimal a){ this.totalAmount = a; }
 
-    public String getShippingAddress()          { return shippingAddress; }
-    public void setShippingAddress(String a)    { this.shippingAddress = a; }
+    public String getShippingAddress(){ return shippingAddress; }
+    public void setShippingAddress(String a){ this.shippingAddress = a; }
 
-    public String getReceiverName()             { return receiverName; }
-    public void setReceiverName(String n)       { this.receiverName = n; }
+    public String getReceiverName(){ return receiverName; }
+    public void setReceiverName(String n){ this.receiverName = n; }
 
-    public String getReceiverPhone()            { return receiverPhone; }
-    public void setReceiverPhone(String p)      { this.receiverPhone = p; }
+    public String getReceiverPhone(){ return receiverPhone; }
+    public void setReceiverPhone(String p){ this.receiverPhone = p; }
 
-    public String getStatus()                   { return status; }
-    public void setStatus(String status)        { this.status = status; }
+    public String getStatus(){ return status; }
+    public void setStatus(String status){ this.status = status; }
 
-    public String getNote()                     { return note; }
-    public void setNote(String note)            { this.note = note; }
+    public String getNote(){ return note; }
+    public void setNote(String note){ this.note = note; }
 
-    public List<OrderDetail> getItems()         { return items; }
-    public void setItems(List<OrderDetail> i)   { this.items = i; }
+    public List<OrderDetail> getItems(){ return items; }
+    public void setItems(List<OrderDetail> i){ this.items = i; }
 
-    public String getPaymentMethod()            { return paymentMethod; }
-    public void setPaymentMethod(String m)      { this.paymentMethod = m; }
+    public String getPaymentMethod(){ return paymentMethod; }
+    public void setPaymentMethod(String m){ this.paymentMethod = m; }
 
-    public BigDecimal getDiscount()             { return discount; }
-    public void setDiscount(BigDecimal d)       { this.discount = d; }
+    public BigDecimal getDiscount(){ return discount; }
+    public void setDiscount(BigDecimal d){ this.discount = d; }
     @Column(name = "vnp_txn_ref")
     private String vnpTxnRef;
 

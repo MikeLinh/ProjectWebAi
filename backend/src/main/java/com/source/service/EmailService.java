@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
-
+    //Gửi mail qua SMTP trong file application.properties
     @Autowired
     private JavaMailSender mailSender; //framework gửi mail tự động của Spring Boot
     //Gửi mật khẩu mới

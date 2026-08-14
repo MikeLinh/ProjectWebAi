@@ -22,12 +22,14 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
-    private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@gmail\\.com$";
-    private static final String PHONE_REGEX = "^[0-9]{10,11}$";
+    private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@gmail\\.com$"; //Kiểm tra kiểu email chỉ cho phép gmail
+    private static final String PHONE_REGEX = "^[0-9]{10,11}$"; //Kiểm tra kiểu số điện thoại chỉ cho phép 10 hoặc 11 chữ số
 
+    // Phương thức kiểm tra tính hợp lệ của email và số điện thoại
     private boolean isValidEmail(String email){
         return email != null && Pattern.matches(EMAIL_REGEX, email);
     }
+    // Phương thức kiểm tra tính hợp lệ của số điện thoại
     private boolean isValidPhone(String phone){
         if(phone == null || phone.trim().isEmpty()){
             return true;
@@ -37,38 +39,38 @@ public class AuthController {
     }
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
-        if(user.getEmail() == null || !isValidEmail(user.getEmail())){
+        if(user.getEmail() == null || !isValidEmail(user.getEmail())){  //Kiểm tra mail hợp lệ
             return ResponseEntity.badRequest().body("Email không hợp lệ");
         }
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email đã tồn tại!");
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) { //Kiểm tra mail đã tồn tại
+            return ResponseEntity.badRequest().body("Email đã tồn tại!"); 
         }
-        if(user.getPhoneNumber() == null || !isValidPhone(user.getPhoneNumber())){
-            return ResponseEntity.badRequest().body("Số điện thoại phải trên hoặc bằng 10 ký tự số!");
+        if(user.getPhoneNumber() == null || !isValidPhone(user.getPhoneNumber())){ //Kiểm tra sdt hợp lệ
+            return ResponseEntity.badRequest().body("Số điện thoại không hợp lệ!");
         }
-        if(user.getPhoneNumber().trim().length() < 10){
+        if(user.getPhoneNumber().trim().length() < 10){ //Kiểm tra sdt có ít nhất 10 chữ số
             return ResponseEntity.badRequest().body("Số điện thoại không xác định!");
         }
 
-        if (user.getFullName() == null || user.getFullName().trim().isEmpty()) {
+        if (user.getFullName() == null || user.getFullName().trim().isEmpty()) { //Kiểm tra họ tên không được để trống
             return ResponseEntity.badRequest().body("Họ tên không được để trống!");
         }
 
-        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) { //Kiểm tra mật khẩu không được để trống
             return ResponseEntity.badRequest().body("Mật khẩu không được để trống!");
         }
         if(user.getPassword().trim().length() < 6){
-            return ResponseEntity.badRequest().body("Mật khẩu phải có ít nhất 6 ký tự!");
+            return ResponseEntity.badRequest().body("Mật khẩu phải có ít nhất 6 ký tự!"); //Kiểm tra ký tự mk
         }
 
-        if (user.getRole() == null || user.getRole().isBlank()) {
+        if (user.getRole() == null || user.getRole().isBlank()) { //Nếu role không được cung cấp, mặc định là "USER"
             user.setRole("USER");
         }
-
+        //Tạo người dùng mới và lưu vào cơ sở dữ liệu
         User savedUser = userRepository.save(user);
         savedUser.setPassword(null); 
-
-        return ResponseEntity.ok(savedUser);
+        
+        return ResponseEntity.ok(savedUser); //Trả về thông tin người dùng đã được lưu
     }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User loginData) {

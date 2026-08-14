@@ -30,21 +30,27 @@ public class OrderDetail {
     @Column(name = "price", precision = 15, scale = 2)
     private BigDecimal price;
 
-    public Long getOrderDetailId()              { return orderDetailId; }
-    public void setOrderDetailId(Long id)       { this.orderDetailId = id; }
+    @Column(name = "size", length = 50)
+    private String size;
 
-    public Order getOrder()                     { return order; }
-    public void setOrder(Order order)           { this.order = order; }
+    public Long getOrderDetailId(){ return orderDetailId; }
+    public void setOrderDetailId(Long id){ this.orderDetailId = id; }
 
-    public Long getProductId()                  { return productId; }
-    public void setProductId(Long productId)    { this.productId = productId; }
+    public Order getOrder() { return order; }
+    public void setOrder(Order order) { this.order = order; }
 
-    public String getProductName()              { return productName; }
-    public void setProductName(String name)     { this.productName = name; }
+    public Long getProductId() { return productId; }
+    public void setProductId(Long productId) { this.productId = productId; }
 
-    public Integer getQuantity()                { return quantity; }
-    public void setQuantity(Integer quantity)   { this.quantity = quantity; }
+    public String getProductName() { return productName; }
+    public void setProductName(String name) { this.productName = name; }
 
-    public BigDecimal getPrice()                { return price; }
-    public void setPrice(BigDecimal price)      { this.price = price; }
+    public Integer getQuantity() { return quantity; }
+    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+
+    public BigDecimal getPrice(){ return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+
+    public String getSize() { return size; }
+    public void setSize(String size) { this.size = size; }
 }

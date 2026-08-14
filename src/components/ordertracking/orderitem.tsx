@@ -22,7 +22,7 @@ export interface Order {
   receiverName: string;
   shippingAddress: string;
   paymentMethod: string;
-  items: { orderDetailId: number; productId?: number; productName: string; quantity: number; price: number }[];
+  items: { orderDetailId: number; productId?: number; productName: string; quantity: number; price: number; size: string; }[];
 }
 
 //Mapping nhãn hiển thị cho từng trạng thái

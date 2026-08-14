@@ -40,32 +40,32 @@ public class WarehouseReceipt {
     @Transient
     private String productName;
 
-    public Long getReceiptId()                      { return receiptId; }
-    public void setReceiptId(Long receiptId)        { this.receiptId = receiptId; }
+    public Long getReceiptId(){ return receiptId; }
+    public void setReceiptId(Long receiptId){ this.receiptId = receiptId; }
 
-    public Long getAdminId()                        { return adminId; }
-    public void setAdminId(Long adminId)            { this.adminId = adminId; }
+    public Long getAdminId(){ return adminId; }
+    public void setAdminId(Long adminId){ this.adminId = adminId; }
 
-    public Long getProductId()                      { return productId; }
-    public void setProductId(Long productId)        { this.productId = productId; }
+    public Long getProductId(){ return productId; }
+    public void setProductId(Long productId){ this.productId = productId; }
 
-    public Integer getQuantityAdded()               { return quantityAdded; }
-    public void setQuantityAdded(Integer q)         { this.quantityAdded = q; }
+    public Integer getQuantityAdded(){ return quantityAdded; }
+    public void setQuantityAdded(Integer q){ this.quantityAdded = q; }
 
-    public BigDecimal getImportPrice()              { return importPrice; }
-    public void setImportPrice(BigDecimal p)        { this.importPrice = p; }
+    public BigDecimal getImportPrice(){ return importPrice; }
+    public void setImportPrice(BigDecimal p){ this.importPrice = p; }
 
-    public LocalDateTime getImportedAt()            { return importedAt; }
-    public void setImportedAt(LocalDateTime t)      { this.importedAt = t; }
+    public LocalDateTime getImportedAt(){ return importedAt; }
+    public void setImportedAt(LocalDateTime t){ this.importedAt = t; }
 
-    public String getProductName()                  { return productName; }
-    public void setProductName(String n)            { this.productName = n; }
+    public String getProductName(){ return productName; }
+    public void setProductName(String n){ this.productName = n; }
 
-    public Supplier getSupplier()                   { return supplier; }
-    public void setSupplier(Supplier s)             { this.supplier = s; }
+    public Supplier getSupplier(){ return supplier; }
+    public void setSupplier(Supplier s){ this.supplier = s; }
 
-    public Manufacturer getManufacturer()           { return manufacturer; }
-    public void setManufacturer(Manufacturer m)     { this.manufacturer = m; }
+    public Manufacturer getManufacturer(){ return manufacturer; }
+    public void setManufacturer(Manufacturer m){ this.manufacturer = m; }
 
     @Transient
     public String getSupplierName() {
