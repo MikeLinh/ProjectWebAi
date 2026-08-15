@@ -21,6 +21,7 @@ interface OrderItem {
   productName: string;
   quantity: number;
   price: number;
+  size: string;
 }
 // Khai báo cấu trúc dữ liệu tổng quan của một Đơn hàng
 interface Order {

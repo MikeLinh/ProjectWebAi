@@ -60,6 +60,11 @@ export default function CartPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-sm truncate text-black">{item.name}</h3>
+                    {item.size &&(
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Size: <strong className="text-gray-700">{item.size}</strong>
+                      </p>
+                    )}
                     <p className="text-red-500 font-semibold text-sm mt-1">{formatVND(item.price)}</p>
                   </div>
                   <div className="flex items-center border border-gray-100 rounded-lg overflow-hidden shrink-0">

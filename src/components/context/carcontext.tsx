@@ -9,6 +9,7 @@ export interface CartItem {
   image: string;
   quantity: number;
   discount?: number;
+  size?: string;
 }
 // Định nghĩa cấu trúc dữ liệu và các hàm mà bộ nhớ giỏ hàng
 interface CartContextType {

@@ -131,14 +131,16 @@ export default function OrderDetailModal({
           <div className="divide-y divide-gray-800 border border-gray-800 rounded-xl overflow-hidden bg-white">
             {order.items.map((item: any) => (
               <div key={item.orderDetailId} className="flex justify-between items-center p-3">
-                <span className="text-gray-800">
-                  {item.productName} <b className="text-red-600 ml-1">x{item.quantity}</b>
-                </span>
-                {item.size && (
-              <span className="text-xs text-gray-500 mt-0.5">
-                    Size: <strong className="text-gray-700">{item.size}</strong>
+                <div className="flex flex-col">
+                  <span className="text-gray-800 font-medium">
+                    {item.productName} <b className="text-red-600 ml-1">x{item.quantity}</b>
                   </span>
-              )}
+                  {item.size && (
+                    <span className="text-xs text-gray-500 mt-0.5">
+                      Size: <strong className="text-gray-700">{item.size}</strong>
+                    </span>
+                  )}
+                </div>
                 <span className="font-extrabold">${formatVND(item.price * item.quantity)}</span>
   
               </div>
