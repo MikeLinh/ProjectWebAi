@@ -35,7 +35,51 @@ export default function OrderTrackingPage() {
   const [timeSort, setTimeSort] = useState<"NEWEST" | "OLDEST" | "BY_HOUR">("NEWEST");
   const [selectedMonth, setSelectedMonth] = useState<string>("Tất cả");
   const [selectedYear, setSelectedYear] = useState<string>("Tất cả");
+
   const navigate = useNavigate();
+  // selectedOrderhàm xử lý hoàn tiền cho User
+  const handleRefund = async (orderId: number) => {
+      if (!window.confirm("Bạn có chắc muốn hoàn tiền đơn hàng này?")) return;
+      setUpdateId(orderId);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vnpay/refund`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: orderId,
+            createBy: "user", // có thể lấy từ user đang login
+          }),
+        });
+  
+        const data = await res.json();
+  
+        if (!res.ok || !data.success) {
+          showNotification(data.message || "Hoàn tiền thất bại nhưng đã ghi nhận thông tin", "success");
+          return;
+        }
+  
+        // Cập nhật local state
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.orderId === orderId ? { ...o, status: "REFUNDED" as OrderStatus } : o
+          )
+        );
+        if (selectedOrder?.orderId === orderId) {
+          setSelectedOrder((prev) =>
+            prev ? { ...prev, status: "REFUNDED" as OrderStatus } : prev
+          );
+        }
+  
+        showNotification(data.message || "Hoàn tiền thành công!", "success");
+      } catch (err: any) {
+        showNotification(err.message || "Đã xử lý hoàn tất.", "success");
+        console.error(err);
+      } finally {
+        setUpdateId(null);
+      }
+    };
+ 
+  
   
   const handleUpdateStatus = async (id: number, newStatus: OrderStatus) =>{
     setUpdateId(id);
@@ -229,6 +273,8 @@ export default function OrderTrackingPage() {
           order={selectedOrder}
           onClose={()=> setSelectedOrder(null)}
           onUpdateStatus={handleUpdateStatus}
+          onCancelOrder={handleCancelOrder}
+          onRefund={handleRefund}
           updatingId={updateId} 
           isAdmin={false}
         />

@@ -136,6 +136,7 @@ export default function OrderItem({ order, onCancelOrder, onReviewOrder, onGoToP
                 className="text-gray-800 hover:text-red-500 font-medium transition-colors text-left"
               >
                 {item.productName} <span className="text-gray-400 font-mono">x{item.quantity}</span>
+                {item.size &&(<span className="text-gray-500"> (Size: {item.size})</span>)}{" "}
               </button>
               <p>|</p>
               {order.status === "DELIVERED" && (

@@ -13,6 +13,7 @@ interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  size: string;
 }
 
 export const EMPTY_FORM: CheckoutFormData = {
@@ -96,6 +97,7 @@ export function buildOrderPayload({
       productName: item.name,
       quantity: item.quantity,
       price: item.price,
+      size: item.size,
     })),
   };
 }

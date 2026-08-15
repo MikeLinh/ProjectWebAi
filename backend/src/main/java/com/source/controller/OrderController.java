@@ -302,7 +302,7 @@ public class OrderController {
                 Date.from(order.getOrderDate().atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toInstant())
             );
 
-            long amountInVnd = order.getTotalAmount().longValue() * 25000;
+            long amountInVnd = order.getTotalAmount().longValue();
 
             Map<String, String> props = vnPayService.createdRefund(
                     txnRef,

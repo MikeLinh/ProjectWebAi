@@ -199,7 +199,7 @@ public class VNPayController {
             );
 
             // Gọi hàm tạo yêu cầu hoàn tiền với mã gốc
-            long amountInVnd = order.getTotalAmount().longValue() * 25000;
+            long amountInVnd = order.getTotalAmount().longValue();
 
         Map<String, String> props = vnpayService.createdRefund(
                 txnRef,

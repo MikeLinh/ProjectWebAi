@@ -44,6 +44,11 @@ export default function CardModel({ isOpen, onClose }: CartModelProps) {
                 
                 <div className="flex-1 min-w-0">
                   <h4 className="text-xs font-semibold text-gray-900 truncate">{item.name}</h4>
+                  {item.size &&(
+                    <p className="text-xs text-gray-500">
+                      Size: <strong className="text-gray-700">{item.size}</strong>
+                    </p>
+                  )}
                   <p className="text-xs text-red-500 font-bold mt-0.5">{formatVND(item.price)}</p>  
                 </div>
 

@@ -7,6 +7,7 @@ interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  size: string;
 }
 // Cấu trúc Props truyền từ Component cha vào Component con
 interface CartItemsListProps {
@@ -20,6 +21,7 @@ export default function CartItemsList({ cart }: CartItemsListProps) {
         <div key={item.id} className="flex justify-between text-xs text-black">
           <span className="truncate max-w-[180px]">
             {item.name} <b className="text-red-500">x{item.quantity}</b>
+            {item.size &&(<span className="text-gray-500">-(Size: {item.size})</span>)}{" "}
           </span>
           <span>{formatVND(item.price * item.quantity)}</span>
         </div>

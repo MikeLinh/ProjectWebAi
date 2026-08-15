@@ -51,18 +51,20 @@ interface OrderDetailModalProps {
   onRefund?: (orderId: number) => void;
   updatingId?: number | null;
   isAdmin?: boolean; // Thêm prop này để phân biệt giao diện Admin và User
+
 }
 
 export default function OrderDetailModal({
   order, onClose, onUpdateStatus, onRefund, updatingId, isAdmin = true, onCancelOrder
 }: OrderDetailModalProps) {
   if (!order) return null;
+  
 
   const action = NEXT_ACTION[order.status as OrderStatus]; 
   const isUpdating = updatingId === order.orderId; 
   const canCancel = ["PENDING", "CONFIRMED","PAID"].includes(order.status); 
   const canRefund = order.status === "CANCELLED" && order.paymentMethod?.toUpperCase() === "VNPAY";
-
+  
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -162,6 +164,16 @@ export default function OrderDetailModal({
           >
             Đóng
           </button>
+          {/* {canRefund && onRefund && (
+            <button
+              onClick={() => onRefund(order.orderId)}
+              disabled={isUpdating}
+              className="flex-1 min-w-[100px] bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1"
+            >
+              <ReplayIcon fontSize="small" />
+              {isUpdating ? "Đang xử lý..." : "Hoàn tiền VNPAY"}
+            </button>
+          )} */}
 
           {/* CHỈ HIỂN THỊ CÁC NÚT CHỨC NĂNG KHI LÀ ADMIN (isAdmin = true) */}
           {isAdmin && (
@@ -199,6 +211,7 @@ export default function OrderDetailModal({
             </>
           )}
         </div>
+        
 
       </div>
     </div>

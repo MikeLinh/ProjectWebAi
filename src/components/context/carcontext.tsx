@@ -41,11 +41,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addToCart = (product: any, quantity: number = 1) => {
     setCart((prevCart) => {
       // Tìm xem sản phẩm định thêm này đã tồn tại trong giỏ hàng
-      const existingItem = prevCart.find((item) => item.id === product.id);
+      const existingItem = prevCart.find((item) => item.id === product.id && item.size === product.size);
       if (existingItem) {
         // Duyệt qua giỏ hàng và cộng dồn số lượng mua mới vào sản phẩm trùng ID
         return prevCart.map((item) =>
-          item.id === product.id
+          item.id === product.id && item.size === product.size
             ? { ...item, quantity: item.quantity + quantity } // Sao chép phần tử cũ và tăng số lượng lên
             : item // Giữ nguyên phần tử không trùng khớp
         );
@@ -60,6 +60,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           image: product.image,
           quantity: quantity,
           discount: product.discount,
+          size: product.size,
         },
       ];
     });
